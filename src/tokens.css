@@ -1,0 +1,33 @@
+/* Hallmark · app-shell: MVN · genre: modern-minimal · theme: Desk Daylight (custom)
+ * pre-emit critique: P4 H5 E4 S4 R5 V4
+ */
+
+:root {
+  --color-paper: oklch(96% 0.012 95);
+  --color-paper-2: oklch(93% 0.014 95);
+  --color-paper-3: oklch(89% 0.016 95);
+  --color-ink: oklch(22% 0.02 160);
+  --color-ink-2: oklch(42% 0.018 160);
+  --color-ink-3: oklch(58% 0.014 160);
+  --color-accent: oklch(38% 0.06 160);
+  --color-accent-2: oklch(48% 0.07 160);
+  --color-stand: oklch(45% 0.08 145);
+  --color-sit: oklch(48% 0.06 55);
+  --color-freeze: oklch(42% 0.05 250);
+  --color-focus: oklch(38% 0.06 160);
+  --color-danger: oklch(48% 0.12 25);
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Source Sans 3', 'Segoe UI', sans-serif;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  --radius: 6px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

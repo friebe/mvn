@@ -1,0 +1,271 @@
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  overflow-x: clip;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, oklch(92% 0.03 145 / 0.7), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, oklch(93% 0.025 85 / 0.5), transparent),
+    var(--color-paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  min-height: 100dvh;
+}
+
+.shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: var(--space-5) var(--space-4) var(--space-6);
+  max-width: 42rem;
+  margin: 0 auto;
+  transition: background-color 0.4s var(--ease);
+}
+
+.shell[data-phase='sit'] .phase-label {
+  color: var(--color-sit);
+}
+
+.shell[data-phase='stand'] .phase-label {
+  color: var(--color-stand);
+}
+
+.shell[data-phase='frozen'] {
+  animation: freeze-pulse 2.4s var(--ease) infinite;
+}
+
+.shell[data-phase='frozen'] .phase-label {
+  color: var(--color-freeze);
+}
+
+.shell[data-phase='exercise'] .countdown {
+  animation: attention-flash 0.8s var(--ease);
+}
+
+@keyframes freeze-pulse {
+  0%,
+  100% {
+    filter: none;
+  }
+  50% {
+    filter: saturate(0.85);
+  }
+}
+
+@keyframes attention-flash {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell[data-phase='frozen'],
+  .shell[data-phase='exercise'] .countdown {
+    animation: none;
+  }
+}
+
+.top {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.brand {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--color-ink);
+}
+
+.tag {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-ink-2);
+  letter-spacing: 0.02em;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-5) 0;
+}
+
+.phase-label {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-accent);
+}
+
+.countdown {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 18vw, 7.5rem);
+  font-weight: 600;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  color: var(--color-ink);
+}
+
+.hint {
+  margin: var(--space-2) 0 0;
+  max-width: 28rem;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: var(--color-ink-2);
+}
+
+.exercise,
+.freeze-prompt {
+  border-top: 1px solid var(--color-paper-3);
+  padding: var(--space-5) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.exercise[hidden],
+.freeze-prompt[hidden],
+.row[hidden],
+button[hidden] {
+  display: none !important;
+}
+
+.exercise-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 600;
+  font-style: normal;
+}
+
+.exercise-hint {
+  margin: 0;
+  color: var(--color-ink-2);
+  line-height: 1.4;
+}
+
+.motivation {
+  margin: 0;
+  padding: var(--space-4) 0 0;
+  border-top: 1px solid var(--color-paper-3);
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--color-ink);
+}
+
+.freeze-q {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.controls {
+  padding-top: var(--space-4);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 0.7rem 1.1rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s var(--ease),
+    color 0.15s var(--ease),
+    border-color 0.15s var(--ease),
+    transform 0.1s var(--ease);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-paper);
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-2);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-paper-3);
+}
+
+.btn-ghost:hover,
+.btn-ghost.is-on {
+  background: var(--color-paper-2);
+  border-color: var(--color-ink-3);
+}
+
+.btn-danger {
+  background: var(--color-freeze);
+  color: var(--color-paper);
+}
+
+.btn-danger:hover {
+  filter: brightness(1.08);
+}
+
+@media (max-width: 414px) {
+  .shell {
+    padding: var(--space-4) var(--space-3) var(--space-5);
+  }
+
+  .btn {
+    flex: 1 1 auto;
+    min-width: calc(50% - var(--space-2));
+  }
+}
