@@ -37,6 +37,10 @@ Dann `http://localhost:4173` öffnen → **App installieren** (oder Browser-Men�
 
 Demo-Modus: Button **Demo** oder `?demo=1`.
 
+## Moments erweitern
+
+Micro-Moments liegen in [`src/moments.json`](src/moments.json) (für Entwickler, nicht Enduser). Felder: `id`, `mode` (`high` | `lazy` | `both`), `kind`, `part`, `posture` (`sit` | `stand` | `either`), `title`, `prompt`.
+
 ## Analytics
 
 Unter `analytics.html` im App-Ordner (Link **Analytics** in der App): lokale Statistik zu Runden, Hochfahren, Lazy, Freeze — nur LocalStorage, keine Cloud. Auf GitHub Pages: `/mvn/analytics.html`.

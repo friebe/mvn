@@ -1,130 +1,41 @@
 import type { EnergyMode } from './state'
+import momentsJson from './moments.json'
 
 export type MomentKind = 'body' | 'eyes' | 'breath' | 'desk' | 'play'
+
+export type MomentPart =
+  | 'neck'
+  | 'shoulders'
+  | 'wrists'
+  | 'hands'
+  | 'forearms'
+  | 'chest'
+  | 'back'
+  | 'hips'
+  | 'glutes'
+  | 'legs'
+  | 'calves'
+  | 'feet'
+  | 'jaw'
+  | 'eyes'
+  | 'breath'
+  | 'desk'
+  | 'play'
+
+export type MomentPosture = 'sit' | 'stand' | 'either'
 
 export interface Moment {
   id: string
   mode: EnergyMode | 'both'
   kind: MomentKind
+  part: MomentPart
+  posture: MomentPosture
   title: string
   prompt: string
 }
 
-/** Micro-moments (~15s) — not workouts. */
-export const MOMENTS: Moment[] = [
-  {
-    id: 'waden-pump',
-    mode: 'high',
-    kind: 'body',
-    title: 'Waden-Pump',
-    prompt: 'Fersen hoch, runter — zehn Mal. Fertig.',
-  },
-  {
-    id: 'nacken-release',
-    mode: 'high',
-    kind: 'body',
-    title: 'Nacken-Release',
-    prompt: 'Ohr zur Schulter, andere Seite. Kein Rucken.',
-  },
-  {
-    id: 'schulterkreisen',
-    mode: 'high',
-    kind: 'body',
-    title: 'Schulterkreisen',
-    prompt: 'Große Kreise rückwärts. Hemd bleibt trocken.',
-  },
-  {
-    id: 'mini-hinge',
-    mode: 'high',
-    kind: 'body',
-    title: 'Mini-Hinge',
-    prompt: 'Hüfte leicht knicken, Rücken lang — fünf Mal.',
-  },
-  {
-    id: 'faules-strecken',
-    mode: 'lazy',
-    kind: 'body',
-    title: 'Faules Strecken',
-    prompt: 'Arme hoch, laut gähnen. Das zählt.',
-  },
-  {
-    id: 'schulter-fallen',
-    mode: 'lazy',
-    kind: 'breath',
-    title: 'Schultern fallen',
-    prompt: 'Einatmen hoch, ausatmen fallen. Dreimal.',
-  },
-  {
-    id: 'fusswippen',
-    mode: 'lazy',
-    kind: 'body',
-    title: 'Fußwippen',
-    prompt: 'Unter dem Tisch wippen. Niemand muss es sehen.',
-  },
-  {
-    id: 'fensterblick',
-    mode: 'both',
-    kind: 'eyes',
-    title: 'Fensterblick',
-    prompt: 'Weitsehen bis zum Horizont. Augen-Reset.',
-  },
-  {
-    id: 'fern-name',
-    mode: 'both',
-    kind: 'eyes',
-    title: 'Was siehst du?',
-    prompt: 'Ein Ding am Fenster benennen. Nur das.',
-  },
-  {
-    id: 'blink-reset',
-    mode: 'both',
-    kind: 'eyes',
-    title: 'Blink-Reset',
-    prompt: 'Zehn bewusste Blinzler. Bildschirm wartet.',
-  },
-  {
-    id: 'wasser-schluck',
-    mode: 'both',
-    kind: 'desk',
-    title: 'Wasserschluck',
-    prompt: 'Einen Schluck. Tisch darf warten.',
-  },
-  {
-    id: 'stuhl-weg',
-    mode: 'both',
-    kind: 'desk',
-    title: 'Stuhl-Schub',
-    prompt: 'Stuhl einen Handbreit weg. Platz für Beine.',
-  },
-  {
-    id: 'tischkante',
-    mode: 'both',
-    kind: 'desk',
-    title: 'Tischkante',
-    prompt: 'Hände an die Kante, leicht abstützen, tief atmen.',
-  },
-  {
-    id: 'fenster-name-play',
-    mode: 'both',
-    kind: 'play',
-    title: 'Wolken-Spot',
-    prompt: 'Eine Form am Himmel finden. Oder erfinden.',
-  },
-  {
-    id: 'laut-gähnen',
-    mode: 'lazy',
-    kind: 'play',
-    title: 'Laut gähnen',
-    prompt: 'Absichtlich. Lächerlich. Wirkt trotzdem.',
-  },
-  {
-    id: 'zeigefinger-stretch',
-    mode: 'both',
-    kind: 'play',
-    title: 'Finger-Welle',
-    prompt: 'Zehn Finger einzeln strecken. Klingt albern. Ist ok.',
-  },
-]
+/** Micro-moments (~15s) — edit [`moments.json`](./moments.json) to extend. */
+export const MOMENTS: Moment[] = momentsJson as Moment[]
 
 const KIND_LABEL: Record<MomentKind, string> = {
   body: 'Körper',
@@ -156,37 +67,65 @@ export function pickMoment(mode: EnergyMode, recentIds: string[], kind?: MomentK
   return candidates[Math.floor(Math.random() * candidates.length)]!
 }
 
-/** Three cards: prefer body / eyes / play-or-desk diversity. */
+/** Prefer distinct body parts when filling the body slot. */
+function pickMomentAvoidingParts(
+  mode: EnergyMode,
+  recentIds: string[],
+  kind: MomentKind,
+  usedParts: Set<MomentPart>,
+): Moment {
+  const pool = poolFor(mode, kind)
+  const fresh = pool.filter((m) => !recentIds.includes(m.id) && !usedParts.has(m.part))
+  const candidates =
+    fresh.length > 0
+      ? fresh
+      : pool.filter((m) => !recentIds.includes(m.id)).length > 0
+        ? pool.filter((m) => !recentIds.includes(m.id))
+        : pool.length > 0
+          ? pool
+          : MOMENTS
+  return candidates[Math.floor(Math.random() * candidates.length)]!
+}
+
+/** Three choices: prefer body / eyes / play-or-desk diversity. */
 export function pickMomentCards(mode: EnergyMode, recentIds: string[]): Moment[] {
   const preferred: MomentKind[] = ['body', 'eyes', Math.random() > 0.5 ? 'play' : 'desk']
   const picked: Moment[] = []
   const used = new Set<string>()
+  const usedParts = new Set<MomentPart>()
 
   for (const kind of preferred) {
-    const m = pickMoment(mode, [...recentIds, ...used], kind)
+    const m =
+      kind === 'body'
+        ? pickMomentAvoidingParts(mode, [...recentIds, ...used], kind, usedParts)
+        : pickMoment(mode, [...recentIds, ...used], kind)
     if (!used.has(m.id)) {
       picked.push(m)
       used.add(m.id)
+      usedParts.add(m.part)
     }
   }
 
   while (picked.length < 3) {
-    const m = pickMoment(mode, [...recentIds, ...used])
+    const m = pickMomentAvoidingParts(mode, [...recentIds, ...used], 'body', usedParts)
     if (used.has(m.id)) {
-      const fallback = poolFor(mode).find((x) => !used.has(x.id)) ?? MOMENTS.find((x) => !used.has(x.id))
+      const fallback =
+        poolFor(mode).find((x) => !used.has(x.id)) ?? MOMENTS.find((x) => !used.has(x.id))
       if (!fallback) break
       picked.push(fallback)
       used.add(fallback.id)
+      usedParts.add(fallback.part)
     } else {
       picked.push(m)
       used.add(m.id)
+      usedParts.add(m.part)
     }
   }
 
   return picked.slice(0, 3)
 }
 
-export function rememberId(recent: string[], id: string, max = 6): string[] {
+export function rememberId(recent: string[], id: string, max = 8): string[] {
   return [id, ...recent.filter((x) => x !== id)].slice(0, max)
 }
 
