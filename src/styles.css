@@ -6,6 +6,11 @@
   box-sizing: border-box;
 }
 
+html {
+  /* Desk-distance scale: readable on small HD secondary monitors */
+  font-size: clamp(18px, 2.4vmin, 28px);
+}
+
 html,
 body {
   margin: 0;
@@ -31,10 +36,44 @@ body {
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  padding: var(--space-5) var(--space-4) var(--space-6);
-  max-width: 42rem;
+  padding: clamp(1.25rem, 3vmin, 2.5rem) clamp(1.25rem, 4vmin, 3rem)
+    clamp(1.5rem, 4vmin, 3rem);
+  max-width: min(56rem, 100%);
   margin: 0 auto;
   transition: background-color 0.4s var(--ease);
+}
+
+.install-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 0 1.15rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-paper-3);
+}
+
+.install-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.install-title {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.3vmin, 1.25rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-ink);
+}
+
+.install-text {
+  margin: 0;
+  max-width: 32rem;
+  font-size: clamp(0.98rem, 2.05vmin, 1.15rem);
+  line-height: 1.35;
+  color: var(--color-ink-2);
 }
 
 .shell[data-phase='sit'] .phase-label {
@@ -55,6 +94,48 @@ body {
 
 .shell[data-phase='exercise'] .countdown {
   animation: attention-flash 0.8s var(--ease);
+}
+
+.shell[data-phase='threshold'] .countdown {
+  letter-spacing: 0.12em;
+  color: var(--color-accent);
+}
+
+.shell[data-approaching='true'] .countdown {
+  color: var(--color-stand);
+}
+
+.shell[data-approaching='true'] .phase-label {
+  color: var(--color-stand);
+}
+
+.shell[data-approaching='true'] {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 0%, oklch(90% 0.04 145 / 0.55), transparent),
+    transparent;
+}
+
+/* Silent-mode catch: one-shot flash */
+.shell[data-attention] {
+  animation: attention-wash 0.9s var(--ease);
+}
+
+.shell[data-attention][data-attention-muted='true'] {
+  animation: attention-wash-strong 1.8s var(--ease);
+}
+
+/* Waiting at threshold without sound — keeps pulsing until you choose */
+.shell[data-needs-action='true'] {
+  animation: needs-action-pulse 1.6s var(--ease) infinite;
+}
+
+.shell[data-needs-action='true'] .countdown,
+.shell[data-needs-action='true'] .threshold-lead {
+  color: var(--color-stand);
+}
+
+.shell[data-muted='true'][data-approaching='true'] {
+  animation: needs-action-pulse 2s var(--ease) infinite;
 }
 
 @keyframes freeze-pulse {
@@ -78,9 +159,55 @@ body {
   }
 }
 
+@keyframes attention-wash {
+  0% {
+    filter: brightness(1.08);
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+  40% {
+    filter: brightness(1.18);
+    box-shadow: inset 0 0 0 6px oklch(45% 0.08 145 / 0.35);
+  }
+  100% {
+    filter: none;
+    box-shadow: none;
+  }
+}
+
+@keyframes attention-wash-strong {
+  0%,
+  100% {
+    filter: none;
+  }
+  25%,
+  75% {
+    filter: brightness(1.22) saturate(1.15);
+    box-shadow: inset 0 0 0 10px oklch(45% 0.1 145 / 0.45);
+  }
+  50% {
+    filter: brightness(1.08);
+    box-shadow: inset 0 0 0 4px oklch(48% 0.06 55 / 0.4);
+  }
+}
+
+@keyframes needs-action-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+  50% {
+    filter: brightness(1.12);
+    box-shadow: inset 0 0 0 8px oklch(45% 0.09 145 / 0.4);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .shell[data-phase='frozen'],
-  .shell[data-phase='exercise'] .countdown {
+  .shell[data-phase='exercise'] .countdown,
+  .shell[data-attention],
+  .shell[data-needs-action='true'],
+  .shell[data-muted='true'][data-approaching='true'] {
     animation: none;
   }
 }
@@ -88,131 +215,203 @@ body {
 .top {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 0.35rem;
 }
 
 .brand {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-size: clamp(2.75rem, 9vmin, 5.5rem);
   font-weight: 600;
   font-style: normal;
   letter-spacing: -0.03em;
-  line-height: 1;
+  line-height: 0.95;
   color: var(--color-ink);
 }
 
 .tag {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: clamp(1rem, 2.2vmin, 1.35rem);
   color: var(--color-ink-2);
   letter-spacing: 0.02em;
+}
+
+.shell[data-demo='true'] .tag::after {
+  content: ' · Demo';
+  color: var(--color-sit);
 }
 
 .stage {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: var(--space-3);
-  padding: var(--space-5) 0;
+  gap: clamp(0.75rem, 2vmin, 1.25rem);
+  padding: clamp(1rem, 3vmin, 2.5rem) 0;
 }
 
 .phase-label {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 1.1rem;
+  font-size: clamp(1.15rem, 2.8vmin, 1.65rem);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   color: var(--color-accent);
 }
 
 .countdown {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(4.5rem, 18vw, 7.5rem);
+  /* Hero signal across the room */
+  font-size: clamp(5.5rem, 28vmin, 14rem);
   font-weight: 600;
   font-style: normal;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.04em;
-  line-height: 0.95;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
   color: var(--color-ink);
 }
 
 .hint {
-  margin: var(--space-2) 0 0;
-  max-width: 28rem;
-  font-size: 1.05rem;
-  line-height: 1.45;
+  margin: 0.5rem 0 0;
+  max-width: 36rem;
+  font-size: clamp(1.15rem, 2.6vmin, 1.55rem);
+  line-height: 1.4;
   color: var(--color-ink-2);
 }
 
-.exercise,
-.freeze-prompt {
-  border-top: 1px solid var(--color-paper-3);
-  padding: var(--space-5) 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+.ambient {
+  margin: clamp(1rem, 2.5vmin, 1.75rem) 0 0;
+  max-width: 38rem;
+  font-size: clamp(1.1rem, 2.4vmin, 1.4rem);
+  line-height: 1.45;
+  color: var(--color-ink-3);
+  border-left: 3px solid var(--color-paper-3);
+  padding-left: 1rem;
 }
 
+.mute-hint {
+  margin: 0.75rem 0 0;
+  max-width: 38rem;
+  font-size: clamp(1rem, 2.2vmin, 1.25rem);
+  line-height: 1.4;
+  color: var(--color-sit);
+}
+
+.threshold,
+.exercise,
+.freeze-prompt,
+.confirm {
+  border-top: 1px solid var(--color-paper-3);
+  padding: clamp(1.25rem, 3vmin, 2rem) 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 2vmin, 1.25rem);
+}
+
+.threshold[hidden],
 .exercise[hidden],
 .freeze-prompt[hidden],
+.ambient[hidden],
+.mute-hint[hidden],
 .row[hidden],
 button[hidden] {
   display: none !important;
 }
 
+.threshold-lead {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5.5vmin, 3.25rem);
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.1;
+}
+
+.threshold-sub {
+  margin: 0;
+  color: var(--color-ink-2);
+  font-size: clamp(1.15rem, 2.5vmin, 1.45rem);
+  line-height: 1.4;
+  max-width: 36rem;
+}
+
+.threshold-actions {
+  margin-top: 0.5rem;
+  gap: 0.75rem;
+}
+
+.threshold-actions .btn {
+  min-width: 9rem;
+}
+
+.ritual-kicker {
+  margin: 0;
+  font-size: clamp(1rem, 2.2vmin, 1.25rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-accent);
+}
+
 .exercise-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-size: clamp(2rem, 5.5vmin, 3.25rem);
   font-weight: 600;
   font-style: normal;
+  line-height: 1.1;
 }
 
 .exercise-hint {
   margin: 0;
   color: var(--color-ink-2);
+  font-size: clamp(1.15rem, 2.5vmin, 1.45rem);
   line-height: 1.4;
 }
 
 .motivation {
   margin: 0;
-  padding: var(--space-4) 0 0;
+  padding: 1rem 0 0;
   border-top: 1px solid var(--color-paper-3);
-  font-size: 1.05rem;
-  line-height: 1.5;
+  font-size: clamp(1.15rem, 2.5vmin, 1.5rem);
+  line-height: 1.45;
   color: var(--color-ink);
 }
 
 .freeze-q {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.8rem;
+  font-size: clamp(2rem, 5vmin, 3rem);
   font-weight: 600;
   font-style: normal;
 }
 
 .controls {
-  padding-top: var(--space-4);
+  padding-top: 1rem;
 }
 
 .row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: 0.65rem;
 }
 
 .btn {
   appearance: none;
   border: 1px solid transparent;
-  border-radius: var(--radius);
-  padding: 0.7rem 1.1rem;
+  border-radius: 8px;
+  min-height: 3.1rem;
+  padding: 0.85rem 1.35rem;
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: clamp(1.05rem, 2.3vmin, 1.3rem);
   font-weight: 600;
+  line-height: 1.2;
   cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition:
     background 0.15s var(--ease),
     color 0.15s var(--ease),
@@ -221,8 +420,8 @@ button[hidden] {
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
 }
 
 .btn:active {
@@ -261,11 +460,16 @@ button[hidden] {
 
 @media (max-width: 414px) {
   .shell {
-    padding: var(--space-4) var(--space-3) var(--space-5);
+    padding: 1rem 0.85rem 1.5rem;
+  }
+
+  .install-banner {
+    grid-template-columns: 1fr;
+    align-items: stretch;
   }
 
   .btn {
     flex: 1 1 auto;
-    min-width: calc(50% - var(--space-2));
+    min-width: calc(50% - 0.65rem);
   }
 }

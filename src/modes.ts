@@ -7,6 +7,7 @@ export interface IntervalPreset {
 }
 
 const MIN = 60_000
+const SEC = 1_000
 
 export const PRESETS: Record<EnergyMode, IntervalPreset> = {
   high: {
@@ -21,8 +22,27 @@ export const PRESETS: Record<EnergyMode, IntervalPreset> = {
   },
 }
 
-export function durationFor(mode: EnergyMode, phase: ActivePhase): number {
-  return PRESETS[mode][phase]
+/** Short intervals for UI testing — no 30‑min wait. */
+export const DEMO_PRESETS: Record<EnergyMode, IntervalPreset> = {
+  high: {
+    sit: 20 * SEC,
+    stand: 12 * SEC,
+    reset: 8 * SEC,
+  },
+  lazy: {
+    sit: 15 * SEC,
+    stand: 10 * SEC,
+    reset: 8 * SEC,
+  },
+}
+
+export const DEMO_EXERCISE_MS = 8 * SEC
+export const DEMO_FREEZE_PROMPT_MS = 12 * SEC
+export const DEMO_FREEZE_EXTEND_MS = 10 * SEC
+
+export function durationFor(mode: EnergyMode, phase: ActivePhase, demo: boolean): number {
+  const presets = demo ? DEMO_PRESETS : PRESETS
+  return presets[mode][phase]
 }
 
 export function nextActivePhase(phase: ActivePhase): ActivePhase {
@@ -31,7 +51,9 @@ export function nextActivePhase(phase: ActivePhase): ActivePhase {
   return 'sit'
 }
 
-export function phaseLabel(phase: ActivePhase | 'exercise' | 'frozen' | 'setup'): string {
+export function phaseLabel(
+  phase: ActivePhase | 'threshold' | 'confirm' | 'exercise' | 'frozen' | 'closing' | 'setup',
+): string {
   switch (phase) {
     case 'sit':
       return 'Sitzen'
@@ -39,11 +61,51 @@ export function phaseLabel(phase: ActivePhase | 'exercise' | 'frozen' | 'setup')
       return 'Stehen'
     case 'reset':
       return 'Reset'
+    case 'threshold':
+      return 'Schwelle'
+    case 'confirm':
+      return 'Beweis'
     case 'exercise':
-      return 'Mikro-Übung'
+      return 'Ritual'
     case 'frozen':
       return 'Freeze'
+    case 'closing':
+      return 'Tagesende'
     case 'setup':
       return 'Setup'
   }
+}
+
+export function nextPhaseVerb(phase: ActivePhase): string {
+  if (phase === 'sit') return 'Hochfahren'
+  if (phase === 'stand') return 'Reset'
+  return 'Wieder setzen'
+}
+
+export function confirmCopy(ended: ActivePhase | null): { lead: string; sub: string; yes: string } {
+  if (ended === 'stand') {
+    return {
+      lead: 'Reset erledigt?',
+      sub: 'Ein Tap macht daraus einen echten Wechsel — nicht nur einen Timer-Klick.',
+      yes: 'Erledigt',
+    }
+  }
+  if (ended === 'reset') {
+    return {
+      lead: 'Wieder gesetzt?',
+      sub: 'Kurzer Beweis, dass du den Wechsel wirklich gemacht hast.',
+      yes: 'Gesetzt',
+    }
+  }
+  return {
+    lead: 'Tisch steht?',
+    sub: 'Ohne Bestätigung zählt die Runde nicht als echt. Ein Tap reicht.',
+    yes: 'Tisch steht',
+  }
+}
+
+export function formatDurationHint(ms: number, demo: boolean): string {
+  if (demo) return `${Math.round(ms / 1000)}s`
+  const min = Math.round(ms / MIN)
+  return min < 1 ? `${Math.round(ms / 1000)}s` : `${min} Min.`
 }

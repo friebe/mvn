@@ -75,6 +75,14 @@ export function pickMotivation(
   return candidates[Math.floor(Math.random() * candidates.length)]!
 }
 
+/** Quiet ambient line for during the countdown — prefers Nordstern. */
+export function pickAmbient(recentIds: string[]): Motivation {
+  const north = MOTIVATIONS.filter((m) => m.kind === 'north')
+  const fresh = north.filter((m) => !recentIds.includes(m.id))
+  const candidates = fresh.length > 0 ? fresh : north
+  return candidates[Math.floor(Math.random() * candidates.length)]!
+}
+
 export function rememberMotivation(recent: string[], id: string, max = 5): string[] {
   return [id, ...recent.filter((x) => x !== id)].slice(0, max)
 }

@@ -28,6 +28,9 @@
   --space-6: 2rem;
   --space-7: 3rem;
 
-  --radius: 6px;
+  --radius: 8px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Secondary-monitor / across-desk readability */
+  --ui-distance-scale: clamp(18px, 2.4vmin, 28px);
 }
