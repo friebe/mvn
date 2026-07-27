@@ -4,6 +4,7 @@ import '@fontsource/source-sans-3/600.css'
 import './styles.css'
 
 import { loadState, saveState } from './state'
+import { summarizeToday } from './stats'
 import {
   dismissInstallBanner,
   onInstallAvailability,
@@ -13,9 +14,11 @@ import {
 } from './pwa'
 import {
   bindCompactMode,
+  dismissDayCloseReward,
   mountUi,
   renderUi,
   setInstallVisible,
+  showDayCloseReward,
   toggleExactClock,
   toggleAtmosphereWords,
 } from './ui'
@@ -120,8 +123,14 @@ mountUi(app, {
   },
   onCloseDay: () => {
     if (!confirm('Tagesabschluss — Timer zurücksetzen?')) return
-    const story = resetDay()
-    alert(story)
+    const summary = summarizeToday()
+    resetDay()
+    showDayCloseReward(summary)
+    refreshUi()
+  },
+  onDismissDayClose: () => {
+    dismissDayCloseReward()
+    refreshUi()
   },
 })
 

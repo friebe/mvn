@@ -6,6 +6,7 @@ import { fillLevel, formatExactTime, softTimeLabel } from './atmosphere'
 import { intervalSummary, resolveIntervals } from './intervals'
 import { appPath } from './paths'
 import { isCheckInVisible } from './timer'
+import { buildDayCloseLine, buildDayStory, type StatsSummary } from './stats'
 
 export interface UiHandlers {
   onStart: () => void
@@ -29,16 +30,30 @@ export interface UiHandlers {
   onConfirmDesk: () => void
   onConfirmDeskLater: () => void
   onCloseDay: () => void
+  onDismissDayClose: () => void
 }
 
 let showExactClock = false
 const WORDS_KEY = 'mvn-atmosphere-words-hidden'
 let wordsHidden = false
+let dayCloseSummary: StatsSummary | null = null
 
 try {
   wordsHidden = localStorage.getItem(WORDS_KEY) === '1'
 } catch {
   wordsHidden = false
+}
+
+export function showDayCloseReward(summary: StatsSummary): void {
+  dayCloseSummary = summary
+}
+
+export function dismissDayCloseReward(): void {
+  dayCloseSummary = null
+}
+
+export function isDayCloseRewardVisible(): boolean {
+  return dayCloseSummary != null
 }
 
 export function getShowExactClock(): boolean {
@@ -193,7 +208,18 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             <p class="motivation" id="motivation"></p>
           </section>
 
+          <section class="day-close-reward" id="day-close-reward" hidden>
+            <p class="day-close-kicker">Tag beendet</p>
+            <p class="day-close-story" id="day-close-story"></p>
+            <p class="day-close-line" id="day-close-line"></p>
+            <div class="day-close-stats" id="day-close-stats" aria-label="Tageszahlen"></div>
+            <a class="day-close-more" id="day-close-more" href="${appPath('analytics.html')}">Alle Analytics</a>
+          </section>
+
           <nav class="primary-actions" id="primary-actions" aria-label="Aktionen">
+            <div class="row day-close-actions" id="day-close-actions" hidden>
+              <button type="button" class="btn btn-primary" id="btn-day-close-done">Weiter</button>
+            </div>
             <div class="row setup-actions" id="setup-controls">
               <button type="button" class="btn btn-primary" id="btn-start">Start</button>
             </div>
@@ -263,6 +289,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   qs(root, 'btn-freeze-path').addEventListener('click', handlers.onChooseFreezePath)
   qs(root, 'btn-confirm-desk').addEventListener('click', handlers.onConfirmDesk)
   qs(root, 'btn-confirm-later').addEventListener('click', handlers.onConfirmDeskLater)
+  qs(root, 'btn-day-close-done').addEventListener('click', handlers.onDismissDayClose)
 
   qs(root, 'moment-cards').addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-moment-id]')
@@ -309,6 +336,7 @@ export function renderUi(
   const isRunning =
     state.phase === 'sit' || state.phase === 'stand' || state.phase === 'reset'
   const checkInVisible = isCheckInVisible()
+  const dayCloseVisible = dayCloseSummary != null
 
   shell.dataset.phase = state.phase
   shell.dataset.mode = state.mode
@@ -318,6 +346,7 @@ export function renderUi(
   shell.dataset.started = isSetup ? 'false' : 'true'
   shell.dataset.showClock = showExactClock ? 'true' : 'false'
   shell.dataset.wordsHidden = wordsHidden ? 'true' : 'false'
+  shell.dataset.dayClose = dayCloseVisible ? 'true' : 'false'
   updateCompactMode(root)
 
   const phaseEl = qs(root, 'phase-label')
@@ -343,29 +372,56 @@ export function renderUi(
   const confirmActions = qs(root, 'confirm-actions')
   const freezeActions = qs(root, 'freeze-actions')
   const exerciseActions = qs(root, 'exercise-actions')
+  const dayCloseReward = qs(root, 'day-close-reward')
+  const dayCloseActions = qs(root, 'day-close-actions')
   const btnLazy = qs(root, 'btn-lazy')
 
-  setupControls.hidden = !isSetup
+  setupControls.hidden = !isSetup || dayCloseVisible
   runControls.hidden =
-    isSetup || isThreshold || isConfirm || isExercise || isPick || checkInVisible
-  thresholdActions.hidden = !isThreshold
-  pickActions.hidden = !isPick
-  confirmActions.hidden = !isConfirm
-  freezeActions.hidden = !(isFrozen && showFreezePrompt)
-  exerciseActions.hidden = !isExercise
-  btnFreeze.hidden = isFrozen || isThreshold || isConfirm || isExercise || isPick
-  btnResume.hidden = !isFrozen || showFreezePrompt
-  freezePrompt.hidden = !(isFrozen && showFreezePrompt)
-  exercise.hidden = !isExercise
-  threshold.hidden = !isThreshold
-  confirm.hidden = !isConfirm
-  pick.hidden = !isPick
-  checkIn.hidden = !checkInVisible
+    isSetup || isThreshold || isConfirm || isExercise || isPick || checkInVisible || dayCloseVisible
+  thresholdActions.hidden = !isThreshold || dayCloseVisible
+  pickActions.hidden = !isPick || dayCloseVisible
+  confirmActions.hidden = !isConfirm || dayCloseVisible
+  freezeActions.hidden = !(isFrozen && showFreezePrompt) || dayCloseVisible
+  exerciseActions.hidden = !isExercise || dayCloseVisible
+  dayCloseActions.hidden = !dayCloseVisible
+  btnFreeze.hidden = isFrozen || isThreshold || isConfirm || isExercise || isPick || dayCloseVisible
+  btnResume.hidden = !isFrozen || showFreezePrompt || dayCloseVisible
+  freezePrompt.hidden = !(isFrozen && showFreezePrompt) || dayCloseVisible
+  exercise.hidden = !isExercise || dayCloseVisible
+  threshold.hidden = !isThreshold || dayCloseVisible
+  confirm.hidden = !isConfirm || dayCloseVisible
+  pick.hidden = !isPick || dayCloseVisible
+  checkIn.hidden = !checkInVisible || dayCloseVisible
+  dayCloseReward.hidden = !dayCloseVisible
 
-  btnLazy.hidden = isThreshold || isConfirm || isExercise || isPick
+  btnLazy.hidden = isThreshold || isConfirm || isExercise || isPick || dayCloseVisible
   btnLazy.textContent = state.mode === 'lazy' ? 'Lazy an' : 'Lazy Mode'
   btnLazy.classList.toggle('is-on', state.mode === 'lazy')
   btnReroll.hidden = state.momentRerolled
+
+  if (dayCloseVisible && dayCloseSummary) {
+    qs(root, 'day-close-story').textContent = buildDayStory(dayCloseSummary)
+    qs(root, 'day-close-line').textContent = buildDayCloseLine(dayCloseSummary)
+    qs(root, 'day-close-stats').innerHTML = `
+      <div class="day-close-stat" data-tone="stand">
+        <p class="day-close-stat-value">${dayCloseSummary.rounds}</p>
+        <p class="day-close-stat-label">Tisch bestätigt</p>
+      </div>
+      <div class="day-close-stat" data-tone="sit">
+        <p class="day-close-stat-value">${dayCloseSummary.rise}</p>
+        <p class="day-close-stat-label">Tisch hoch</p>
+      </div>
+      <div class="day-close-stat">
+        <p class="day-close-stat-value">${dayCloseSummary.ritual_done}</p>
+        <p class="day-close-stat-label">Momente</p>
+      </div>
+      <div class="day-close-stat" data-tone="freeze">
+        <p class="day-close-stat-value">${dayCloseSummary.freeze_total}</p>
+        <p class="day-close-stat-label">Freeze</p>
+      </div>
+    `
+  }
 
   const skipStand = qs(root, 'btn-skip-standing')
   const skipStandEx = qs(root, 'btn-skip-standing-ex')
@@ -374,13 +430,13 @@ export function renderUi(
   skipStand.textContent = skipLabel
   skipStandEx.textContent = skipLabel
 
-  phaseEl.textContent = phaseLabel(state.phase)
+  phaseEl.textContent = dayCloseVisible ? 'Tagesabschluss' : phaseLabel(state.phase)
 
   const level = isRunning || isExercise ? fillLevel(remainingMs, state.phaseDurationMs) : isSetup ? 0.85 : 0.4
   shell.style.setProperty('--atmosphere-fill', String(level))
   const edgeFill = qs(root, 'desk-edge-fill')
   edgeFill.style.transform = `scaleX(${level})`
-  atmo.hidden = isPick || isThreshold || isConfirm || checkInVisible
+  atmo.hidden = isPick || isThreshold || isConfirm || checkInVisible || dayCloseVisible
   atmo.classList.toggle('is-timed', isRunning || isExercise)
   atmo.classList.toggle('is-words-hidden', wordsHidden)
   qs(root, 'btn-atmosphere-label').hidden = wordsHidden
@@ -401,7 +457,7 @@ export function renderUi(
 
   const muteHint = qs(root, 'mute-hint')
   const compact = shell.dataset.compact === 'true'
-  if (!state.soundEnabled && !(compact && isRunning) && !wordsHidden) {
+  if (!state.soundEnabled && !(compact && isRunning) && !wordsHidden && !dayCloseVisible) {
     muteHint.hidden = false
     muteHint.textContent = state.notificationsEnabled
       ? 'Ton aus — Signale über Farbe, Tab-Titel und Notifications.'
@@ -417,7 +473,7 @@ export function renderUi(
   }
 
   const ambientMot = MOTIVATIONS.find((m) => m.id === state.ambientMotivationId)
-  if (isRunning && ambientMot?.kind === 'north' && !compact) {
+  if (isRunning && ambientMot?.kind === 'north' && !compact && !dayCloseVisible) {
     ambient.hidden = false
     ambient.textContent = ambientMot.text
   } else {
@@ -425,7 +481,9 @@ export function renderUi(
     ambient.textContent = ''
   }
 
-  if (checkInVisible) {
+  if (dayCloseVisible) {
+    hint.textContent = 'Kurzer Blick auf den Tag — der Tisch hat mitgehalten.'
+  } else if (checkInVisible) {
     qs(root, 'check-in-q').textContent =
       state.phase === 'stand' ? 'Noch am Stehen?' : 'Noch am Tisch?'
     hint.textContent = 'Kurzer Check — kein Alarm. Ein Tap reicht.'
@@ -482,7 +540,7 @@ export function renderUi(
         : 'Der Tisch hält den Rhythmus. Du entscheidest die Wechsel.'
   }
 
-  if (wordsHidden && (isRunning || isExercise || isFrozen) && !checkInVisible) {
+  if (wordsHidden && (isRunning || isExercise || isFrozen) && !checkInVisible && !dayCloseVisible) {
     hint.hidden = true
   } else {
     hint.hidden = false

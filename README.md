@@ -43,4 +43,4 @@ Micro-Moments liegen in [`src/moments.json`](src/moments.json) (für Entwickler,
 
 ## Analytics
 
-Unter `analytics.html` im App-Ordner (Link **Analytics** in der App): lokale Statistik zu Runden, Hochfahren, Lazy, Freeze — nur LocalStorage, keine Cloud. Auf GitHub Pages: `/mvn/analytics.html`.
+Unter `analytics.html` im App-Ordner (Icon **Analytics** im Header): lokale Statistik zu Tisch-Wechseln, Momenten, Lazy, Freeze — nur LocalStorage, keine Cloud. Auf GitHub Pages: `/mvn/analytics.html`.
