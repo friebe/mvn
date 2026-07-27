@@ -31,7 +31,7 @@ import {
 import { getMoment, pickMoment, pickMomentCards, rememberId } from './exercises'
 import { pickAmbient, pickMotivation, rememberMotivation } from './motivation'
 import { notifyPhase } from './notify'
-import { recordStat, todayKey } from './stats'
+import { buildDayCloseLine, recordStat, summarizeToday, todayKey } from './stats'
 
 export type TimerListener = (
   state: AppState,
@@ -532,7 +532,8 @@ export function startDay(mode: EnergyMode = state.mode): void {
   enterActivePhase('sit')
 }
 
-export function resetDay(): void {
+export function resetDay(): string {
+  const story = buildDayCloseLine(summarizeToday())
   const closeKey = todayKey()
   if (state.dayClosedKey !== closeKey) {
     recordStat('day_close')
@@ -565,6 +566,7 @@ export function resetDay(): void {
   }
   setBaseTitle('MVN')
   emit()
+  return story
 }
 
 export function confirmDesk(): void {

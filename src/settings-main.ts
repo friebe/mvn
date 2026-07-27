@@ -4,7 +4,6 @@ import './settings.css'
 
 import { ensureNotificationPermission } from './notify'
 import {
-  closeDayInStorage,
   getResolvedIntervals,
   readPreferences,
   setIntervals,
@@ -49,11 +48,18 @@ function render(): void {
   root.innerHTML = `
     <div class="settings">
       <header class="settings-top">
-        <div>
+        <a class="back-link" href="${appPath()}" aria-label="Zurück zur App" title="Zurück">
+          <svg class="back-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+            <path
+              fill="currentColor"
+              d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"
+            />
+          </svg>
+        </a>
+        <div class="settings-heading">
           <p class="settings-brand">Einstellungen</p>
           <p class="settings-tag">MVN · lokal auf diesem Gerät</p>
         </div>
-        <a class="settings-back" href="${appPath()}">Zurück</a>
       </header>
 
       <section class="settings-group" aria-label="Signale">
@@ -140,13 +146,6 @@ function render(): void {
             ${s.demo ? 'An' : 'Aus'}
           </button>
         </div>
-        <div class="setting-row">
-          <div class="setting-copy">
-            <p class="setting-label">Tagesabschluss</p>
-            <p class="setting-note">Tag beenden und Timer zurücksetzen.</p>
-          </div>
-          <button type="button" class="setting-btn danger" id="btn-close-day">Beenden</button>
-        </div>
       </section>
     </div>
   `
@@ -170,14 +169,6 @@ function render(): void {
   root.querySelector('#btn-demo')?.addEventListener('click', () => {
     togglePreference('demo')
     render()
-  })
-
-  root.querySelector('#btn-close-day')?.addEventListener('click', () => {
-    if (confirm('Tagesabschluss — Timer zurücksetzen?')) {
-      const { story } = closeDayInStorage()
-      alert(story)
-      window.location.href = appPath()
-    }
   })
 
   root.querySelectorAll<HTMLSelectElement>('.setting-select').forEach((select) => {

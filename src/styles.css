@@ -126,15 +126,13 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: safe center;
+  gap: clamp(0.85rem, 2.5vmin, 1.5rem);
   overflow: auto;
-  /* Optisch etwas über der echten Mitte — Buttons ziehen den Blick nach unten */
-  padding-bottom: clamp(0.5rem, 4vmin, 2.5rem);
 }
 
 .primary-actions {
   flex: 0 0 auto;
-  margin-top: 0;
-  padding: 0.5rem 0 0;
+  padding: 0;
 }
 
 .primary-actions .row {
@@ -354,20 +352,39 @@ body {
   min-width: 0;
 }
 
-.settings-link {
+.top-actions {
   flex-shrink: 0;
-  margin-top: 0.35rem;
-  font-size: clamp(0.95rem, 2vmin, 1.1rem);
-  font-weight: 600;
-  color: var(--color-ink-2);
-  text-decoration: none;
-  padding: 0.35rem 0;
-  border-bottom: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-top: 0.15rem;
 }
 
-.settings-link:hover {
+.icon-link {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-ink-2);
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.icon-link:hover {
   color: var(--color-ink);
-  border-bottom-color: var(--color-paper-3);
+  background: var(--color-paper-2);
+}
+
+.icon-link .icon {
+  display: block;
 }
 
 .brand {
@@ -409,8 +426,7 @@ body {
 }
 
 .shell[data-compact='true'] .middle {
-  padding-bottom: clamp(0.25rem, 2vmin, 1rem);
-  justify-content: center;
+  gap: 0.65rem;
 }
 
 .shell[data-compact='true'][data-started='true'] .top-brand .tag {
@@ -491,7 +507,7 @@ body {
 }
 
 .shell[data-compact='true'] .primary-actions {
-  padding: 0.25rem 0 0;
+  padding: 0;
 }
 
 .shell[data-compact='true'] .primary-actions .btn {
@@ -736,8 +752,24 @@ button[hidden] {
   gap: 0.75rem;
 }
 
-.threshold-actions .btn {
-  min-width: 9rem;
+.threshold-actions {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.threshold-actions > .btn-primary {
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.threshold-secondary {
+  width: 100%;
+  margin: 0;
+}
+
+.threshold-secondary .btn {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .controls {

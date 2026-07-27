@@ -33,6 +33,7 @@ import {
   getState,
   initTimer,
   rerollMoment,
+  resetDay,
   resume,
   setDemo,
   setMode,
@@ -116,6 +117,11 @@ mountUi(app, {
   },
   onConfirmDeskLater: () => {
     confirmDeskLater()
+  },
+  onCloseDay: () => {
+    if (!confirm('Tagesabschluss — Timer zurücksetzen?')) return
+    const story = resetDay()
+    alert(story)
   },
 })
 
