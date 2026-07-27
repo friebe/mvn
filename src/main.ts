@@ -11,23 +11,36 @@ import {
   registerPwa,
   shouldShowInstallBanner,
 } from './pwa'
-import { bindCompactMode, mountUi, renderUi, setInstallVisible } from './ui'
+import {
+  bindCompactMode,
+  mountUi,
+  renderUi,
+  setInstallVisible,
+  toggleExactClock,
+  toggleAtmosphereWords,
+} from './ui'
 import {
   chooseFreezePath,
   chooseLazyPath,
+  chooseMoment,
   chooseRise,
-  extendFreeze,
-  freeze,
+  completeMoment,
+  confirmCheckIn,
   confirmDesk,
   confirmDeskLater,
+  extendFreeze,
+  freeze,
   getState,
   initTimer,
+  rerollMoment,
   resume,
   setDemo,
   setMode,
-  skipExercise,
+  skipStanding,
   startDay,
+  startFreezeAfterplay,
   subscribe,
+  refreshUi,
 } from './timer'
 
 registerPwa()
@@ -53,12 +66,35 @@ mountUi(app, {
   onExtendFreeze: () => {
     extendFreeze()
   },
-  onSkip: () => {
-    skipExercise()
+  onAfterplay: () => {
+    startFreezeAfterplay()
+  },
+  onSkipStanding: () => {
+    skipStanding()
+  },
+  onCompleteMoment: () => {
+    completeMoment()
+  },
+  onRerollMoment: () => {
+    rerollMoment()
+  },
+  onChooseMoment: (id) => {
+    chooseMoment(id)
+  },
+  onConfirmCheckIn: () => {
+    confirmCheckIn()
   },
   onToggleLazy: () => {
     const next = getState().mode === 'lazy' ? 'high' : 'lazy'
     setMode(next)
+  },
+  onToggleClock: () => {
+    toggleExactClock()
+    refreshUi()
+  },
+  onToggleAtmosphereWords: () => {
+    toggleAtmosphereWords()
+    refreshUi()
   },
   onInstall: async () => {
     await promptInstallPwa()

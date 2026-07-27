@@ -174,7 +174,8 @@ function render(): void {
 
   root.querySelector('#btn-close-day')?.addEventListener('click', () => {
     if (confirm('Tagesabschluss — Timer zurücksetzen?')) {
-      closeDayInStorage()
+      const { story } = closeDayInStorage()
+      alert(story)
       window.location.href = appPath()
     }
   })

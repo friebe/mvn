@@ -61,15 +61,13 @@ export const MOTIVATIONS: Motivation[] = [
   },
 ]
 
-/** Every 3rd–4th pick pulls from nordstern; otherwise mode pool. */
+/** Mode pool only — Nordstern is reserved for rare ambient at day start. */
 export function pickMotivation(
   mode: EnergyMode,
   recentIds: string[],
-  pickCount: number,
+  _pickCount: number,
 ): Motivation {
-  const useNorth = pickCount > 0 && pickCount % 4 === 0
-  const kind: MotivationKind = useNorth ? 'north' : mode
-  const pool = MOTIVATIONS.filter((m) => m.kind === kind)
+  const pool = MOTIVATIONS.filter((m) => m.kind === mode)
   const fresh = pool.filter((m) => !recentIds.includes(m.id))
   const candidates = fresh.length > 0 ? fresh : pool
   return candidates[Math.floor(Math.random() * candidates.length)]!

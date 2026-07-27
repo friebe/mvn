@@ -4,6 +4,7 @@ import '@fontsource/source-sans-3/600.css'
 import './analytics.css'
 
 import {
+  buildDayStory,
   clearStats,
   lastDayBuckets,
   summarizeAll,
@@ -57,8 +58,8 @@ function render(period: Period): void {
 
       ${
         empty
-          ? `<p class="empty">Noch keine Nutzung in diesem Zeitraum. Starte auf dem Timer eine Session — hier siehst du dann, ob MVN wirklich mitläuft.</p>`
-          : ''
+          ? `<p class="empty">Noch keine Nutzung in diesem Zeitraum. Starte eine Session — hier wird daraus eine Tagesgeschichte.</p>`
+          : `<p class="day-story">${buildDayStory(s)}</p>`
       }
 
       <section class="hero-grid" aria-label="Kernzahlen">

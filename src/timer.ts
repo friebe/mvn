@@ -8,6 +8,9 @@ import {
   type AttentionKind,
 } from './attention'
 import {
+  CHECKIN_RATIO,
+  CHECKIN_TIMEOUT_MS,
+  DEMO_CHECKIN_TIMEOUT_MS,
   EXERCISE_MS,
   FORESHADOW_RATIO,
   FREEZE_EXTEND_MS,
@@ -25,7 +28,7 @@ import {
   nextActivePhase,
   phaseLabel,
 } from './modes'
-import { pickExercise, rememberId } from './exercises'
+import { getMoment, pickMoment, pickMomentCards, rememberId } from './exercises'
 import { pickAmbient, pickMotivation, rememberMotivation } from './motivation'
 import { notifyPhase } from './notify'
 import { recordStat, todayKey } from './stats'
@@ -64,7 +67,14 @@ function remainingMs(): number {
   if (state.phase === 'frozen') {
     return state.frozenRemainingMs ?? 0
   }
-  if (state.phase === 'threshold' || state.phase === 'setup') return 0
+  if (
+    state.phase === 'threshold' ||
+    state.phase === 'setup' ||
+    state.phase === 'pick' ||
+    state.phase === 'confirm'
+  ) {
+    return 0
+  }
   if (state.phaseEndsAt == null) return 0
   return Math.max(0, state.phaseEndsAt - Date.now())
 }
@@ -86,8 +96,12 @@ function freezeExtendMs(): number {
   return state.demo ? DEMO_FREEZE_EXTEND_MS : FREEZE_EXTEND_MS
 }
 
-function exerciseMs(): number {
+function momentMs(): number {
   return state.demo ? DEMO_EXERCISE_MS : EXERCISE_MS
+}
+
+function checkInTimeoutMs(): number {
+  return state.demo ? DEMO_CHECKIN_TIMEOUT_MS : CHECKIN_TIMEOUT_MS
 }
 
 function shouldShowFreezePrompt(): boolean {
@@ -111,10 +125,19 @@ function startTicking(): void {
 }
 
 function onTick(): void {
-  if (state.phase === 'setup' || state.phase === 'frozen' || state.phase === 'threshold') {
+  if (
+    state.phase === 'setup' ||
+    state.phase === 'frozen' ||
+    state.phase === 'threshold' ||
+    state.phase === 'pick' ||
+    state.phase === 'confirm'
+  ) {
     emit()
     return
   }
+
+  maybeShowCheckIn()
+  maybeTimeoutCheckIn()
 
   const rem = remainingMs()
   if (
@@ -123,7 +146,7 @@ function onTick(): void {
     (state.phase === 'sit' || state.phase === 'stand' || state.phase === 'reset')
   ) {
     state = { ...state, foreshadowFired: true }
-    signalAttention('foreshadow', 'Gleich', 'Schwelle kommt.')
+    signalAttention('foreshadow', 'Gleich', 'Tisch meldet sich bald.')
   }
 
   if (state.phaseEndsAt != null && Date.now() >= state.phaseEndsAt) {
@@ -132,9 +155,39 @@ function onTick(): void {
   emit()
 }
 
+function maybeShowCheckIn(): void {
+  if (state.phase !== 'sit' && state.phase !== 'stand') return
+  if (state.checkInHandled || state.checkInShownAt != null) return
+  if (state.checkInAt == null || Date.now() < state.checkInAt) return
+
+  state = {
+    ...state,
+    checkInShownAt: Date.now(),
+  }
+  signalAttention('foreshadow', 'Check-in', checkInPrompt())
+}
+
+function maybeTimeoutCheckIn(): void {
+  if (state.checkInShownAt == null || state.checkInHandled) return
+  if (state.phase !== 'sit' && state.phase !== 'stand') return
+  if (Date.now() - state.checkInShownAt < checkInTimeoutMs()) return
+
+  const ended = state.phase
+  state = {
+    ...state,
+    checkInHandled: true,
+    checkInShownAt: null,
+    checkInAt: null,
+  }
+  enterThreshold(ended)
+}
+
+function checkInPrompt(): string {
+  return state.phase === 'stand' ? 'Noch am Stehen?' : 'Noch am Tisch?'
+}
+
 function shouldNotify(muted: boolean): boolean {
   if (state.notificationsEnabled) return true
-  // Ton aus + Permission schon da → trotzdem pingen (zweiter Monitor)
   return muted && 'Notification' in window && Notification.permission === 'granted'
 }
 
@@ -167,8 +220,13 @@ function onPhaseComplete(): void {
   if (state.phase === 'exercise') {
     clearAttention()
     recordStat('ritual_done')
+
+    if (state.resumeAfterAfterplay) {
+      finishAfterplay()
+      return
+    }
+
     if (state.pendingNextPhase === 'stand') {
-      // USP-Kniff: nur ein Tap macht aus "Timer" einen echten Wechsel.
       state = {
         ...state,
         phase: 'confirm',
@@ -177,6 +235,7 @@ function onPhaseComplete(): void {
         foreshadowFired: false,
         currentExerciseId: null,
         currentMotivationId: null,
+        momentChoiceIds: null,
         resumeToThreshold: false,
         resumeToConfirm: false,
       }
@@ -191,6 +250,28 @@ function onPhaseComplete(): void {
   if (state.phase === 'sit' || state.phase === 'stand' || state.phase === 'reset') {
     enterThreshold(state.phase)
   }
+}
+
+function finishAfterplay(): void {
+  const rem = state.frozenRemainingMs ?? 0
+  const phase = state.frozenPhase ?? 'sit'
+  state = {
+    ...state,
+    phase,
+    phaseEndsAt: Date.now() + Math.max(rem, 1000),
+    phaseDurationMs: state.phaseDurationMs ?? rem,
+    foreshadowFired: false,
+    frozenAt: null,
+    frozenRemainingMs: null,
+    freezeExtendUntil: null,
+    frozenPhase: null,
+    resumeAfterAfterplay: false,
+    currentExerciseId: null,
+    currentMotivationId: null,
+    momentChoiceIds: null,
+  }
+  setBaseTitle(`MVN · ${phaseLabel(phase)}`)
+  emit()
 }
 
 function enterThreshold(ended: ActivePhase): void {
@@ -209,15 +290,42 @@ function enterThreshold(ended: ActivePhase): void {
     pendingNextPhase: next,
     currentExerciseId: null,
     currentMotivationId: null,
+    momentChoiceIds: null,
+    checkInAt: null,
+    checkInShownAt: null,
+    checkInHandled: true,
     resumeToThreshold: false,
+    resumeAfterAfterplay: false,
   }
-  signalAttention('threshold', 'Schwelle', 'Du entscheidest.')
+  signalAttention(
+    'threshold',
+    'Tisch',
+    ended === 'sit' ? 'Tisch will hoch.' : 'Tisch wartet.',
+  )
   emit()
 }
 
-function enterRitual(): void {
+function enterPick(): void {
+  const cards = pickMomentCards(state.mode, state.recentExerciseIds)
+  clearAttention()
+  state = {
+    ...state,
+    phase: 'pick',
+    phaseEndsAt: null,
+    phaseDurationMs: null,
+    foreshadowFired: false,
+    momentChoiceIds: cards.map((c) => c.id),
+    currentExerciseId: null,
+    currentMotivationId: null,
+    momentRerolled: false,
+  }
+  signalAttention('ritual', 'Moment', 'Drei Karten. Eine reicht.')
+  emit()
+}
+
+function enterRitualWithMoment(momentId: string): void {
+  const moment = getMoment(momentId) ?? pickMoment(state.mode, state.recentExerciseIds)
   const next = state.pendingNextPhase ?? 'sit'
-  const exercise = pickExercise(state.mode, state.recentExerciseIds)
   motivationPickCount += 1
   const motivation = pickMotivation(state.mode, state.recentMotivationIds, motivationPickCount)
 
@@ -225,22 +333,34 @@ function enterRitual(): void {
   state = {
     ...state,
     phase: 'exercise',
-    phaseEndsAt: Date.now() + exerciseMs(),
-    phaseDurationMs: exerciseMs(),
+    phaseEndsAt: Date.now() + momentMs(),
+    phaseDurationMs: momentMs(),
     foreshadowFired: false,
     pendingNextPhase: next,
-    currentExerciseId: exercise.id,
+    currentExerciseId: moment.id,
     currentMotivationId: motivation.id,
-    recentExerciseIds: rememberId(state.recentExerciseIds, exercise.id),
+    recentExerciseIds: rememberId(state.recentExerciseIds, moment.id),
     recentMotivationIds: rememberMotivation(state.recentMotivationIds, motivation.id),
+    momentChoiceIds: null,
+    momentRerolled: false,
   }
-  signalAttention('ritual', 'Ritual', exercise.title)
+  signalAttention('ritual', 'Moment', moment.title)
   emit()
 }
 
 function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): void {
   const ms = durationFor(state.mode, phase, state.demo, state.intervals)
-  const ambient = pickAmbient(state.recentMotivationIds)
+  const day = todayKey()
+  let ambientId: string | null = null
+  let recentMot = state.recentMotivationIds
+  let northKey = state.northShownKey
+
+  if (phase === 'sit' && northKey !== day) {
+    const ambient = pickAmbient(recentMot)
+    ambientId = ambient.id
+    recentMot = rememberMotivation(recentMot, ambient.id)
+    northKey = day
+  }
 
   clearAttention()
   state = {
@@ -253,9 +373,16 @@ function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): vo
     endedPhase: null,
     currentExerciseId: null,
     currentMotivationId: null,
-    ambientMotivationId: ambient.id,
-    recentMotivationIds: rememberMotivation(state.recentMotivationIds, ambient.id),
+    ambientMotivationId: ambientId,
+    recentMotivationIds: recentMot,
+    northShownKey: northKey,
     resumeToThreshold: false,
+    resumeAfterAfterplay: false,
+    momentChoiceIds: null,
+    checkInAt:
+      phase === 'sit' || phase === 'stand' ? Date.now() + ms * CHECKIN_RATIO : null,
+    checkInShownAt: null,
+    checkInHandled: false,
   }
 
   if (opts.soft) {
@@ -266,11 +393,79 @@ function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): vo
   emit()
 }
 
-/** Threshold → Ritual (Hochfahren) */
+/** Threshold → Moment-Pick (Tisch hoch) */
 export function chooseRise(): void {
   if (state.phase !== 'threshold') return
   recordStat('rise')
-  enterRitual()
+  enterPick()
+}
+
+export function chooseMoment(momentId: string): void {
+  if (state.phase !== 'pick') return
+  if (!state.momentChoiceIds?.includes(momentId)) return
+  enterRitualWithMoment(momentId)
+}
+
+/** Skip ritual — standing is enough */
+export function skipStanding(): void {
+  if (state.phase !== 'pick' && state.phase !== 'exercise') return
+  recordStat('ritual_skip')
+  clearAttention()
+  const next = state.pendingNextPhase ?? 'sit'
+  state = {
+    ...state,
+    momentChoiceIds: null,
+    currentExerciseId: null,
+    currentMotivationId: null,
+  }
+  if (next === 'stand') {
+    state = {
+      ...state,
+      phase: 'confirm',
+      phaseEndsAt: null,
+      phaseDurationMs: null,
+      foreshadowFired: false,
+      resumeToThreshold: false,
+      resumeToConfirm: false,
+    }
+    signalAttention('threshold', 'Beweis', 'Tisch steht? Ein Tap reicht.')
+    emit()
+    return
+  }
+  enterActivePhase(next, { soft: true })
+}
+
+export function completeMoment(): void {
+  if (state.phase !== 'exercise') return
+  state = { ...state, phaseEndsAt: Date.now() }
+  onPhaseComplete()
+}
+
+export function rerollMoment(): void {
+  if (state.phase !== 'exercise' || state.momentRerolled) return
+  const moment = pickMoment(state.mode, state.recentExerciseIds)
+  state = {
+    ...state,
+    currentExerciseId: moment.id,
+    recentExerciseIds: rememberId(state.recentExerciseIds, moment.id),
+    momentRerolled: true,
+    phaseEndsAt: Date.now() + momentMs(),
+    phaseDurationMs: momentMs(),
+  }
+  signalAttention('ritual', 'Moment', moment.title)
+  emit()
+}
+
+export function confirmCheckIn(): void {
+  if (state.checkInShownAt == null || state.checkInHandled) return
+  state = {
+    ...state,
+    checkInHandled: true,
+    checkInShownAt: null,
+  }
+  clearAttention()
+  setBaseTitle(`MVN · ${phaseLabel(state.phase)}`)
+  emit()
 }
 
 /** Threshold → Lazy + next phase without ritual */
@@ -289,6 +484,7 @@ export function chooseLazyPath(): void {
       foreshadowFired: false,
       currentExerciseId: null,
       currentMotivationId: null,
+      momentChoiceIds: null,
       resumeToThreshold: false,
       resumeToConfirm: false,
     }
@@ -313,6 +509,7 @@ export function chooseFreezePath(): void {
     freezeExtendUntil: null,
     frozenPhase: null,
     resumeToThreshold: true,
+    momentChoiceIds: null,
   }
   setBaseTitle('MVN · Freeze')
   emit()
@@ -329,6 +526,8 @@ export function startDay(mode: EnergyMode = state.mode): void {
     freezeExtendUntil: null,
     frozenPhase: null,
     resumeToThreshold: false,
+    resumeAfterAfterplay: false,
+    northShownKey: null,
   }
   enterActivePhase('sit')
 }
@@ -351,12 +550,17 @@ export function resetDay(): void {
     frozenPhase: null,
     resumeToThreshold: false,
     resumeToConfirm: false,
+    resumeAfterAfterplay: false,
     startedAt: null,
     pendingNextPhase: null,
     endedPhase: null,
     currentExerciseId: null,
     currentMotivationId: null,
     ambientMotivationId: null,
+    momentChoiceIds: null,
+    checkInAt: null,
+    checkInShownAt: null,
+    checkInHandled: false,
     dayClosedKey: closeKey,
   }
   setBaseTitle('MVN')
@@ -418,6 +622,25 @@ export function freeze(): void {
     return
   }
 
+  if (state.phase === 'pick') {
+    recordStat('freeze_choice')
+    clearAttention()
+    state = {
+      ...state,
+      phase: 'frozen',
+      phaseEndsAt: null,
+      frozenRemainingMs: 0,
+      frozenAt: Date.now(),
+      freezeExtendUntil: null,
+      frozenPhase: null,
+      resumeToThreshold: true,
+      momentChoiceIds: null,
+    }
+    setBaseTitle('MVN · Freeze')
+    emit()
+    return
+  }
+
   recordStat('freeze_manual')
 
   const rem =
@@ -441,6 +664,8 @@ export function freeze(): void {
     freezeExtendUntil: null,
     frozenPhase,
     resumeToThreshold: false,
+    resumeAfterAfterplay: false,
+    momentChoiceIds: null,
   }
   clearAttention()
   setBaseTitle('MVN · Freeze')
@@ -485,9 +710,40 @@ export function resume(): void {
       frozenRemainingMs: null,
       freezeExtendUntil: null,
       frozenPhase: null,
+      checkInAt: null,
+      checkInShownAt: null,
+      checkInHandled: true,
     }
   }
   setBaseTitle(`MVN · ${phaseLabel(state.phase)}`)
+  emit()
+}
+
+/** Freeze prompt → short recovery moment, then resume */
+export function startFreezeAfterplay(): void {
+  if (state.phase !== 'frozen' || !shouldShowFreezePrompt()) return
+  if (state.resumeToThreshold) {
+    resume()
+    return
+  }
+
+  const moment = pickMoment(state.mode, state.recentExerciseIds)
+  clearAttention()
+  state = {
+    ...state,
+    phase: 'exercise',
+    phaseEndsAt: Date.now() + momentMs(),
+    phaseDurationMs: momentMs(),
+    foreshadowFired: false,
+    currentExerciseId: moment.id,
+    recentExerciseIds: rememberId(state.recentExerciseIds, moment.id),
+    resumeAfterAfterplay: true,
+    frozenAt: null,
+    freezeExtendUntil: null,
+    momentChoiceIds: null,
+    momentRerolled: false,
+  }
+  signalAttention('ritual', 'Nachspiel', moment.title)
   emit()
 }
 
@@ -502,9 +758,7 @@ export function extendFreeze(): void {
 }
 
 export function skipExercise(): void {
-  if (state.phase !== 'exercise') return
-  recordStat('ritual_skip')
-  enterActivePhase(state.pendingNextPhase ?? 'sit', { soft: true })
+  skipStanding()
 }
 
 export function formatTime(ms: number): string {
@@ -512,4 +766,12 @@ export function formatTime(ms: number): string {
   const m = Math.floor(totalSec / 60)
   const s = totalSec % 60
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
+export function isCheckInVisible(): boolean {
+  return state.checkInShownAt != null && !state.checkInHandled
+}
+
+export function refreshUi(): void {
+  emit()
 }

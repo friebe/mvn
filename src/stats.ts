@@ -195,17 +195,35 @@ export function lastDayBuckets(n: number): DayBucket[] {
 export function buildDayCloseLine(s: StatsSummary): string {
   const parts: string[] = []
   if (s.desk_confirmed > 0) {
-    parts.push(`${s.desk_confirmed}× echt gewechselt`)
+    parts.push(`${s.desk_confirmed}× hochgefahren`)
   } else if (s.rise > 0) {
-    parts.push(`${s.rise}× Hochfahren ohne Bestätigung`)
+    parts.push(`${s.rise}× Tisch hoch ohne Beweis`)
   } else if (s.sit_done > 0) {
-    parts.push(`${s.sit_done} Intervalle beendet`)
+    parts.push(`${s.sit_done} Sitzblöcke beendet`)
   } else {
     parts.push('Heute kaum Bewegung')
   }
-  if (s.lazy_choice > 0) parts.push(`${s.lazy_choice}× Lazy`)
-  if (s.freeze_total > 0) parts.push(`${s.freeze_total}× Freeze`)
-  return `${parts.join(', ')}. Prävention fürs Mitspielen — das zählt.`
+  if (s.ritual_done > 0) parts.push(`${s.ritual_done}× Moment`)
+  if (s.ritual_skip > 0) parts.push(`${s.ritual_skip}× nur Stehen`)
+  if (s.lazy_choice > 0) parts.push(`Lazy ${s.lazy_choice}×`)
+  if (s.freeze_total > 0) parts.push(`${s.freeze_total}× Freeze wegen Call`)
+  return `${parts.join(', ')}. Der Tisch hat mitgehalten — das zählt fürs Mitspielen.`
+}
+
+/** Short narrative for analytics hero. */
+export function buildDayStory(s: StatsSummary): string {
+  if (s.day_start === 0 && s.rounds === 0 && s.sit_done === 0) {
+    return 'Noch kein Tag gestartet. Der Tisch wartet.'
+  }
+  const bits: string[] = []
+  if (s.rounds > 0) bits.push(`${s.rounds} echte Hochfahrt${s.rounds === 1 ? '' : 'en'}`)
+  else if (s.rise > 0) bits.push(`${s.rise}× angesetzt`)
+  if (s.freeze_total > 0) bits.push(`${s.freeze_total}× Freeze`)
+  if (s.lazy_choice > 0) bits.push('Lazy unterwegs')
+  if (s.ritual_done > 0 && s.ritual_skip === 0) bits.push('Momente mitgemacht')
+  else if (s.ritual_skip > s.ritual_done) bits.push('öfter nur gestanden')
+  if (bits.length === 0) return 'Der Tag läuft. Noch keine Wechsel — ok.'
+  return bits.join(' · ') + '.'
 }
 
 export function clearStats(): void {

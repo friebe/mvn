@@ -237,3 +237,13 @@ body {
   line-height: 1.45;
   max-width: 32rem;
 }
+
+.day-story {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vmin, 2.25rem);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-ink);
+  max-width: 40rem;
+}

@@ -23,19 +23,24 @@ Tageslicht-Homeoffice, Stehtisch-Instrument. Warmes Papier, ein tiefer Fichten-A
 - `--color-danger`    oklch(48% 0.12 25)
 
 ## Typography
-- Display: Fraunces (local), weight 600 — countdown + brand
+- Display: Fraunces (local), weight 600 — soft atmosphere label + brand (not exam mm:ss)
 - Body: Source Sans 3 (local), weight 400–600
-- Outlier: Source Sans 3 mono-ish via tabular-nums on timer
+- Outlier: tabular-nums only when user taps for exact time
 
 Ratio: major third (1.25). Measure: full viewport instrument, not prose column.
 
+## Atmosphere
+Progress is a **wash** (shell radial, phase-tinted) plus a single **desk-edge** line under the soft label — not a boxed meter or card cluster.
+Hero signal = soft words in Fraunces („noch ein Stück“ / „gleich“). Exact clock is opt-in by tap.
+
 ## Motion
-motion-on, restrained: phase fade, freeze pulse, attention flash. Respect `prefers-reduced-motion`.
+motion-on, restrained: phase fade, freeze pulse, attention flash, wash breathe. Respect `prefers-reduced-motion`.
 
 ## Voice
-utilitarian · dry desk-worker · no wellness kitsch · no streaks
+utilitarian · dry desk-worker · no wellness kitsch · no streaks · Tisch-Metapher
 
 ## Slop gates
 - No purple, no cream+terracotta cliché, no broadsheet, no card clusters, no dark-mode default
 - Brand MVN hero-level in first viewport
 - Tokens only — no mid-render hex improvisation
+- Moment pick = text list, not cards

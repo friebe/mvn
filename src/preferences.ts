@@ -1,7 +1,7 @@
 import { loadState, saveState, type AppState } from './state'
 import type { UserIntervals } from './intervals'
 import { normalizeStoredIntervals, resolveIntervals } from './intervals'
-import { recordStat, todayKey } from './stats'
+import { buildDayCloseLine, recordStat, summarizeToday, todayKey } from './stats'
 
 export type PreferenceKey = 'soundEnabled' | 'notificationsEnabled' | 'demo' | 'mode' | 'intervals'
 
@@ -30,9 +30,10 @@ export function getResolvedIntervals(): UserIntervals {
   return resolveIntervals(loadState().intervals)
 }
 
-export function closeDayInStorage(): AppState {
+export function closeDayInStorage(): { state: AppState; story: string } {
   const state = loadState()
   const closeKey = todayKey()
+  const story = buildDayCloseLine(summarizeToday())
   if (state.dayClosedKey !== closeKey) {
     recordStat('day_close')
   }
@@ -48,14 +49,19 @@ export function closeDayInStorage(): AppState {
     frozenPhase: null,
     resumeToThreshold: false,
     resumeToConfirm: false,
+    resumeAfterAfterplay: false,
     startedAt: null,
     pendingNextPhase: null,
     endedPhase: null,
     currentExerciseId: null,
     currentMotivationId: null,
     ambientMotivationId: null,
+    momentChoiceIds: null,
+    checkInAt: null,
+    checkInShownAt: null,
+    checkInHandled: false,
     dayClosedKey: closeKey,
   }
   saveState(next)
-  return next
+  return { state: next, story }
 }

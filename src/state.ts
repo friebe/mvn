@@ -6,6 +6,7 @@ export type Phase =
   | ActivePhase
   | 'threshold'
   | 'confirm'
+  | 'pick'
   | 'exercise'
   | 'frozen'
   | 'closing'
@@ -34,6 +35,8 @@ export interface AppState {
   resumeToThreshold: boolean
   /** Resume back into desk-confirm after freeze */
   resumeToConfirm: boolean
+  /** After freeze afterplay moment, resume interrupted phase */
+  resumeAfterAfterplay: boolean
   soundEnabled: boolean
   notificationsEnabled: boolean
   recentMotivationIds: string[]
@@ -41,9 +44,19 @@ export interface AppState {
   startedAt: number | null
   /** Quiet why-line during sit/stand (not an alert) */
   ambientMotivationId: string | null
-  /** Current exercise/motivation shown in ritual */
+  /** Current moment / motivation shown in ritual */
   currentExerciseId: string | null
   currentMotivationId: string | null
+  /** Three moment cards at pick phase */
+  momentChoiceIds: string[] | null
+  /** Already used "Anderer Moment" once */
+  momentRerolled: boolean
+  /** Soft check-in due at this timestamp (sit/stand mid-phase) */
+  checkInAt: number | null
+  /** Check-in visible since */
+  checkInShownAt: number | null
+  /** Check-in answered or dismissed for this phase */
+  checkInHandled: boolean
   /** Which active phase just ended (threshold/confirm context) */
   endedPhase: ActivePhase | null
   /** Next phase after ritual / lazy skip */
@@ -52,14 +65,22 @@ export interface AppState {
   dayClosedKey: string | null
   /** Custom sit/stand/reset durations; null = defaults */
   intervals: UserIntervals | null
+  /** Nordstern line already shown today */
+  northShownKey: string | null
 }
 
 export const STORAGE_KEY = 'mvn.v1'
 export const FREEZE_PROMPT_MS = 30 * 60 * 1000
 export const FREEZE_EXTEND_MS = 15 * 60 * 1000
-export const EXERCISE_MS = 60 * 1000
+/** Micro-moment duration (was 60s exercise) */
+export const EXERCISE_MS = 15 * 1000
+export const MOMENT_MS = EXERCISE_MS
 /** Soft foreshadow when this fraction of the phase remains */
 export const FORESHADOW_RATIO = 0.1
+/** Mid-phase soft check-in */
+export const CHECKIN_RATIO = 0.5
+export const CHECKIN_TIMEOUT_MS = 60 * 1000
+export const DEMO_CHECKIN_TIMEOUT_MS = 8 * 1000
 
 export function defaultState(): AppState {
   return {
@@ -75,6 +96,7 @@ export function defaultState(): AppState {
     frozenPhase: null,
     resumeToThreshold: false,
     resumeToConfirm: false,
+    resumeAfterAfterplay: false,
     soundEnabled: false,
     notificationsEnabled: false,
     recentMotivationIds: [],
@@ -83,10 +105,16 @@ export function defaultState(): AppState {
     ambientMotivationId: null,
     currentExerciseId: null,
     currentMotivationId: null,
+    momentChoiceIds: null,
+    momentRerolled: false,
+    checkInAt: null,
+    checkInShownAt: null,
+    checkInHandled: false,
     endedPhase: null,
     pendingNextPhase: null,
     dayClosedKey: null,
     intervals: null,
+    northShownKey: null,
   }
 }
 
