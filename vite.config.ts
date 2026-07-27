@@ -3,6 +3,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'node:path'
 
 export default defineConfig({
+  base: '/mvn/',
   build: {
     rollupOptions: {
       input: {
@@ -28,8 +29,8 @@ export default defineConfig({
         background_color: '#f4f1ea',
         display: 'standalone',
         orientation: 'any',
-        start_url: '/',
-        scope: '/',
+        start_url: '/mvn/',
+        scope: '/mvn/',
         icons: [
           {
             src: 'icons/icon-192.png',
@@ -53,7 +54,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
-        navigateFallback: '/index.html',
+        navigateFallback: '/mvn/index.html',
         navigateFallbackDenylist: [/^\/analytics\.html$/],
       },
       devOptions: {
