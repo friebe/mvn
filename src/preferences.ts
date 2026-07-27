@@ -1,0 +1,61 @@
+import { loadState, saveState, type AppState } from './state'
+import type { UserIntervals } from './intervals'
+import { normalizeStoredIntervals, resolveIntervals } from './intervals'
+import { recordStat, todayKey } from './stats'
+
+export type PreferenceKey = 'soundEnabled' | 'notificationsEnabled' | 'demo' | 'mode' | 'intervals'
+
+export function readPreferences(): AppState {
+  return loadState()
+}
+
+export function writePreferences(patch: Partial<Pick<AppState, PreferenceKey>>): AppState {
+  const next = { ...loadState(), ...patch }
+  saveState(next)
+  return next
+}
+
+export function togglePreference(key: 'soundEnabled' | 'notificationsEnabled' | 'demo'): AppState {
+  const state = loadState()
+  return writePreferences({ [key]: !state[key] })
+}
+
+export function setIntervals(intervals: UserIntervals): AppState {
+  const next = { ...loadState(), intervals: normalizeStoredIntervals(intervals) }
+  saveState(next)
+  return next
+}
+
+export function getResolvedIntervals(): UserIntervals {
+  return resolveIntervals(loadState().intervals)
+}
+
+export function closeDayInStorage(): AppState {
+  const state = loadState()
+  const closeKey = todayKey()
+  if (state.dayClosedKey !== closeKey) {
+    recordStat('day_close')
+  }
+  const next: AppState = {
+    ...state,
+    phase: 'setup',
+    phaseEndsAt: null,
+    phaseDurationMs: null,
+    foreshadowFired: false,
+    frozenAt: null,
+    frozenRemainingMs: null,
+    freezeExtendUntil: null,
+    frozenPhase: null,
+    resumeToThreshold: false,
+    resumeToConfirm: false,
+    startedAt: null,
+    pendingNextPhase: null,
+    endedPhase: null,
+    currentExerciseId: null,
+    currentMotivationId: null,
+    ambientMotivationId: null,
+    dayClosedKey: closeKey,
+  }
+  saveState(next)
+  return next
+}

@@ -239,7 +239,7 @@ function enterRitual(): void {
 }
 
 function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): void {
-  const ms = durationFor(state.mode, phase, state.demo)
+  const ms = durationFor(state.mode, phase, state.demo, state.intervals)
   const ambient = pickAmbient(state.recentMotivationIds)
 
   clearAttention()

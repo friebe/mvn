@@ -5,21 +5,73 @@ export type InstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-let deferredPrompt: InstallPromptEvent | null = null
-const installListeners = new Set<(canInstall: boolean) => void>()
+const INSTALLED_KEY = 'mvn-pwa-installed'
+const DISMISSED_KEY = 'mvn-install-banner-dismissed'
 
-export function onInstallAvailability(fn: (canInstall: boolean) => void): () => void {
+let deferredPrompt: InstallPromptEvent | null = null
+let bannerDismissed = false
+const installListeners = new Set<() => void>()
+
+export function onInstallAvailability(fn: () => void): () => void {
   installListeners.add(fn)
-  fn(deferredPrompt != null)
+  fn()
   return () => installListeners.delete(fn)
 }
 
 function emitInstall(): void {
-  const can = deferredPrompt != null
-  for (const fn of installListeners) fn(can)
+  for (const fn of installListeners) fn()
+}
+
+export function markPwaInstalled(): void {
+  try {
+    localStorage.setItem(INSTALLED_KEY, '1')
+  } catch {
+    // LocalStorage unavailable — standalone check still works this session.
+  }
+}
+
+export function isPwaInstalled(): boolean {
+  if (isStandaloneDisplay()) {
+    markPwaInstalled()
+    return true
+  }
+  try {
+    return localStorage.getItem(INSTALLED_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function isInstallBannerDismissed(): boolean {
+  if (bannerDismissed) return true
+  try {
+    return localStorage.getItem(DISMISSED_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function dismissInstallBanner(): void {
+  bannerDismissed = true
+  try {
+    localStorage.setItem(DISMISSED_KEY, '1')
+  } catch {
+    // In-memory flag still hides the banner for this session.
+  }
+  emitInstall()
+}
+
+export function shouldShowInstallBanner(): boolean {
+  return canInstallPwa() && !isPwaInstalled() && !isInstallBannerDismissed()
 }
 
 export function registerPwa(): void {
+  try {
+    bannerDismissed = localStorage.getItem(DISMISSED_KEY) === '1'
+  } catch {
+    bannerDismissed = false
+  }
+
   registerSW({
     immediate: true,
     onRegisteredSW(_url, registration) {
@@ -36,8 +88,15 @@ export function registerPwa(): void {
 
   window.addEventListener('appinstalled', () => {
     deferredPrompt = null
+    markPwaInstalled()
     emitInstall()
   })
+
+  for (const mode of ['standalone', 'fullscreen', 'minimal-ui'] as const) {
+    window.matchMedia(`(display-mode: ${mode})`).addEventListener('change', () => {
+      if (isPwaInstalled()) emitInstall()
+    })
+  }
 }
 
 export function canInstallPwa(): boolean {
@@ -57,6 +116,8 @@ export async function promptInstallPwa(): Promise<boolean> {
 export function isStandaloneDisplay(): boolean {
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    window.matchMedia('(display-mode: minimal-ui)').matches ||
     ('standalone' in navigator &&
       Boolean((navigator as Navigator & { standalone?: boolean }).standalone))
   )

@@ -1,3 +1,5 @@
+import type { UserIntervals } from './intervals'
+
 export type EnergyMode = 'high' | 'lazy'
 export type ActivePhase = 'sit' | 'stand' | 'reset'
 export type Phase =
@@ -48,6 +50,8 @@ export interface AppState {
   pendingNextPhase: ActivePhase | null
   /** Day already closed today (ISO date key) */
   dayClosedKey: string | null
+  /** Custom sit/stand/reset durations; null = defaults */
+  intervals: UserIntervals | null
 }
 
 export const STORAGE_KEY = 'mvn.v1'
@@ -82,6 +86,7 @@ export function defaultState(): AppState {
     endedPhase: null,
     pendingNextPhase: null,
     dayClosedKey: null,
+    intervals: null,
   }
 }
 

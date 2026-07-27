@@ -4,14 +4,14 @@ import '@fontsource/source-sans-3/600.css'
 import './styles.css'
 
 import { loadState, saveState } from './state'
-import { ensureNotificationPermission } from './notify'
 import {
-  isStandaloneDisplay,
+  dismissInstallBanner,
   onInstallAvailability,
   promptInstallPwa,
   registerPwa,
+  shouldShowInstallBanner,
 } from './pwa'
-import { mountUi, renderUi, setInstallVisible } from './ui'
+import { bindCompactMode, mountUi, renderUi, setInstallVisible } from './ui'
 import {
   chooseFreezePath,
   chooseLazyPath,
@@ -22,16 +22,12 @@ import {
   confirmDeskLater,
   getState,
   initTimer,
-  resetDay,
   resume,
   setDemo,
   setMode,
-  setNotificationsEnabled,
   skipExercise,
   startDay,
   subscribe,
-  toggleDemo,
-  toggleSound,
 } from './timer'
 
 registerPwa()
@@ -47,9 +43,6 @@ if (params.get('demo') === '1' || params.get('demo') === 'true') {
 mountUi(app, {
   onStart: () => {
     startDay(getState().mode)
-  },
-  onReset: () => {
-    resetDay()
   },
   onFreeze: () => {
     freeze()
@@ -67,18 +60,11 @@ mountUi(app, {
     const next = getState().mode === 'lazy' ? 'high' : 'lazy'
     setMode(next)
   },
-  onToggleDemo: () => {
-    toggleDemo()
-  },
-  onToggleSound: () => {
-    toggleSound()
-  },
-  onEnableNotifications: async () => {
-    const ok = await ensureNotificationPermission()
-    setNotificationsEnabled(ok)
-  },
   onInstall: async () => {
     await promptInstallPwa()
+  },
+  onDismissInstall: () => {
+    dismissInstallBanner()
   },
   onChooseRise: () => {
     chooseRise()
@@ -97,9 +83,14 @@ mountUi(app, {
   },
 })
 
-onInstallAvailability((canInstall) => {
-  setInstallVisible(app, canInstall && !isStandaloneDisplay())
-})
+bindCompactMode(app)
+
+function updateInstallBanner(): void {
+  setInstallVisible(app, shouldShowInstallBanner())
+}
+
+onInstallAvailability(updateInstallBanner)
+updateInstallBanner()
 
 subscribe((state, remaining, showFreezePrompt, approaching) => {
   renderUi(app, state, remaining, showFreezePrompt, approaching)
@@ -111,3 +102,13 @@ initTimer(initial)
 if ((params.get('demo') === '1' || params.get('demo') === 'true') && !getState().demo) {
   setDemo(true)
 }
+
+window.addEventListener('pageshow', () => {
+  initTimer(loadState())
+})
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    initTimer(loadState())
+  }
+})

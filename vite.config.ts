@@ -2,13 +2,16 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'node:path'
 
+const base = '/mvn/'
+
 export default defineConfig({
-  base: '/mvn/',
+  base,
   build: {
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
         analytics: resolve(__dirname, 'analytics.html'),
+        settings: resolve(__dirname, 'settings.html'),
       },
     },
   },
@@ -54,8 +57,11 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
-        navigateFallback: '/mvn/index.html',
-        navigateFallbackDenylist: [/^\/analytics\.html$/],
+        navigateFallback: `${base}index.html`,
+        navigateFallbackDenylist: [
+          new RegExp(`^${base.replace(/\/$/, '')}/analytics\\.html$`),
+          new RegExp(`^${base.replace(/\/$/, '')}/settings\\.html$`),
+        ],
       },
       devOptions: {
         enabled: true,

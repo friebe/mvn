@@ -11,6 +11,7 @@ import {
   summarizeToday,
   type StatsSummary,
 } from './stats'
+import { appPath } from './paths'
 
 type Period = 'today' | '7d' | 'all'
 
@@ -41,7 +42,8 @@ function render(period: Period): void {
           <p class="analytics-tag">Analytics · nur lokal auf diesem Gerät</p>
         </div>
         <nav class="analytics-nav">
-          <a class="primary" href="/">Zurück zur App</a>
+          <a class="primary" href="${appPath()}">Zurück zur App</a>
+          <a href="${appPath('settings.html')}">Einstellungen</a>
           <button type="button" id="btn-refresh">Aktualisieren</button>
           <button type="button" id="btn-clear">Reset Stats</button>
         </nav>

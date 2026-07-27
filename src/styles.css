@@ -35,12 +35,54 @@ body {
 .shell {
   min-height: 100dvh;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto auto minmax(0, 1fr);
   padding: clamp(1.25rem, 3vmin, 2.5rem) clamp(1.25rem, 4vmin, 3rem)
     clamp(1.5rem, 4vmin, 3rem);
   max-width: min(56rem, 100%);
   margin: 0 auto;
   transition: background-color 0.4s var(--ease);
+}
+
+.shell[data-compact='true'] {
+  max-height: 100dvh;
+  overflow: hidden;
+  padding-top: clamp(0.75rem, 2vmin, 1.25rem);
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.content-area {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
+.primary-actions {
+  flex-shrink: 0;
+  padding: 0.35rem 0 0.75rem;
+}
+
+.primary-actions .row {
+  width: 100%;
+}
+
+.primary-actions .row + .row {
+  margin-top: 0.5rem;
+}
+
+.quick-actions {
+  padding-top: 0.15rem;
+  border-top: 1px solid var(--color-paper-3);
+}
+
+.quick-actions .btn,
+.quick-actions a {
+  flex: 1 1 auto;
+}
+
+.primary-actions .btn {
+  flex: 1 1 auto;
 }
 
 .install-banner {
@@ -51,6 +93,31 @@ body {
   padding: 1rem 0 1.15rem;
   margin-bottom: 0.5rem;
   border-bottom: 1px solid var(--color-paper-3);
+}
+
+.install-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
+.install-dismiss {
+  padding: 0.35rem 0.5rem;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-ink-2);
+  font-family: var(--font-body);
+  font-size: clamp(0.85rem, 1.8vmin, 0.98rem);
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+}
+
+.install-dismiss:hover {
+  color: var(--color-ink);
+  background: var(--color-paper-2);
 }
 
 .install-copy {
@@ -214,8 +281,29 @@ body {
 
 .top {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.top-brand {
+  min-width: 0;
+}
+
+.settings-link {
+  flex-shrink: 0;
+  margin-top: 0.35rem;
+  font-size: clamp(0.95rem, 2vmin, 1.1rem);
+  font-weight: 600;
+  color: var(--color-ink-2);
+  text-decoration: none;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid transparent;
+}
+
+.settings-link:hover {
+  color: var(--color-ink);
+  border-bottom-color: var(--color-paper-3);
 }
 
 .brand {
@@ -247,6 +335,105 @@ body {
   justify-content: center;
   gap: clamp(0.75rem, 2vmin, 1.25rem);
   padding: clamp(1rem, 3vmin, 2.5rem) 0;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.shell[data-compact='true'] .stage {
+  justify-content: flex-start;
+  padding: 0.35rem 0 0.5rem;
+  gap: 0.35rem;
+}
+
+.shell[data-compact='true'][data-started='true'] .top-brand .tag {
+  display: none;
+}
+
+.shell[data-compact='true'][data-started='true'] .top-brand .brand {
+  font-size: clamp(1.35rem, 4vmin, 2rem);
+}
+
+.shell[data-compact='true'] .brand {
+  font-size: clamp(1.75rem, 5.5vmin, 2.75rem);
+}
+
+.shell[data-compact='true'] .tag {
+  font-size: clamp(0.9rem, 1.8vmin, 1.05rem);
+}
+
+.shell[data-compact='true'] .countdown {
+  font-size: clamp(3.25rem, 16vmin, 6.5rem);
+  line-height: 0.92;
+}
+
+.shell[data-compact='true'] .phase-label {
+  font-size: clamp(0.95rem, 2vmin, 1.15rem);
+}
+
+.shell[data-compact='true'] .hint {
+  font-size: clamp(0.95rem, 2vmin, 1.1rem);
+  line-height: 1.3;
+  margin-top: 0.15rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.shell[data-compact='true'] .threshold,
+.shell[data-compact='true'] .confirm,
+.shell[data-compact='true'] .freeze-prompt {
+  padding: 0.25rem 0 0;
+  border-top: none;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+.shell[data-compact='true'] .threshold-lead,
+.shell[data-compact='true'] .exercise-title,
+.shell[data-compact='true'] .freeze-q {
+  font-size: clamp(1.35rem, 3.5vmin, 2rem);
+}
+
+.shell[data-compact='true'] .threshold-sub,
+.shell[data-compact='true'] .exercise-hint {
+  font-size: clamp(0.95rem, 2vmin, 1.1rem);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.shell[data-compact='true'] .exercise {
+  padding: 0.5rem 0 0;
+  border-top: 1px solid var(--color-paper-3);
+  gap: 0.35rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.shell[data-compact='true'] .exercise .motivation {
+  display: none;
+}
+
+.shell[data-compact='true'] .install-banner {
+  padding: 0.65rem 0;
+  margin-bottom: 0.25rem;
+}
+
+.shell[data-compact='true'] .install-text {
+  display: none;
+}
+
+.shell[data-compact='true'] .primary-actions {
+  padding: 0.25rem 0 0.5rem;
+}
+
+.shell[data-compact='true'] .primary-actions .btn {
+  min-height: 2.65rem;
+  padding: 0.65rem 1rem;
+  font-size: clamp(0.95rem, 2vmin, 1.1rem);
 }
 
 .phase-label {
@@ -309,8 +496,10 @@ body {
   gap: clamp(0.75rem, 2vmin, 1.25rem);
 }
 
+.install-banner[hidden],
 .threshold[hidden],
 .exercise[hidden],
+.confirm[hidden],
 .freeze-prompt[hidden],
 .ambient[hidden],
 .mute-hint[hidden],
@@ -336,13 +525,20 @@ button[hidden] {
   max-width: 36rem;
 }
 
-.threshold-actions {
-  margin-top: 0.5rem;
+.threshold-actions,
+.confirm-actions,
+.freeze-actions,
+.exercise-actions {
+  margin-top: 0;
   gap: 0.75rem;
 }
 
 .threshold-actions .btn {
   min-width: 9rem;
+}
+
+.controls {
+  padding-top: 1rem;
 }
 
 .ritual-kicker {
@@ -466,6 +662,10 @@ button[hidden] {
   .install-banner {
     grid-template-columns: 1fr;
     align-items: stretch;
+  }
+
+  .install-actions {
+    width: 100%;
   }
 
   .btn {

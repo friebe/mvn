@@ -39,4 +39,4 @@ Demo-Modus: Button **Demo** oder `?demo=1`.
 
 ## Analytics
 
-Unter `/analytics.html` (Link **Analytics** in der App): lokale Statistik zu Runden, Hochfahren, Lazy, Freeze — nur LocalStorage, keine Cloud.
+Unter `analytics.html` im App-Ordner (Link **Analytics** in der App): lokale Statistik zu Runden, Hochfahren, Lazy, Freeze — nur LocalStorage, keine Cloud. Auf GitHub Pages: `/mvn/analytics.html`.
