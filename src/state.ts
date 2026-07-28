@@ -67,6 +67,10 @@ export interface AppState {
   intervals: UserIntervals | null
   /** Nordstern line already shown today */
   northShownKey: string | null
+  /** Show keyboard hints on action buttons */
+  shortcutHintsEnabled: boolean
+  /** Keep OS toast visible until dismissed (requireInteraction) */
+  notificationPersistent: boolean
 }
 
 export const STORAGE_KEY = 'mvn.v1'
@@ -115,6 +119,8 @@ export function defaultState(): AppState {
     dayClosedKey: null,
     intervals: null,
     northShownKey: null,
+    shortcutHintsEnabled: true,
+    notificationPersistent: false,
   }
 }
 

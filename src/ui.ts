@@ -1,12 +1,13 @@
 import type { AppState } from './state'
 import { getMoment, kindLabel, MOMENTS } from './exercises'
 import { MOTIVATIONS } from './motivation'
-import { confirmCopy, nextPhaseVerb, phaseLabel, thresholdLead, thresholdSub } from './modes'
-import { fillLevel, formatExactTime, softTimeLabel } from './atmosphere'
+import { confirmCopy, nextPhaseVerb, phaseLabel, pickLead, skipMomentLabel, thresholdLead, thresholdSub } from './modes'
+import { fillLevel, formatExactTime, formatRemainingPercent, softTimeLabel } from './atmosphere'
 import { intervalSummary, resolveIntervals } from './intervals'
 import { appPath } from './paths'
 import { isCheckInVisible } from './timer'
 import { buildDayCloseLine, buildDayStory, type StatsSummary } from './stats'
+import { shortcutHintLabel, type ShortcutId } from './shortcuts'
 
 export interface UiHandlers {
   onStart: () => void
@@ -33,7 +34,9 @@ export interface UiHandlers {
   onDismissDayClose: () => void
 }
 
-let showExactClock = false
+type AtmosphereDetail = 'soft' | 'clock' | 'percent'
+
+let atmosphereDetail: AtmosphereDetail = 'soft'
 const WORDS_KEY = 'mvn-atmosphere-words-hidden'
 let wordsHidden = false
 let dayCloseSummary: StatsSummary | null = null
@@ -42,6 +45,59 @@ try {
   wordsHidden = localStorage.getItem(WORDS_KEY) === '1'
 } catch {
   wordsHidden = false
+}
+
+function setButtonLabel(btn: HTMLElement, text: string): void {
+  const label = btn.querySelector<HTMLElement>('.btn-text')
+  if (label) label.textContent = text
+  else btn.textContent = text
+}
+
+function actionButton(
+  id: string,
+  classes: string,
+  label: string,
+  shortcut: ShortcutId | null,
+  hidden = false,
+): string {
+  const kbd = shortcut
+    ? `<span class="btn-kbd" aria-hidden="true">${shortcutHintLabel(shortcut)}</span>`
+    : ''
+  const shortcutAttr = shortcut ? ` data-shortcut="${shortcut}"` : ''
+  const hiddenAttr = hidden ? ' hidden' : ''
+  return `<button type="button" class="${classes}${shortcut ? ' has-kbd' : ''}" id="${id}"${shortcutAttr}${hiddenAttr}>
+    <span class="btn-text">${label}</span>${kbd}
+  </button>`
+}
+
+function applyShortcutHints(root: HTMLElement, enabled: boolean): void {
+  root.querySelectorAll<HTMLButtonElement>('[data-shortcut]').forEach((btn) => {
+    const id = btn.dataset.shortcut as ShortcutId
+    const kbd = btn.querySelector<HTMLElement>('.btn-kbd')
+    if (kbd) {
+      kbd.textContent = shortcutHintLabel(id)
+      kbd.hidden = !enabled
+    }
+    btn.classList.toggle('has-kbd', enabled && Boolean(kbd))
+  })
+
+  root.querySelectorAll<HTMLElement>('.moment-choice').forEach((card, index) => {
+    let kbd = card.querySelector<HTMLElement>('.btn-kbd')
+    if (enabled) {
+      if (!kbd) {
+        kbd = document.createElement('span')
+        kbd.className = 'btn-kbd'
+        kbd.setAttribute('aria-hidden', 'true')
+        card.appendChild(kbd)
+      }
+      kbd.textContent = String(index + 1)
+      kbd.hidden = false
+      card.classList.add('has-kbd')
+    } else {
+      kbd?.remove()
+      card.classList.remove('has-kbd')
+    }
+  })
 }
 
 export function showDayCloseReward(summary: StatsSummary): void {
@@ -56,16 +112,22 @@ export function isDayCloseRewardVisible(): boolean {
   return dayCloseSummary != null
 }
 
-export function getShowExactClock(): boolean {
-  return showExactClock
+export function getAtmosphereDetail(): AtmosphereDetail {
+  return atmosphereDetail
 }
 
-export function toggleExactClock(): void {
+export function toggleAtmosphereDetail(): void {
   if (wordsHidden) {
     setAtmosphereWordsHidden(false)
     return
   }
-  showExactClock = !showExactClock
+  atmosphereDetail =
+    atmosphereDetail === 'soft' ? 'clock' : atmosphereDetail === 'clock' ? 'percent' : 'soft'
+}
+
+/** @deprecated use toggleAtmosphereDetail */
+export function toggleExactClock(): void {
+  toggleAtmosphereDetail()
 }
 
 export function isAtmosphereWordsHidden(): boolean {
@@ -74,7 +136,7 @@ export function isAtmosphereWordsHidden(): boolean {
 
 export function setAtmosphereWordsHidden(hidden: boolean): void {
   wordsHidden = hidden
-  if (hidden) showExactClock = false
+  if (hidden) atmosphereDetail = 'soft'
   try {
     localStorage.setItem(WORDS_KEY, hidden ? '1' : '0')
   } catch {
@@ -154,7 +216,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
                 class="atmosphere-hit"
                 id="btn-atmosphere-label"
                 aria-live="polite"
-                aria-label="Phase, Tippen für genaue Zeit"
+                aria-label="Phase, tippen für Zeit oder Prozent"
               >
                 <span class="atmosphere-label" id="atmosphere-label">bereit</span>
               </button>
@@ -179,7 +241,10 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
 
           <section class="check-in" id="check-in" hidden>
             <p class="check-in-q" id="check-in-q">Noch am Tisch?</p>
-            <button type="button" class="btn btn-primary" id="btn-check-in">Ja</button>
+            <button type="button" class="btn btn-primary has-kbd" id="btn-check-in" data-shortcut="checkIn">
+              <span class="btn-text">Ja</span>
+              <span class="btn-kbd" aria-hidden="true">↵</span>
+            </button>
           </section>
 
           <section class="threshold" id="threshold" hidden>
@@ -197,7 +262,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
           </section>
 
           <section class="pick" id="pick" hidden>
-            <p class="pick-lead">Ein Moment. Oder nur stehen.</p>
+            <p class="pick-lead" id="pick-lead">Kurz bewegen, bevor du hochgehst.</p>
             <div class="moment-list" id="moment-cards"></div>
           </section>
 
@@ -218,42 +283,42 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
 
           <nav class="primary-actions" id="primary-actions" aria-label="Aktionen">
             <div class="row day-close-actions" id="day-close-actions" hidden>
-              <button type="button" class="btn btn-primary" id="btn-day-close-done">Weiter</button>
+              ${actionButton('btn-day-close-done', 'btn btn-primary', 'Weiter', 'dayCloseDone')}
             </div>
             <div class="row setup-actions" id="setup-controls">
-              <button type="button" class="btn btn-primary" id="btn-start">Start</button>
+              ${actionButton('btn-start', 'btn btn-primary', 'Start', 'start')}
             </div>
             <div class="row run-actions" id="run-controls" hidden>
-              <button type="button" class="btn btn-danger" id="btn-freeze">Freeze</button>
-              <button type="button" class="btn btn-primary" id="btn-resume" hidden>Weiter</button>
+              ${actionButton('btn-freeze', 'btn btn-danger', 'Freeze', 'freeze')}
+              ${actionButton('btn-resume', 'btn btn-primary', 'Weiter', 'resume', true)}
             </div>
             <div class="row threshold-actions" id="threshold-actions" hidden>
-              <button type="button" class="btn btn-primary" id="btn-rise">Tisch hoch</button>
+              ${actionButton('btn-rise', 'btn btn-primary', 'Tisch hoch', 'rise')}
               <div class="row threshold-secondary">
-                <button type="button" class="btn btn-ghost" id="btn-lazy-path">Lazy weiter</button>
-                <button type="button" class="btn btn-danger" id="btn-freeze-path">Freeze</button>
+                ${actionButton('btn-lazy-path', 'btn btn-ghost', 'Lazy weiter', 'lazyPath')}
+                ${actionButton('btn-freeze-path', 'btn btn-danger', 'Freeze', 'freezePath')}
               </div>
             </div>
             <div class="row pick-actions" id="pick-actions" hidden>
-              <button type="button" class="btn btn-primary" id="btn-skip-standing">Heute reicht Stehen</button>
-              <button type="button" class="btn btn-danger" id="btn-freeze-pick">Freeze</button>
+              ${actionButton('btn-skip-standing', 'btn btn-primary', 'Heute reicht Stehen', 'skipStanding')}
+              ${actionButton('btn-freeze-pick', 'btn btn-danger', 'Freeze', 'freeze')}
             </div>
             <div class="row confirm-actions" id="confirm-actions" hidden>
-              <button type="button" class="btn btn-primary" id="btn-confirm-desk">Tisch steht</button>
-              <button type="button" class="btn btn-ghost" id="btn-confirm-later">Später</button>
+              ${actionButton('btn-confirm-desk', 'btn btn-primary', 'Tisch steht', 'confirmDesk')}
+              ${actionButton('btn-confirm-later', 'btn btn-ghost', 'Später', 'confirmLater')}
             </div>
             <div class="row freeze-actions" id="freeze-actions" hidden>
-              <button type="button" class="btn btn-primary" id="btn-afterplay">Call-Nachspiel</button>
-              <button type="button" class="btn btn-ghost" id="btn-call-done">Sofort weiter</button>
-              <button type="button" class="btn btn-ghost" id="btn-extend">Noch 15 Min</button>
+              ${actionButton('btn-afterplay', 'btn btn-primary', 'Call-Nachspiel', 'afterplay')}
+              ${actionButton('btn-call-done', 'btn btn-ghost', 'Sofort weiter', 'resume')}
+              ${actionButton('btn-extend', 'btn btn-ghost', 'Noch 15 Min', 'extendFreeze')}
             </div>
             <div class="row exercise-actions" id="exercise-actions" hidden>
-              <button type="button" class="btn btn-primary" id="btn-done-moment">Erledigt</button>
-              <button type="button" class="btn btn-ghost" id="btn-reroll">Anderer Moment</button>
-              <button type="button" class="btn btn-ghost" id="btn-skip-standing-ex">Heute reicht Stehen</button>
+              ${actionButton('btn-done-moment', 'btn btn-primary', 'Erledigt', 'doneMoment')}
+              ${actionButton('btn-reroll', 'btn btn-ghost', 'Anderer Moment', 'reroll')}
+              ${actionButton('btn-skip-standing-ex', 'btn btn-ghost', 'Heute reicht Stehen', 'skipStanding')}
             </div>
             <div class="row quick-actions" id="quick-actions">
-              <button type="button" class="btn btn-ghost" id="btn-lazy">Lazy Mode</button>
+              ${actionButton('btn-lazy', 'btn btn-ghost', 'Lazy Mode', 'toggleLazy')}
             </div>
           </nav>
         </div>
@@ -344,7 +409,7 @@ export function renderUi(
   shell.dataset.approaching = approaching ? 'true' : 'false'
   shell.dataset.muted = state.soundEnabled ? 'false' : 'true'
   shell.dataset.started = isSetup ? 'false' : 'true'
-  shell.dataset.showClock = showExactClock ? 'true' : 'false'
+  shell.dataset.atmosphereDetail = atmosphereDetail
   shell.dataset.wordsHidden = wordsHidden ? 'true' : 'false'
   shell.dataset.dayClose = dayCloseVisible ? 'true' : 'false'
   updateCompactMode(root)
@@ -396,7 +461,7 @@ export function renderUi(
   dayCloseReward.hidden = !dayCloseVisible
 
   btnLazy.hidden = isThreshold || isConfirm || isExercise || isPick || dayCloseVisible
-  btnLazy.textContent = state.mode === 'lazy' ? 'Lazy an' : 'Lazy Mode'
+  setButtonLabel(btnLazy, state.mode === 'lazy' ? 'Lazy an' : 'Lazy Mode')
   btnLazy.classList.toggle('is-on', state.mode === 'lazy')
   btnReroll.hidden = state.momentRerolled
 
@@ -425,10 +490,9 @@ export function renderUi(
 
   const skipStand = qs(root, 'btn-skip-standing')
   const skipStandEx = qs(root, 'btn-skip-standing-ex')
-  const skipLabel =
-    state.pendingNextPhase === 'stand' ? 'Heute reicht Stehen' : 'Ohne Moment weiter'
-  skipStand.textContent = skipLabel
-  skipStandEx.textContent = skipLabel
+  const skipLabel = skipMomentLabel(state.pendingNextPhase)
+  setButtonLabel(skipStand, skipLabel)
+  setButtonLabel(skipStandEx, skipLabel)
 
   phaseEl.textContent = dayCloseVisible ? 'Tagesabschluss' : phaseLabel(state.phase)
 
@@ -447,8 +511,10 @@ export function renderUi(
     atmoLabel.textContent = 'bereit'
   } else if (isFrozen) {
     atmoLabel.textContent = showFreezePrompt ? 'Call vorbei?' : 'Freeze'
-  } else if (showExactClock && (isRunning || isExercise)) {
+  } else if (atmosphereDetail === 'clock' && (isRunning || isExercise)) {
     atmoLabel.textContent = formatExactTime(remainingMs)
+  } else if (atmosphereDetail === 'percent' && (isRunning || isExercise)) {
+    atmoLabel.textContent = formatRemainingPercent(remainingMs, state.phaseDurationMs)
   } else if (isRunning || isExercise) {
     atmoLabel.textContent = softTimeLabel(remainingMs, state.phaseDurationMs, approaching)
   } else {
@@ -467,9 +533,9 @@ export function renderUi(
   }
 
   if (state.endedPhase) {
-    btnRise.textContent = nextPhaseVerb(state.endedPhase)
+    setButtonLabel(btnRise, nextPhaseVerb(state.endedPhase))
   } else {
-    btnRise.textContent = 'Tisch hoch'
+    setButtonLabel(btnRise, 'Tisch hoch')
   }
 
   const ambientMot = MOTIVATIONS.find((m) => m.id === state.ambientMotivationId)
@@ -503,7 +569,11 @@ export function renderUi(
     qs(root, 'threshold-lead').textContent = thresholdLead(state.endedPhase)
     qs(root, 'threshold-sub').textContent = thresholdSub(state.endedPhase)
   } else if (isPick) {
-    hint.textContent = 'Tippen — oder einfach stehen.'
+    qs(root, 'pick-lead').textContent = pickLead(state.pendingNextPhase)
+    hint.textContent =
+      state.pendingNextPhase === 'sit'
+        ? 'Tippen — oder direkt setzen.'
+        : 'Tippen — oder einfach stehen.'
     const cards = qs(root, 'moment-cards')
     const ids = state.momentChoiceIds ?? []
     cards.innerHTML = ids
@@ -558,4 +628,6 @@ export function renderUi(
     qs(root, 'exercise-hint').textContent = ex?.prompt ?? ''
     qs(root, 'motivation').textContent = state.resumeAfterAfterplay ? '' : (mot?.text ?? '')
   }
+
+  applyShortcutHints(root, state.shortcutHintsEnabled !== false)
 }

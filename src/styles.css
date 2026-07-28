@@ -65,8 +65,7 @@ body {
   transform-origin: 50% 40%;
   transition:
     opacity 0.6s var(--ease),
-    transform 0.8s var(--ease),
-    background 0.5s var(--ease);
+    background 0.8s var(--ease);
 }
 
 .frame {
@@ -243,29 +242,6 @@ body {
   color: var(--color-stand);
 }
 
-/* Silent-mode catch: one-shot flash */
-.shell[data-attention] {
-  animation: attention-wash 0.9s var(--ease);
-}
-
-.shell[data-attention][data-attention-muted='true'] {
-  animation: attention-wash-strong 1.8s var(--ease);
-}
-
-/* Waiting at threshold without sound — keeps pulsing until you choose */
-.shell[data-needs-action='true'] {
-  animation: needs-action-pulse 1.6s var(--ease) infinite;
-}
-
-.shell[data-needs-action='true'] .threshold-lead,
-.shell[data-needs-action='true'] .pick-lead {
-  color: var(--color-stand);
-}
-
-.shell[data-muted='true'][data-approaching='true'] {
-  animation: needs-action-pulse 2s var(--ease) infinite;
-}
-
 @keyframes freeze-pulse {
   0%,
   100% {
@@ -274,6 +250,11 @@ body {
   50% {
     filter: saturate(0.85);
   }
+}
+
+.shell[data-needs-action='true'] .threshold-lead,
+.shell[data-needs-action='true'] .pick-lead {
+  color: var(--color-stand);
 }
 
 @keyframes attention-flash {
@@ -287,55 +268,9 @@ body {
   }
 }
 
-@keyframes attention-wash {
-  0% {
-    filter: brightness(1.08);
-    box-shadow: inset 0 0 0 0 transparent;
-  }
-  40% {
-    filter: brightness(1.18);
-    box-shadow: inset 0 0 0 6px oklch(45% 0.08 145 / 0.35);
-  }
-  100% {
-    filter: none;
-    box-shadow: none;
-  }
-}
-
-@keyframes attention-wash-strong {
-  0%,
-  100% {
-    filter: none;
-  }
-  25%,
-  75% {
-    filter: brightness(1.22) saturate(1.15);
-    box-shadow: inset 0 0 0 10px oklch(45% 0.1 145 / 0.45);
-  }
-  50% {
-    filter: brightness(1.08);
-    box-shadow: inset 0 0 0 4px oklch(48% 0.06 55 / 0.4);
-  }
-}
-
-@keyframes needs-action-pulse {
-  0%,
-  100% {
-    filter: brightness(1);
-    box-shadow: inset 0 0 0 0 transparent;
-  }
-  50% {
-    filter: brightness(1.12);
-    box-shadow: inset 0 0 0 8px oklch(45% 0.09 145 / 0.4);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .shell[data-phase='frozen'],
-  .shell[data-phase='exercise'] .atmosphere,
-  .shell[data-attention],
-  .shell[data-needs-action='true'],
-  .shell[data-muted='true'][data-approaching='true'] {
+  .shell[data-phase='exercise'] .atmosphere {
     animation: none;
   }
 }
@@ -641,9 +576,15 @@ body {
   height: 4px;
 }
 
-.shell[data-show-clock='true'] .atmosphere-label {
+.shell[data-atmosphere-detail='clock'] .atmosphere-label {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.045em;
+}
+
+.shell[data-atmosphere-detail='percent'] .atmosphere-label {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
 }
 
 .shell[data-phase='frozen'] .atmosphere-label {
@@ -1017,11 +958,56 @@ button[hidden] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.65rem;
   transition:
     background 0.15s var(--ease),
     color 0.15s var(--ease),
     border-color 0.15s var(--ease),
     transform 0.1s var(--ease);
+}
+
+.btn.has-kbd {
+  justify-content: space-between;
+}
+
+.btn-text {
+  min-width: 0;
+}
+
+.btn-kbd {
+  flex-shrink: 0;
+  font-size: 0.62em;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  padding: 0.28em 0.45em;
+  border-radius: 5px;
+  color: var(--color-ink-3);
+  background: oklch(40% 0.02 250 / 0.06);
+  border: 1px solid oklch(40% 0.02 250 / 0.1);
+}
+
+.btn-primary .btn-kbd,
+.btn-danger .btn-kbd {
+  color: oklch(98% 0 0 / 0.62);
+  background: oklch(0% 0 0 / 0.14);
+  border-color: oklch(100% 0 0 / 0.16);
+}
+
+.moment-choice {
+  position: relative;
+}
+
+.moment-choice.has-kbd {
+  padding-right: 2.4rem;
+}
+
+.moment-choice .btn-kbd {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  font-size: 0.72rem;
 }
 
 .btn:focus-visible {

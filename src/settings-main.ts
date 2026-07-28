@@ -20,6 +20,9 @@ import {
   msFromMinutes,
   type UserIntervals,
 } from './intervals'
+import {
+  shortcutsByContext,
+} from './shortcuts'
 import type { EnergyMode } from './state'
 
 type IntervalPhase = 'sit' | 'stand' | 'reset'
@@ -44,6 +47,7 @@ function render(): void {
   const root = document.querySelector<HTMLElement>('#app')!
   const s = readPreferences()
   const intervals = getResolvedIntervals()
+  const shortcutGroups = shortcutsByContext()
 
   root.innerHTML = `
     <div class="settings">
@@ -82,6 +86,27 @@ function render(): void {
             ${s.notificationsEnabled ? 'An' : 'Aus'}
           </button>
         </div>
+        <div class="setting-row">
+          <div class="setting-copy">
+            <p class="setting-label">Toast sichtbar halten</p>
+            <p class="setting-note">
+              Bleibt am Bildschirm bis du wegklickst. Hilft auf Windows, wenn nur das Info-Center blinkt.
+              Sekunden-Dauer steuert Windows selbst — nicht die App.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="setting-btn ${s.notificationPersistent ? 'is-on' : ''}"
+            id="btn-notif-persistent"
+            ${s.notificationsEnabled ? '' : 'disabled'}
+          >
+            ${s.notificationPersistent ? 'An' : 'Aus'}
+          </button>
+        </div>
+        <p class="settings-hint settings-hint-tight">
+          Windows: Einstellungen → System → Benachrichtigungen → MVN → „Banner“ aktivieren.
+          Fokusassistenz kann Toasts unterdrücken.
+        </p>
       </section>
 
       <section class="settings-group" aria-label="Intervalle">
@@ -135,6 +160,43 @@ function render(): void {
         </div>
       </section>
 
+      <section class="settings-group" aria-label="Tastenkürzel">
+        <h2 class="settings-group-title">Tastenkürzel</h2>
+        <p class="settings-hint">Nur wenn MVN fokussiert ist — kein globaler System-Shortcut.</p>
+        <div class="setting-row">
+          <div class="setting-copy">
+            <p class="setting-label">Hinweise auf Buttons</p>
+            <p class="setting-note">Kleine graue Kürzel neben den Aktionen.</p>
+          </div>
+          <button
+            type="button"
+            class="setting-btn ${s.shortcutHintsEnabled !== false ? 'is-on' : ''}"
+            id="btn-shortcut-hints"
+          >
+            ${s.shortcutHintsEnabled !== false ? 'An' : 'Aus'}
+          </button>
+        </div>
+        <div class="shortcut-list" aria-label="Shortcut-Übersicht">
+          ${[...shortcutGroups.entries()]
+            .map(
+              ([context, items]) => `
+            <div class="shortcut-group">
+              <p class="shortcut-context">${context}</p>
+              ${items
+                .map(
+                  (item) => `
+                <div class="shortcut-row">
+                  <span class="shortcut-action">${item.action}</span>
+                  <kbd class="shortcut-key">${item.label}</kbd>
+                </div>`,
+                )
+                .join('')}
+            </div>`,
+            )
+            .join('')}
+        </div>
+      </section>
+
       <section class="settings-group" aria-label="Sonstiges">
         <h2 class="settings-group-title">Sonstiges</h2>
         <div class="setting-row">
@@ -166,8 +228,18 @@ function render(): void {
     render()
   })
 
+  root.querySelector('#btn-notif-persistent')?.addEventListener('click', () => {
+    togglePreference('notificationPersistent')
+    render()
+  })
+
   root.querySelector('#btn-demo')?.addEventListener('click', () => {
     togglePreference('demo')
+    render()
+  })
+
+  root.querySelector('#btn-shortcut-hints')?.addEventListener('click', () => {
+    togglePreference('shortcutHintsEnabled')
     render()
   })
 

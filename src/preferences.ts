@@ -3,7 +3,14 @@ import type { UserIntervals } from './intervals'
 import { normalizeStoredIntervals, resolveIntervals } from './intervals'
 import { buildDayCloseLine, recordStat, summarizeToday, todayKey } from './stats'
 
-export type PreferenceKey = 'soundEnabled' | 'notificationsEnabled' | 'demo' | 'mode' | 'intervals'
+export type PreferenceKey =
+  | 'soundEnabled'
+  | 'notificationsEnabled'
+  | 'demo'
+  | 'mode'
+  | 'intervals'
+  | 'shortcutHintsEnabled'
+  | 'notificationPersistent'
 
 export function readPreferences(): AppState {
   return loadState()
@@ -15,7 +22,9 @@ export function writePreferences(patch: Partial<Pick<AppState, PreferenceKey>>):
   return next
 }
 
-export function togglePreference(key: 'soundEnabled' | 'notificationsEnabled' | 'demo'): AppState {
+export function togglePreference(
+  key: 'soundEnabled' | 'notificationsEnabled' | 'demo' | 'shortcutHintsEnabled' | 'notificationPersistent',
+): AppState {
   const state = loadState()
   return writePreferences({ [key]: !state[key] })
 }

@@ -91,6 +91,18 @@ export function thresholdLead(ended: ActivePhase | null): string {
 }
 
 export function thresholdSub(ended: ActivePhase | null): string {
-  if (ended === 'sit') return 'Kein Zwang. Wähl einen Moment — oder steh einfach.'
+  if (ended === 'sit') return 'Kurz bewegen — oder einfach stehen.'
+  if (ended === 'stand') return 'Kurze Reset-Phase. Kein Moment nötig.'
+  if (ended === 'reset') return 'Kurz bewegen — oder direkt setzen.'
   return 'Du musst nichts beweisen. Wähl den Weg, der heute geht.'
+}
+
+export function pickLead(pendingNext: ActivePhase | null): string {
+  if (pendingNext === 'sit') return 'Kurz bewegen, bevor du dich setzt.'
+  return 'Kurz bewegen, bevor du hochgehst.'
+}
+
+export function skipMomentLabel(pendingNext: ActivePhase | null): string {
+  if (pendingNext === 'sit') return 'Heute reicht Sitzen'
+  return 'Heute reicht Stehen'
 }

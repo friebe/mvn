@@ -15,13 +15,15 @@ import {
 import {
   bindCompactMode,
   dismissDayCloseReward,
+  isDayCloseRewardVisible,
   mountUi,
   renderUi,
   setInstallVisible,
   showDayCloseReward,
-  toggleExactClock,
+  toggleAtmosphereDetail,
   toggleAtmosphereWords,
 } from './ui'
+import { bindShortcuts } from './shortcuts'
 import {
   chooseFreezePath,
   chooseLazyPath,
@@ -35,6 +37,7 @@ import {
   freeze,
   getState,
   initTimer,
+  isCheckInVisible,
   rerollMoment,
   resetDay,
   resume,
@@ -57,43 +60,48 @@ if (params.get('demo') === '1' || params.get('demo') === 'true') {
   initial.demo = true
 }
 
-mountUi(app, {
-  onStart: () => {
-    startDay(getState().mode)
-  },
-  onFreeze: () => {
-    freeze()
-  },
-  onResume: () => {
-    resume()
-  },
-  onExtendFreeze: () => {
-    extendFreeze()
-  },
-  onAfterplay: () => {
-    startFreezeAfterplay()
-  },
-  onSkipStanding: () => {
-    skipStanding()
-  },
-  onCompleteMoment: () => {
-    completeMoment()
-  },
-  onRerollMoment: () => {
-    rerollMoment()
-  },
-  onChooseMoment: (id) => {
-    chooseMoment(id)
-  },
-  onConfirmCheckIn: () => {
-    confirmCheckIn()
-  },
+let showFreezePromptLatest = false
+
+const shortcutHandlers = {
+  onStart: () => startDay(getState().mode),
+  onFreeze: () => freeze(),
+  onResume: () => resume(),
+  onExtendFreeze: () => extendFreeze(),
+  onAfterplay: () => startFreezeAfterplay(),
+  onSkipStanding: () => skipStanding(),
+  onCompleteMoment: () => completeMoment(),
+  onRerollMoment: () => rerollMoment(),
+  onChooseMoment: (id: string) => chooseMoment(id),
+  onConfirmCheckIn: () => confirmCheckIn(),
   onToggleLazy: () => {
     const next = getState().mode === 'lazy' ? 'high' : 'lazy'
     setMode(next)
   },
+  onChooseRise: () => chooseRise(),
+  onChooseLazyPath: () => chooseLazyPath(),
+  onChooseFreezePath: () => chooseFreezePath(),
+  onConfirmDesk: () => confirmDesk(),
+  onConfirmDeskLater: () => confirmDeskLater(),
+  onDismissDayClose: () => {
+    dismissDayCloseReward()
+    refreshUi()
+  },
+}
+
+bindShortcuts(
+  () => ({
+    state: getState(),
+    showFreezePrompt: showFreezePromptLatest,
+    dayCloseVisible: isDayCloseRewardVisible(),
+    checkInVisible: isCheckInVisible(),
+  }),
+  shortcutHandlers,
+)
+
+mountUi(app, {
+  ...shortcutHandlers,
   onToggleClock: () => {
-    toggleExactClock()
+    toggleAtmosphereDetail()
     refreshUi()
   },
   onToggleAtmosphereWords: () => {
@@ -106,30 +114,11 @@ mountUi(app, {
   onDismissInstall: () => {
     dismissInstallBanner()
   },
-  onChooseRise: () => {
-    chooseRise()
-  },
-  onChooseLazyPath: () => {
-    chooseLazyPath()
-  },
-  onChooseFreezePath: () => {
-    chooseFreezePath()
-  },
-  onConfirmDesk: () => {
-    confirmDesk()
-  },
-  onConfirmDeskLater: () => {
-    confirmDeskLater()
-  },
   onCloseDay: () => {
     if (!confirm('Tagesabschluss — Timer zurücksetzen?')) return
     const summary = summarizeToday()
     resetDay()
     showDayCloseReward(summary)
-    refreshUi()
-  },
-  onDismissDayClose: () => {
-    dismissDayCloseReward()
     refreshUi()
   },
 })
@@ -144,6 +133,7 @@ onInstallAvailability(updateInstallBanner)
 updateInstallBanner()
 
 subscribe((state, remaining, showFreezePrompt, approaching) => {
+  showFreezePromptLatest = showFreezePrompt
   renderUi(app, state, remaining, showFreezePrompt, approaching)
   saveState(state)
 })

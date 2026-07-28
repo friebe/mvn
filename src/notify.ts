@@ -1,3 +1,5 @@
+import { appPath } from './paths'
+
 export async function ensureNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) return false
   if (Notification.permission === 'granted') return true
@@ -15,23 +17,33 @@ async function getReadyRegistration(): Promise<ServiceWorkerRegistration | null>
   }
 }
 
+export interface NotifyOptions {
+  /** OS toast stays until dismissed (where supported, e.g. Windows). */
+  persistent?: boolean
+  /** Play the system notification sound (in-app mute stays separate). */
+  playSound?: boolean
+}
+
 /** Prefer Service Worker notifications (works better for installed PWAs). */
 export async function notifyPhase(
   title: string,
   body: string,
   enabled: boolean,
+  opts: NotifyOptions = {},
 ): Promise<void> {
   if (!enabled) return
   if (!('Notification' in window)) return
   if (Notification.permission !== 'granted') return
 
+  const icon = appPath('icons/icon-192.png')
   const options: NotificationOptions = {
     body,
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
-    // Keep silent so in-app mute stays mute at OS level
-    silent: true,
-    tag: 'mvn-phase',
+    icon,
+    badge: icon,
+    silent: !opts.playSound,
+    // Unique tag so Windows shows a fresh toast instead of silently replacing in the panel.
+    tag: `mvn-${Date.now()}`,
+    requireInteraction: opts.persistent === true,
   }
 
   try {

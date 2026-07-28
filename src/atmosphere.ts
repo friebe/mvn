@@ -47,3 +47,10 @@ export function formatExactTime(ms: number): string {
   const s = totalSec % 60
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
+
+/** Remaining share of the current phase, 0–100 %. */
+export function formatRemainingPercent(remainingMs: number, durationMs: number | null): string {
+  if (!durationMs || durationMs <= 0) return '—'
+  const pct = Math.max(0, Math.min(100, Math.round(remainingRatio(remainingMs, durationMs) * 100)))
+  return `${pct}%`
+}

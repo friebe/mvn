@@ -2,7 +2,6 @@
 
 let titleBlinkId: number | null = null
 let baseTitle = 'MVN'
-let flashClearId: number | null = null
 
 export type AttentionKind = 'foreshadow' | 'threshold' | 'ritual' | 'phase'
 
@@ -35,21 +34,9 @@ export function startTitleBlink(label: string): void {
   }, 900)
 }
 
-/** One-shot full-shell flash. Stronger when muted. */
-export function flashShell(kind: AttentionKind, muted: boolean): void {
-  const shell = shellEl()
-  if (!shell) return
-  shell.dataset.attention = kind
-  shell.dataset.attentionMuted = muted ? 'true' : 'false'
-  if (flashClearId != null) window.clearTimeout(flashClearId)
-  const ms = muted ? 1800 : 900
-  flashClearId = window.setTimeout(() => {
-    if (shell.dataset.attention === kind) {
-      delete shell.dataset.attention
-      delete shell.dataset.attentionMuted
-    }
-    flashClearId = null
-  }, ms)
+/** One-shot full-shell flash — disabled; hue shift on .shell::before is enough. */
+export function flashShell(_kind: AttentionKind, _muted: boolean): void {
+  // no-op: edge pulse removed
 }
 
 export function setNeedsAction(active: boolean): void {

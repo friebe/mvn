@@ -194,7 +194,10 @@ function shouldNotify(muted: boolean): boolean {
 function signalAttention(kind: AttentionKind, title: string, body: string): void {
   const muted = !state.soundEnabled
   playBeep(state.soundEnabled)
-  void notifyPhase(`MVN · ${title}`, body, shouldNotify(muted))
+  void notifyPhase(`MVN · ${title}`, body, shouldNotify(muted), {
+    persistent: state.notificationPersistent,
+    playSound: state.soundEnabled,
+  })
   flashShell(kind, muted)
 
   if (kind === 'threshold') {
@@ -393,11 +396,42 @@ function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): vo
   emit()
 }
 
-/** Threshold → Moment-Pick (Tisch hoch) */
+/** Threshold → next phase without moment pick (stand → reset). */
+function advanceThresholdNext(): void {
+  clearAttention()
+  const next = state.pendingNextPhase ?? 'sit'
+  if (next === 'stand') {
+    state = {
+      ...state,
+      phase: 'confirm',
+      phaseEndsAt: null,
+      phaseDurationMs: null,
+      foreshadowFired: false,
+      currentExerciseId: null,
+      currentMotivationId: null,
+      momentChoiceIds: null,
+      resumeToThreshold: false,
+      resumeToConfirm: false,
+    }
+    signalAttention('threshold', 'Beweis', 'Tisch steht? Ein Tap reicht.')
+    emit()
+    return
+  }
+  enterActivePhase(next, { soft: true })
+}
+
+/** Threshold primary — moment only on desk up (sit) or down (reset). */
 export function chooseRise(): void {
   if (state.phase !== 'threshold') return
-  recordStat('rise')
-  enterPick()
+  const ended = state.endedPhase
+
+  if (ended === 'sit' || ended === 'reset') {
+    recordStat('rise')
+    enterPick()
+    return
+  }
+
+  advanceThresholdNext()
 }
 
 export function chooseMoment(momentId: string): void {
