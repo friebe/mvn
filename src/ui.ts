@@ -193,12 +193,12 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
       <div class="frame">
       <section class="install-banner" id="install-banner" hidden>
         <div class="install-copy">
-          <p class="install-title">Als App installieren</p>
-          <p class="install-text">Besser für Zweitmonitor, Notifications und einen echten Dauerplatz auf dem Desktop.</p>
+          <p class="install-title">Install as app</p>
+          <p class="install-text">Better for a second monitor, notifications, and a permanent spot on your desktop.</p>
         </div>
         <div class="install-actions">
-          <button type="button" class="btn btn-primary" id="btn-install">App installieren</button>
-          <button type="button" class="install-dismiss" id="btn-install-dismiss">Nicht jetzt</button>
+          <button type="button" class="btn btn-primary" id="btn-install">Install app</button>
+          <button type="button" class="install-dismiss" id="btn-install-dismiss">Not now</button>
         </div>
       </section>
 
@@ -212,8 +212,8 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             type="button"
             class="icon-link"
             id="btn-close-day"
-            aria-label="Tagesabschluss"
-            title="Tagesabschluss"
+            aria-label="Day close"
+            title="Day close"
           >
             <svg class="icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
               <path
@@ -230,7 +230,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
               />
             </svg>
           </a>
-          <a class="icon-link" href="${appPath('settings.html')}" aria-label="Einstellungen" title="Einstellungen">
+          <a class="icon-link" href="${appPath('settings.html')}" aria-label="Settings" title="Settings">
             <svg class="icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
               <path
                 fill="currentColor"
@@ -251,48 +251,48 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
                 class="atmosphere-hit"
                 id="btn-atmosphere-label"
                 aria-live="polite"
-                aria-label="Phase, tippen für Zeit oder Prozent"
+                aria-label="Phase — tap for time or percent"
               >
-                <span class="atmosphere-label" id="atmosphere-label">bereit</span>
+                <span class="atmosphere-label" id="atmosphere-label">ready</span>
               </button>
               <div class="desk-edge-row">
                 <button
                   type="button"
                   class="desk-edge"
                   id="btn-desk-edge"
-                  aria-label="Fortschritt, Tippen zeigt Text wieder"
+                  aria-label="Progress — tap to show text again"
                 >
                   <span class="desk-edge-fill" id="desk-edge-fill"></span>
                 </button>
                 <button type="button" class="atmosphere-min" id="btn-atmosphere-min">
-                  nur Progress
+                  progress only
                 </button>
               </div>
             </div>
-            <p class="hint" id="hint">Wähle deinen Start — die Hürde bleibt lächerlich niedrig.</p>
+            <p class="hint" id="hint">Pick your start — the bar stays laughably low.</p>
             <p class="ambient" id="ambient" hidden></p>
             <p class="mute-hint" id="mute-hint" hidden></p>
           </main>
 
           <section class="check-in" id="check-in" hidden>
-            <p class="check-in-q" id="check-in-q">Noch am Tisch?</p>
+            <p class="check-in-q" id="check-in-q">Still at your desk?</p>
             <button type="button" class="btn btn-primary has-kbd" id="btn-check-in" data-shortcut="checkIn">
-              <span class="btn-text">Ja</span>
+              <span class="btn-text">Yes</span>
               <span class="btn-kbd" aria-hidden="true">↵</span>
             </button>
           </section>
 
           <section class="threshold" id="threshold" hidden>
-            <p class="threshold-lead" id="threshold-lead">Tisch will hoch.</p>
-            <p class="threshold-sub" id="threshold-sub">Kein Zwang. Wähl den Weg, der heute geht.</p>
+            <p class="threshold-lead" id="threshold-lead">Desk wants up.</p>
+            <p class="threshold-sub" id="threshold-sub">Nothing to prove. Pick what works today.</p>
           </section>
 
           <section class="freeze-prompt" id="freeze-prompt" hidden>
-            <p class="freeze-q">Call vorbei?</p>
+            <p class="freeze-q">Call over?</p>
           </section>
 
           <section class="pick" id="pick" hidden>
-            <p class="pick-lead" id="pick-lead">Tisch hochfahren und kurz bewegen.</p>
+            <p class="pick-lead" id="pick-lead">Raise the desk and move briefly.</p>
             <div class="moment-list" id="moment-cards"></div>
           </section>
 
@@ -304,42 +304,42 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
           </section>
 
           <section class="day-close-reward" id="day-close-reward" hidden>
-            <p class="day-close-kicker">Tag beendet</p>
+            <p class="day-close-kicker">Day closed</p>
             <p class="day-close-story" id="day-close-story"></p>
-            <div class="day-close-stats" id="day-close-stats" aria-label="Tageszahlen"></div>
-            <a class="day-close-more" id="day-close-more" href="${appPath('analytics.html')}">Alle Analytics</a>
+            <div class="day-close-stats" id="day-close-stats" aria-label="Day stats"></div>
+            <a class="day-close-more" id="day-close-more" href="${appPath('analytics.html')}">All analytics</a>
           </section>
 
-          <nav class="primary-actions" id="primary-actions" aria-label="Aktionen">
+          <nav class="primary-actions" id="primary-actions" aria-label="Actions">
             <div class="row day-close-actions" id="day-close-actions" hidden>
-              ${actionButton('btn-day-close-done', 'btn btn-primary', 'Weiter', 'dayCloseDone')}
+              ${actionButton('btn-day-close-done', 'btn btn-primary', 'Continue', 'dayCloseDone')}
             </div>
             <div class="row setup-actions" id="setup-controls">
               ${actionButton('btn-start', 'btn btn-primary', 'Start', 'start')}
             </div>
             <div class="row run-actions" id="run-controls" hidden>
               ${actionButton('btn-freeze', 'btn btn-danger', 'Freeze', 'freeze')}
-              ${actionButton('btn-resume', 'btn btn-primary', 'Weiter', 'resume', true)}
+              ${actionButton('btn-resume', 'btn btn-primary', 'Continue', 'resume', true)}
             </div>
             <div class="row threshold-actions" id="threshold-actions" hidden>
-              ${actionButton('btn-rise', 'btn btn-primary', 'Kurz bewegen', 'rise')}
-              ${actionButton('btn-threshold-skip', 'btn btn-ghost', 'Einfach setzen', 'skipStanding')}
+              ${actionButton('btn-rise', 'btn btn-primary', 'Move briefly', 'rise')}
+              ${actionButton('btn-threshold-skip', 'btn btn-ghost', 'Just sit', 'skipStanding')}
               <div class="row threshold-secondary">
-                ${actionButton('btn-lazy-path', 'btn btn-ghost', 'Lazy weiter', 'lazyPath')}
+                ${actionButton('btn-lazy-path', 'btn btn-ghost', 'Lazy continue', 'lazyPath')}
               </div>
             </div>
             <div class="row pick-actions" id="pick-actions" hidden>
-              ${actionButton('btn-skip-standing', 'btn btn-primary', 'Heute reicht Stehen', 'skipStanding')}
+              ${actionButton('btn-skip-standing', 'btn btn-primary', 'Standing is enough today', 'skipStanding')}
             </div>
             <div class="row freeze-actions" id="freeze-actions" hidden>
-              ${actionButton('btn-afterplay', 'btn btn-primary', 'Call-Nachspiel', 'afterplay')}
-              ${actionButton('btn-call-done', 'btn btn-ghost', 'Sofort weiter', 'resume')}
-              ${actionButton('btn-extend', 'btn btn-ghost', 'Noch 15 Min', 'extendFreeze')}
+              ${actionButton('btn-afterplay', 'btn btn-primary', 'Call cooldown', 'afterplay')}
+              ${actionButton('btn-call-done', 'btn btn-ghost', 'Resume now', 'resume')}
+              ${actionButton('btn-extend', 'btn btn-ghost', '15 more min', 'extendFreeze')}
             </div>
             <div class="row exercise-actions" id="exercise-actions" hidden>
-              ${actionButton('btn-done-moment', 'btn btn-primary', 'Erledigt', 'doneMoment')}
-              ${actionButton('btn-reroll', 'btn btn-ghost', 'Anderer Moment', 'reroll')}
-              ${actionButton('btn-skip-standing-ex', 'btn btn-ghost', 'Heute reicht Stehen', 'skipStanding')}
+              ${actionButton('btn-done-moment', 'btn btn-primary', 'Done', 'doneMoment')}
+              ${actionButton('btn-reroll', 'btn btn-ghost', 'Another moment', 'reroll')}
+              ${actionButton('btn-skip-standing-ex', 'btn btn-ghost', 'Standing is enough today', 'skipStanding')}
             </div>
             <div class="row quick-actions" id="quick-actions">
               ${actionButton('btn-lazy', 'btn btn-ghost', 'Lazy Mode', 'toggleLazy')}
@@ -489,7 +489,7 @@ export function renderUi(
   dayCloseReward.hidden = !dayCloseVisible
 
   btnLazy.hidden = isThreshold || isExercise || isPick || dayCloseVisible
-  setButtonLabel(btnLazy, state.mode === 'lazy' ? 'Lazy an' : 'Lazy Mode')
+  setButtonLabel(btnLazy, state.mode === 'lazy' ? 'Lazy on' : 'Lazy Mode')
   btnLazy.classList.toggle('is-on', state.mode === 'lazy')
   btnReroll.hidden = state.momentRerolled
 
@@ -499,15 +499,15 @@ export function renderUi(
     qs(root, 'day-close-stats').innerHTML = `
       <div class="day-close-stat" data-tone="stand">
         <p class="day-close-stat-value">${dayCloseSummary.rounds}</p>
-        <p class="day-close-stat-label">Bestätigt</p>
+        <p class="day-close-stat-label">Confirmed</p>
       </div>
       <div class="day-close-stat">
         <p class="day-close-stat-value">${open}</p>
-        <p class="day-close-stat-label">Ohne Steh-Check</p>
+        <p class="day-close-stat-label">No stand check</p>
       </div>
       <div class="day-close-stat">
         <p class="day-close-stat-value">${dayCloseSummary.ritual_skip}</p>
-        <p class="day-close-stat-label">Ohne Bewegung</p>
+        <p class="day-close-stat-label">No movement</p>
       </div>
     `
   }
@@ -532,7 +532,7 @@ export function renderUi(
     btnRise.classList.remove('btn-ghost')
   }
 
-  phaseEl.textContent = dayCloseVisible ? 'Tagesabschluss' : phaseLabel(state.phase)
+  phaseEl.textContent = dayCloseVisible ? 'Day close' : phaseLabel(state.phase)
   phaseEl.hidden = isThreshold || dayCloseVisible
 
   const level =
@@ -555,13 +555,13 @@ export function renderUi(
   atmo.classList.toggle('is-words-hidden', wordsHidden)
   qs(root, 'btn-atmosphere-label').hidden = wordsHidden
   atmoMin.hidden = false
-  atmoMin.textContent = wordsHidden ? 'Text an' : 'nur Progress'
+  atmoMin.textContent = wordsHidden ? 'Show text' : 'progress only'
   atmoMin.setAttribute('aria-pressed', wordsHidden ? 'true' : 'false')
 
   if (isSetup) {
-    atmoLabel.textContent = 'bereit'
+    atmoLabel.textContent = 'ready'
   } else if (isFrozen) {
-    atmoLabel.textContent = showFreezePrompt ? 'Call vorbei?' : 'Freeze'
+    atmoLabel.textContent = showFreezePrompt ? 'Call over?' : 'Freeze'
   } else if (
     (atmosphereDetail === 'clock' || isReturnOrientationActive()) &&
     (isRunning || isExercise)
@@ -580,8 +580,8 @@ export function renderUi(
   if (!state.soundEnabled && !(compact && isRunning) && !wordsHidden && !dayCloseVisible) {
     muteHint.hidden = false
     muteHint.textContent = state.notificationsEnabled
-      ? 'Ton aus — Signale über Farbe, Tab-Titel und Notifications.'
-      : 'Ton aus — in Einstellungen Notifications aktivieren.'
+      ? 'Sound off — signals via color, tab title, and notifications.'
+      : 'Sound off — enable notifications in settings.'
   } else {
     muteHint.hidden = true
   }
@@ -599,32 +599,32 @@ export function renderUi(
     // hint hidden — story + stats carry the message
   } else if (checkInVisible) {
     qs(root, 'check-in-q').textContent =
-      state.phase === 'stand' ? 'Noch am Stehen?' : 'Noch am Tisch?'
+      state.phase === 'stand' ? 'Still standing?' : 'Still at your desk?'
     hint.textContent =
       state.phase === 'stand'
-        ? 'Ja tippen — das zählt als Beweis, dass du stehst.'
-        : 'Kurzer Check — kein Alarm. Ein Tap reicht.'
+        ? 'Tap Yes — that counts as proof you\'re standing.'
+        : 'Quick check — no alarm. One tap is enough.'
   } else if (isSetup) {
     const intervals = resolveIntervals(state.intervals)
     if (state.demo) {
       hint.textContent =
-        state.mode === 'lazy' ? 'Demo Lazy — Kurzzeiten zum Testen.' : 'Demo aktiv — Kurzzeiten zum Testen.'
+        state.mode === 'lazy' ? 'Demo Lazy — short intervals for testing.' : 'Demo on — short intervals for testing.'
     } else {
       hint.textContent =
         state.mode === 'lazy'
-          ? `${intervalSummary(intervals, 'lazy')} · Überlebensmodus.`
+          ? `${intervalSummary(intervals, 'lazy')} · Survival mode.`
           : intervalSummary(intervals, 'high')
     }
   } else if (isThreshold) {
-    hint.textContent = 'Der Tisch wartet. Kein Zwang.'
+    hint.textContent = 'The desk is waiting. No pressure.'
     qs(root, 'threshold-lead').textContent = thresholdLead(state.endedPhase)
     qs(root, 'threshold-sub').textContent = thresholdSub(state.endedPhase)
   } else if (isPick) {
     qs(root, 'pick-lead').textContent = pickLead(state.pendingNextPhase)
     hint.textContent =
       state.pendingNextPhase === 'sit'
-        ? 'Tischknopf runter und Moment — oder direkt setzen.'
-        : 'Tischknopf hoch und Moment — oder direkt stehen.'
+        ? 'Desk button down and a moment — or sit right away.'
+        : 'Desk button up and a moment — or stand right away.'
     const cards = qs(root, 'moment-cards')
     const ids = state.momentChoiceIds ?? []
     cards.innerHTML = ids
@@ -638,22 +638,22 @@ export function renderUi(
       .join('')
   } else if (isFrozen) {
     hint.textContent = showFreezePrompt
-      ? 'Call vorbei? Nachspiel oder sofort weiter — kein Stress.'
+      ? 'Call over? Cooldown or resume now — no stress.'
       : state.demo
-        ? 'Freeze aktiv — Demo-Prompt nach ~12s.'
-        : 'Freeze aktiv — Call-Schutz. Der Tisch wartet.'
+        ? 'Freeze on — demo prompt after ~12s.'
+        : 'Freeze on — call protection. The desk waits.'
   } else if (isExercise) {
     hint.textContent = state.resumeAfterAfterplay
-      ? 'Kurzes Nachspiel nach dem Call.'
+      ? 'Short cooldown after the call.'
       : momentOrderHint(state.pendingNextPhase)
   } else if (approaching) {
-    hint.textContent = 'Gleich. Der Tisch meldet sich — kein Überraschungsalarm.'
+    hint.textContent = 'Soon. The desk will check in — no surprise alarm.'
   } else {
     hint.textContent = state.demo
-      ? 'Demo — Atmosphäre, Moment, Tisch.'
+      ? 'Demo — atmosphere, moment, desk.'
       : state.mode === 'lazy'
-        ? 'Lazy Mode — die Hürde bleibt unten.'
-        : 'Der Tisch hält den Rhythmus. Du entscheidest die Wechsel.'
+        ? 'Lazy Mode — the bar stays low.'
+        : 'The desk keeps the rhythm. You choose the switches.'
   }
 
   if (
@@ -670,7 +670,7 @@ export function renderUi(
     const ex = getMoment(state.currentExerciseId)
     const mot = MOTIVATIONS.find((m) => m.id === state.currentMotivationId)
     qs(root, 'ritual-kicker').textContent = state.resumeAfterAfterplay
-      ? 'Nachspiel'
+      ? 'Cooldown'
       : ex
         ? kindLabel(ex.kind)
         : 'Moment'

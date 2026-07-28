@@ -36,7 +36,7 @@ function intervalSelect(
   const opts = options
     .map(
       (m) =>
-        `<option value="${m}"${m === current ? ' selected' : ''}>${m} Min</option>`,
+        `<option value="${m}"${m === current ? ' selected' : ''}>${m} min</option>`,
     )
     .join('')
   return `<select class="setting-select" data-mode="${mode}" data-phase="${phase}" aria-label="${phase}">${opts}</select>`
@@ -51,7 +51,7 @@ function render(): void {
   root.innerHTML = `
     <div class="settings">
       <header class="settings-top">
-        <a class="back-link" href="${appPath()}" aria-label="Zurück zur App" title="Zurück">
+        <a class="back-link" href="${appPath()}" aria-label="Back to app" title="Back">
           <svg class="back-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
             <path
               fill="currentColor"
@@ -60,37 +60,37 @@ function render(): void {
           </svg>
         </a>
         <div class="settings-heading">
-          <p class="settings-brand">Einstellungen</p>
-          <p class="settings-tag">MVN · lokal auf diesem Gerät</p>
+          <p class="settings-brand">Settings</p>
+          <p class="settings-tag">MVN · local on this device</p>
         </div>
       </header>
 
-      <section class="settings-group" aria-label="Signale">
-        <h2 class="settings-group-title">Signale</h2>
+      <section class="settings-group" aria-label="Signals">
+        <h2 class="settings-group-title">Signals</h2>
         <div class="setting-row">
           <div class="setting-copy">
             <p class="setting-label">Sound</p>
-            <p class="setting-note">Akustische Hinweise bei Phasenwechsel.</p>
+            <p class="setting-note">Audio cues on phase changes.</p>
           </div>
           <button type="button" class="setting-btn ${s.soundEnabled ? 'is-on' : ''}" id="btn-sound">
-            ${s.soundEnabled ? 'An' : 'Aus'}
+            ${s.soundEnabled ? 'On' : 'Off'}
           </button>
         </div>
         <div class="setting-row">
           <div class="setting-copy">
             <p class="setting-label">Notifications</p>
-            <p class="setting-note">Browser-Hinweise — am besten als installierte App.</p>
+            <p class="setting-note">Browser toasts — best as an installed app.</p>
           </div>
           <button type="button" class="setting-btn ${s.notificationsEnabled ? 'is-on' : ''}" id="btn-notif">
-            ${s.notificationsEnabled ? 'An' : 'Aus'}
+            ${s.notificationsEnabled ? 'On' : 'Off'}
           </button>
         </div>
         <div class="setting-row">
           <div class="setting-copy">
-            <p class="setting-label">Toast sichtbar halten</p>
+            <p class="setting-label">Keep toast visible</p>
             <p class="setting-note">
-              Bleibt am Bildschirm bis du wegklickst. Hilft auf Windows, wenn nur das Info-Center blinkt.
-              Sekunden-Dauer steuert Windows selbst — nicht die App.
+              Stays on screen until you dismiss it. Helps on Windows when only the action center blinks.
+              Display duration is controlled by Windows — not the app.
             </p>
           </div>
           <button
@@ -99,19 +99,19 @@ function render(): void {
             id="btn-notif-persistent"
             ${s.notificationsEnabled ? '' : 'disabled'}
           >
-            ${s.notificationPersistent ? 'An' : 'Aus'}
+            ${s.notificationPersistent ? 'On' : 'Off'}
           </button>
         </div>
         <p class="settings-hint settings-hint-tight">
-          Windows: Einstellungen → System → Benachrichtigungen → MVN → „Banner“ aktivieren.
-          Fokusassistenz kann Toasts unterdrücken.
+          Windows: Settings → System → Notifications → MVN → enable “Banners”.
+          Focus assist can suppress toasts.
         </p>
       </section>
 
-      <section class="settings-group" aria-label="Intervalle">
-        <h2 class="settings-group-title">Intervalle</h2>
+      <section class="settings-group" aria-label="Intervals">
+        <h2 class="settings-group-title">Intervals</h2>
         <p class="settings-hint">
-          Sitzen und Stehen. Beim Wechsel gibt’s jeweils einen kurzen Moment — oder direkt weiter.
+          Sitting and standing. Each switch gets a short moment — or you continue directly.
         </p>
 
         <div class="interval-block">
@@ -119,13 +119,13 @@ function render(): void {
           <p class="interval-summary">${intervalSummary(intervals, 'high')}</p>
           <div class="setting-row">
             <div class="setting-copy">
-              <p class="setting-label">Sitzen</p>
+              <p class="setting-label">Sitting</p>
             </div>
             ${intervalSelect('high', 'sit', SIT_OPTIONS.high, intervals)}
           </div>
           <div class="setting-row">
             <div class="setting-copy">
-              <p class="setting-label">Stehen</p>
+              <p class="setting-label">Standing</p>
             </div>
             ${intervalSelect('high', 'stand', STAND_OPTIONS.high, intervals)}
           </div>
@@ -136,36 +136,36 @@ function render(): void {
           <p class="interval-summary">${intervalSummary(intervals, 'lazy')}</p>
           <div class="setting-row">
             <div class="setting-copy">
-              <p class="setting-label">Sitzen</p>
+              <p class="setting-label">Sitting</p>
             </div>
             ${intervalSelect('lazy', 'sit', SIT_OPTIONS.lazy, intervals)}
           </div>
           <div class="setting-row">
             <div class="setting-copy">
-              <p class="setting-label">Stehen</p>
+              <p class="setting-label">Standing</p>
             </div>
             ${intervalSelect('lazy', 'stand', STAND_OPTIONS.lazy, intervals)}
           </div>
         </div>
       </section>
 
-      <section class="settings-group" aria-label="Tastenkürzel">
-        <h2 class="settings-group-title">Tastenkürzel</h2>
-        <p class="settings-hint">Nur wenn MVN fokussiert ist — kein globaler System-Shortcut.</p>
+      <section class="settings-group" aria-label="Keyboard shortcuts">
+        <h2 class="settings-group-title">Keyboard shortcuts</h2>
+        <p class="settings-hint">Only while MVN is focused — not a global OS shortcut.</p>
         <div class="setting-row">
           <div class="setting-copy">
-            <p class="setting-label">Hinweise auf Buttons</p>
-            <p class="setting-note">Kleine graue Kürzel neben den Aktionen.</p>
+            <p class="setting-label">Hints on buttons</p>
+            <p class="setting-note">Small grey key labels next to actions.</p>
           </div>
           <button
             type="button"
             class="setting-btn ${s.shortcutHintsEnabled !== false ? 'is-on' : ''}"
             id="btn-shortcut-hints"
           >
-            ${s.shortcutHintsEnabled !== false ? 'An' : 'Aus'}
+            ${s.shortcutHintsEnabled !== false ? 'On' : 'Off'}
           </button>
         </div>
-        <div class="shortcut-list" aria-label="Shortcut-Übersicht">
+        <div class="shortcut-list" aria-label="Shortcut overview">
           ${[...shortcutGroups.entries()]
             .map(
               ([context, items]) => `
@@ -186,17 +186,20 @@ function render(): void {
         </div>
       </section>
 
-      <section class="settings-group" aria-label="Sonstiges">
-        <h2 class="settings-group-title">Sonstiges</h2>
+      <section class="settings-group" aria-label="Other">
+        <h2 class="settings-group-title">Other</h2>
         <div class="setting-row">
           <div class="setting-copy">
             <p class="setting-label">Demo</p>
-            <p class="setting-note">Kurze Intervalle zum Testen des Flows.</p>
+            <p class="setting-note">Short intervals to try the full loop.</p>
           </div>
           <button type="button" class="setting-btn ${s.demo ? 'is-on' : ''}" id="btn-demo">
-            ${s.demo ? 'An' : 'Aus'}
+            ${s.demo ? 'On' : 'Off'}
           </button>
         </div>
+        <p class="settings-hint">
+          Micro-moments (exercises) stay in German for now — clearer body cues.
+        </p>
       </section>
     </div>
   `

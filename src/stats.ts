@@ -226,41 +226,41 @@ export function lastDayBuckets(n: number): DayBucket[] {
 export function buildDayCloseLine(s: StatsSummary): string {
   const parts: string[] = []
   if (s.desk_confirmed > 0) {
-    parts.push(`${s.desk_confirmed}× im Stehen bestätigt`)
+    parts.push(`${s.desk_confirmed}× standing confirmed`)
   } else if (s.rise > 0) {
-    parts.push(`${s.rise}× Tisch hoch ohne Steh-Check`)
+    parts.push(`${s.rise}× desk up without stand check`)
   } else if (s.sit_done > 0) {
-    parts.push(`${s.sit_done} Sitzblöcke beendet`)
+    parts.push(`${s.sit_done} sitting blocks finished`)
   } else {
-    parts.push('Heute kaum Bewegung')
+    parts.push('Hardly any movement today')
   }
-  if (s.ritual_done > 0) parts.push(`${s.ritual_done}× Moment`)
-  if (s.ritual_skip > 0) parts.push(`${s.ritual_skip}× ohne Bewegung`)
+  if (s.ritual_done > 0) parts.push(`${s.ritual_done}× moment`)
+  if (s.ritual_skip > 0) parts.push(`${s.ritual_skip}× no movement`)
   if (s.lazy_choice > 0) parts.push(`Lazy ${s.lazy_choice}×`)
-  if (s.freeze_total > 0) parts.push(`${s.freeze_total}× Freeze wegen Call`)
-  return `${parts.join(', ')}. Der Tisch hat mitgehalten — das zählt fürs Mitspielen.`
+  if (s.freeze_total > 0) parts.push(`${s.freeze_total}× freeze for calls`)
+  return `${parts.join(', ')}. The desk kept up — that counts for showing up.`
 }
 
 /** Short narrative for analytics — no number dump (hero grid has the counts). */
 export function buildDayStory(s: StatsSummary): string {
   if (s.day_start === 0 && s.rounds === 0 && s.sit_done === 0) {
-    return 'Noch kein Tag gestartet. Der Tisch wartet.'
+    return 'No day started yet. The desk is waiting.'
   }
   const open = unconfirmedRises(s)
   if (s.ritual_skip > 0 && s.ritual_skip >= s.ritual_done) {
-    return 'Oft direkt weiter — ohne kurzen Moment dazwischen.'
+    return 'Often continued straight on — without a short moment in between.'
   }
   if (open > 0) {
-    return 'Oft hochgefahren — Steh-Check manchmal ausgelassen.'
+    return 'Often raised the desk — stand check sometimes skipped.'
   }
   if (s.rounds > 0 && s.ritual_done > s.ritual_skip) {
-    return 'Stehen bestätigt und Momente mitgenommen.'
+    return 'Standing confirmed and moments taken.'
   }
-  if (s.rounds > 0) return 'Im Stehen bestätigt — der Rhythmus hat gehalten.'
-  if (s.rise > 0) return 'Tisch hoch angesetzt — Steh-Check oft ohne Tap.'
-  if (s.freeze_total > 0) return 'Calls unterbrochen den Flow — Freeze hat geschützt.'
-  if (s.lazy_choice > 0) return 'Lazy Mode war im Spiel.'
-  return 'Der Tag läuft. Noch keine Wechsel — ok.'
+  if (s.rounds > 0) return 'Standing confirmed — the rhythm held.'
+  if (s.rise > 0) return 'Desk raised — stand check often without a tap.'
+  if (s.freeze_total > 0) return 'Calls interrupted the flow — freeze protected you.'
+  if (s.lazy_choice > 0) return 'Lazy Mode was in play.'
+  return 'The day is running. No switches yet — ok.'
 }
 
 export function clearStats(): void {

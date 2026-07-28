@@ -12,52 +12,52 @@ export const MOTIVATIONS: Motivation[] = [
   {
     id: 'server',
     kind: 'high',
-    text: 'Dein Rücken ist keine unbegrenzte Ressource. Behandle ihn wie deine Server-Infrastruktur: Prävention schlägt Systemausfall.',
+    text: 'Your back is not an unlimited resource. Treat it like infra: prevention beats outage.',
   },
   {
     id: 'oxygen',
     kind: 'high',
-    text: 'Stehen ist kein Workout. Es ist Wartung. Und Wartung macht man, bevor es brennt.',
+    text: 'Standing is not a workout. It is maintenance — before things catch fire.',
   },
   {
     id: 'desk-debt',
     kind: 'high',
-    text: 'Jede Stunde am Stuhl ohne Wechsel ist technische Schuld. Zinseszins inklusive.',
+    text: 'Every hour in the chair without a switch is tech debt. Compound interest included.',
   },
   {
     id: 'procrastinate-stand',
     kind: 'lazy',
-    text: 'Prokrastinieren im Stehen ist immer noch gesünder als Prokrastinieren im Sitzen. Fahr hoch das Ding.',
+    text: 'Procrastinating while standing still beats procrastinating while sitting. Raise the desk.',
   },
   {
     id: 'almost-nothing',
     kind: 'lazy',
-    text: 'Du musst nicht motiviert sein. Du musst nur drei Minuten nicht absagen.',
+    text: 'You do not need motivation. You only need three minutes you do not cancel.',
   },
   {
     id: 'lazy-win',
     kind: 'lazy',
-    text: 'Lazy Mode ist kein Versagen. Es ist der Überlebensmodus für echte Tage.',
+    text: 'Lazy Mode is not failure. It is survival mode for real days.',
   },
   {
     id: 'papa-fang',
     kind: 'north',
-    text: 'Du trainierst nicht für den Feierabend — du investierst in den Moment, in dem jemand „Papa, fang!“ ruft.',
+    text: 'You are not training for quitting time — you are investing in the moment someone yells “Dad, catch!”',
   },
   {
     id: 'earlier-fit',
     kind: 'north',
-    text: 'Früher warst du fit. Heute reicht eine Minute. Das zählt.',
+    text: 'You used to be fit. Today one minute is enough. That counts.',
   },
   {
     id: 'battery-empty',
     kind: 'north',
-    text: 'Nach Feierabend ist die Batterie leer. Deshalb passiert das hier — zwischen den Meetings.',
+    text: 'After work the battery is empty. That is why this happens between meetings.',
   },
   {
     id: 'long-game',
     kind: 'north',
-    text: 'Ziel ist nicht der Sixpack. Ziel ist: noch lange mitspielen können.',
+    text: 'The goal is not a six-pack. The goal is staying in the game for a long time.',
   },
 ]
 

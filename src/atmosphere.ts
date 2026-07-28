@@ -25,19 +25,19 @@ export function softTimeLabel(
   durationMs: number | null,
   approaching: boolean,
 ): string {
-  if (approaching) return 'gleich'
+  if (approaching) return 'soon'
   const stage = atmosphereStage(remainingRatio(remainingMs, durationMs))
   switch (stage) {
     case 'full':
-      return 'noch viel Luft'
+      return 'plenty of room'
     case 'plenty':
-      return 'noch ein Stück'
+      return 'still a stretch'
     case 'mid':
-      return 'halbwegs'
+      return 'halfway'
     case 'low':
-      return 'bald'
+      return 'almost'
     case 'near':
-      return 'gleich'
+      return 'soon'
   }
 }
 

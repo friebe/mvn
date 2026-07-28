@@ -31,13 +31,13 @@ export function phaseLabel(
 ): string {
   switch (phase) {
     case 'sit':
-      return 'Sitzen'
+      return 'Sitting'
     case 'stand':
-      return 'Stehen'
+      return 'Standing'
     case 'reset':
       return 'Reset'
     case 'threshold':
-      return 'Tisch'
+      return 'Desk'
     case 'pick':
       return 'Moment'
     case 'exercise':
@@ -45,53 +45,53 @@ export function phaseLabel(
     case 'frozen':
       return 'Freeze'
     case 'closing':
-      return 'Tagesende'
+      return 'Day end'
     case 'setup':
       return 'Setup'
   }
 }
 
 export function nextPhaseVerb(phase: ActivePhase): string {
-  if (phase === 'sit') return 'Tisch hoch'
-  return 'Wieder setzen'
+  if (phase === 'sit') return 'Desk up'
+  return 'Sit again'
 }
 
 export function thresholdLead(ended: ActivePhase | null): string {
-  if (ended === 'sit') return 'Tisch will hoch.'
-  if (ended === 'stand' || ended === 'reset') return 'Wieder setzen?'
-  return 'Tisch wartet.'
+  if (ended === 'sit') return 'Desk wants up.'
+  if (ended === 'stand' || ended === 'reset') return 'Sit again?'
+  return 'Desk is waiting.'
 }
 
 export function thresholdSub(ended: ActivePhase | null): string {
-  if (ended === 'sit') return 'Tisch hochfahren und kurz bewegen — oder gleich stehen.'
-  if (ended === 'stand' || ended === 'reset') return 'Tisch runter und kurz bewegen — oder gleich setzen.'
-  return 'Du musst nichts beweisen. Wähl den Weg, der heute geht.'
+  if (ended === 'sit') return 'Raise the desk and move briefly — or just stand.'
+  if (ended === 'stand' || ended === 'reset') return 'Lower the desk and move briefly — or just sit.'
+  return 'Nothing to prove. Pick what works today.'
 }
 
 export function pickLead(pendingNext: ActivePhase | null): string {
-  if (pendingNext === 'sit') return 'Tisch runterfahren und kurz bewegen.'
-  return 'Tisch hochfahren und kurz bewegen.'
+  if (pendingNext === 'sit') return 'Lower the desk and move briefly.'
+  return 'Raise the desk and move briefly.'
 }
 
 /** Short orientation while a moment runs. */
 export function momentOrderHint(pendingNext: ActivePhase | null): string {
-  if (pendingNext === 'sit') return 'Knopf runter und kurz bewegen — in einem.'
-  if (pendingNext === 'stand') return 'Knopf hoch und kurz bewegen — in einem.'
-  return 'Kurz. Erledigt, wenn du fertig bist.'
+  if (pendingNext === 'sit') return 'Desk button down and a short move — together.'
+  if (pendingNext === 'stand') return 'Desk button up and a short move — together.'
+  return 'Keep it short. Done when you are.'
 }
 
 export function skipMomentLabel(pendingNext: ActivePhase | null): string {
-  if (pendingNext === 'sit') return 'Heute reicht Sitzen'
-  return 'Heute reicht Stehen'
+  if (pendingNext === 'sit') return 'Sitting is enough today'
+  return 'Standing is enough today'
 }
 
-/** Direct path at threshold — matches „oder direkt setzen/stehen“. */
+/** Direct path at threshold — matches “or just sit/stand”. */
 export function thresholdSkipLabel(pendingNext: ActivePhase | null): string {
-  if (pendingNext === 'sit') return 'Einfach setzen'
-  return 'Einfach stehen'
+  if (pendingNext === 'sit') return 'Just sit'
+  return 'Just stand'
 }
 
 export function thresholdRiseLabel(ended: ActivePhase | null): string {
-  if (ended === 'sit' || ended === 'stand' || ended === 'reset') return 'Kurz bewegen'
-  return 'Weiter'
+  if (ended === 'sit' || ended === 'stand' || ended === 'reset') return 'Move briefly'
+  return 'Continue'
 }

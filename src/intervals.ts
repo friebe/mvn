@@ -92,7 +92,7 @@ export function minutesFromMs(ms: number): number {
 
 export function intervalSummary(intervals: UserIntervals, mode: EnergyMode): string {
   const p = intervals[mode]
-  return `${minutesFromMs(p.sit)} Min sitzen → ${minutesFromMs(p.stand)} Min stehen`
+  return `${minutesFromMs(p.sit)} min sit → ${minutesFromMs(p.stand)} min stand`
 }
 
 export function durationFor(

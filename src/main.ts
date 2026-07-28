@@ -111,7 +111,7 @@ mountUi(app, {
     dismissInstallBanner()
   },
   onCloseDay: () => {
-    if (!confirm('Tagesabschluss — Timer zurücksetzen?')) return
+    if (!confirm('Close the day — reset the timer?')) return
     const summary = summarizeToday()
     resetDay()
     showDayCloseReward(summary)

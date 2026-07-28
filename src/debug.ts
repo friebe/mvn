@@ -35,7 +35,7 @@ export function mountDebugToolbar(): void {
     const paused = isTimerPaused()
     const { phase } = getState()
     phaseEl.textContent = phase
-    btn.textContent = paused ? '▶ Weiter' : '⏸ Pause'
+    btn.textContent = paused ? '▶ Continue' : '⏸ Pause'
     btn.setAttribute('aria-pressed', paused ? 'true' : 'false')
     bar.dataset.paused = paused ? 'true' : 'false'
   }

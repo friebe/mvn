@@ -251,7 +251,7 @@ function onTick(): void {
     (state.phase === 'sit' || state.phase === 'stand' || state.phase === 'reset')
   ) {
     state = { ...state, foreshadowFired: true }
-    signalAttention('foreshadow', 'Gleich', 'Tisch meldet sich bald.')
+    signalAttention('foreshadow', 'Soon', 'The desk will check in soon.')
   }
 
   if (state.phaseEndsAt != null && Date.now() >= state.phaseEndsAt) {
@@ -288,7 +288,7 @@ function maybeTimeoutCheckIn(): void {
 }
 
 function checkInPrompt(): string {
-  return state.phase === 'stand' ? 'Noch am Stehen?' : 'Noch am Tisch?'
+  return state.phase === 'stand' ? 'Still standing?' : 'Still at your desk?'
 }
 
 function shouldNotify(muted: boolean): boolean {
@@ -392,8 +392,8 @@ function enterThreshold(ended: ActivePhase): void {
   }
   signalAttention(
     'threshold',
-    'Tisch',
-    ended === 'sit' ? 'Tisch will hoch.' : 'Wieder setzen?',
+    'Desk',
+    ended === 'sit' ? 'Desk wants up.' : 'Sit again?',
   )
   emit()
 }
@@ -412,7 +412,7 @@ function enterPick(): void {
     currentMotivationId: null,
     momentRerolled: false,
   }
-  signalAttention('ritual', 'Moment', 'Drei Karten. Eine reicht.')
+  signalAttention('ritual', 'Moment', 'Three cards. One is enough.')
   emit()
 }
 
@@ -765,7 +765,7 @@ export function startFreezeAfterplay(): void {
     momentChoiceIds: null,
     momentRerolled: false,
   }
-  signalAttention('ritual', 'Nachspiel', moment.title)
+  signalAttention('ritual', 'Cooldown', moment.title)
   emit()
 }
 

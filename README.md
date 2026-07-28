@@ -1,119 +1,121 @@
 # MVN
 
-Elastischer Schreibtisch-Copilot für Minimal Viable Movement.
+Elastic desk copilot for Minimal Viable Movement.
 
-Lokale PWA — kein Account, keine Cloud, nur LocalStorage.
+Local PWA — no account, no cloud, LocalStorage only.
 
-## Entwickeln
+**UI language: English.** Micro-moments (exercises) stay in **German** for clearer body cues.
+
+## Develop
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Als App installieren (empfohlen für Zweitmonitor + Notifications)
+## Install as an app (recommended for second monitor + notifications)
 
-Chrome/Edge auf dem Desktop:
+Chrome/Edge on desktop:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-Dann `http://localhost:4173` öffnen → **App installieren** (oder Browser-Menü „App installieren“).
+Then open `http://localhost:4173` → **Install app** (or browser menu “Install app”).
 
-1. Installierte MVN-App öffnen (eigenes Fenster)
-2. **Notifications** erlauben
-3. Auf den zweiten Monitor ziehen
+1. Open the installed MVN app (its own window)
+2. Allow **Notifications**
+3. Drag it to your second monitor
 
-`npm run preview` nach `build` ist der zuverlässigste Weg zur Installation.
+`npm run preview` after `build` is the most reliable path to install.
 
-## Intervalle
+## Intervals
 
 | Mode | Sit | Stand | Reset |
 |------|-----|-------|-------|
 | High | 30 min | 5 min | 1 min |
 | Lazy | 20 min | 3 min | 1 min |
 
-Demo-Modus: Button **Demo** oder `?demo=1`.
+Demo mode: **Demo** button or `?demo=1`.
 
-## Moments erweitern
+## Extending moments
 
-Micro-Moments liegen in [`src/moments.json`](src/moments.json) (für Entwickler, nicht Enduser). Felder: `id`, `mode` (`high` | `lazy` | `both`), `kind`, `part`, `posture` (`sit` | `stand` | `either`), `title`, `prompt`.
+Micro-moments live in [`src/moments.json`](src/moments.json) (for developers, not end users). Fields: `id`, `mode` (`high` | `lazy` | `both`), `kind`, `part`, `posture` (`sit` | `stand` | `either`), `title`, `prompt`. Copy is German on purpose.
 
 ## Analytics
 
-Unter `analytics.html` im App-Ordner (Icon **Analytics** im Header): lokale Statistik zu Tisch-Wechseln, Momenten, Lazy, Freeze — nur LocalStorage, keine Cloud. Auf GitHub Pages: `/mvn/analytics.html`.
+`analytics.html` in the app folder (Analytics icon in the header): local stats for desk switches, moments, Lazy, Freeze — LocalStorage only, no cloud. On GitHub Pages: `/mvn/analytics.html`.
 
 ## LocalStorage
 
-Alles bleibt auf dem Gerät. Die App speichert unter mehreren Keys:
+Everything stays on the device. The app uses several keys:
 
-| Key | Inhalt |
-|-----|--------|
-| `mvn.v1` | Kompletter App-State (JSON-Blob, Felder unten) |
-| `mvn.stats.v1` | Tages-Buckets für Analytics |
-| `mvn-atmosphere-words-hidden` | Atmosphäre-Text ausgeblendet (`1` / `0`) |
-| `mvn-pwa-installed` | Install-Banner als installiert markiert |
-| `mvn-install-banner-dismissed` | Install-Banner manuell verworfen |
+| Key | Contents |
+|-----|----------|
+| `mvn.v1` | Full app state (JSON blob, fields below) |
+| `mvn.stats.v1` | Day buckets for analytics |
+| `mvn-atmosphere-words-hidden` | Atmosphere text hidden (`1` / `0`) |
+| `mvn-pwa-installed` | Install banner marked installed |
+| `mvn-install-banner-dismissed` | Install banner dismissed manually |
 
-`mvn.v1` wird als Ganzes geschrieben (Einstellungen + laufende Session). Nicht jedes Feld müsste einzeln persistieren — das ist pragmatisch, damit ein Reload die Session fortsetzt.
+`mvn.v1` is written as a whole (settings + live session). Not every field needs its own key — this is pragmatic so a reload can resume the session.
 
-### Einstellungen
+### Settings
 
-| Feld | Bedeutung |
-|------|-----------|
-| `mode` | High oder Lazy (Intervall-Set) |
-| `demo` | Kurzzeiten zum Testen |
-| `soundEnabled` | App-Sound an/aus |
-| `notificationsEnabled` | Browser-Toasts |
-| `notificationPersistent` | Toast bleibt bis Dismiss |
-| `shortcutHintsEnabled` | Tastatur-Hints auf Buttons |
-| `intervals` | Eigene Sit/Stand-Zeiten (`null` = Defaults) |
+| Field | Meaning |
+|------|---------|
+| `mode` | High or Lazy (interval set) |
+| `demo` | Short intervals for testing |
+| `soundEnabled` | App sound on/off |
+| `notificationsEnabled` | Browser toasts |
+| `notificationPersistent` | Toast stays until dismiss |
+| `shortcutHintsEnabled` | Keyboard hints on buttons |
+| `intervals` | Custom sit/stand durations (`null` = defaults) |
 
-### Session / Fortschritt
+### Session / progress
 
-| Feld | Bedeutung |
-|------|-----------|
-| `phase` | Aktuelle Phase (`setup`, `sit`, `stand`, `threshold`, `pick`, …) |
-| `startedAt` | Wann der Tag gestartet wurde |
-| `phaseEndsAt` | Wall-Clock-Ende des aktuellen Countdowns |
-| `phaseDurationMs` | Gesamtdauer der aktuellen timed Phase |
-| `foreshadowFired` | Soft-Warnung (~10 % Rest) schon gelaufen |
-| `endedPhase` | Welche aktive Phase gerade endete |
-| `pendingNextPhase` | Nächste Phase nach Ritual / Lazy-Skip |
-| `dayClosedKey` | Tagesabschluss schon heute (ISO-Datum) |
-| `northShownKey` | Nordstern-Zeile heute schon gezeigt |
+| Field | Meaning |
+|------|---------|
+| `phase` | Current phase (`setup`, `sit`, `stand`, `threshold`, `pick`, …) |
+| `startedAt` | When the day started |
+| `phaseEndsAt` | Wall-clock end of the current countdown |
+| `phaseDurationMs` | Full duration of the current timed phase |
+| `foreshadowFired` | Soft warning (~10% left) already fired |
+| `endedPhase` | Which active phase just ended |
+| `pendingNextPhase` | Next phase after ritual / lazy skip |
+| `dayClosedKey` | Day already closed today (ISO date) |
+| `northShownKey` | North-star line already shown today |
 
 ### Freeze
 
-| Feld | Bedeutung |
-|------|-----------|
-| `frozenAt` | Wann Freeze startete |
-| `frozenRemainingMs` | Restzeit der unterbrochenen Phase |
-| `frozenPhase` | Unterbrochene aktive Phase |
-| `freezeExtendUntil` | „Noch 15 Min“ — Prompt unterdrücken bis dahin |
-| `resumeToThreshold` | Nach Freeze zurück zur Schwelle |
-| `resumeAfterAfterplay` | Nach Call-Nachspiel zurück zur unterbrochenen Phase |
+| Field | Meaning |
+|------|---------|
+| `frozenAt` | When freeze started |
+| `frozenRemainingMs` | Remaining time of interrupted phase |
+| `frozenPhase` | Interrupted active phase |
+| `freezeExtendUntil` | “15 more min” — suppress prompt until then |
+| `resumeToThreshold` | After freeze, return to threshold |
+| `resumeAfterAfterplay` | After call cooldown, return to interrupted phase |
 
 ### Check-in
 
-| Feld | Bedeutung |
-|------|-----------|
-| `checkInAt` | Wann der Soft-Check-in fällig ist |
-| `checkInShownAt` | Seit wann der Check-in sichtbar ist |
-| `checkInHandled` | Schon beantwortet oder abgelaufen |
+| Field | Meaning |
+|------|---------|
+| `checkInAt` | When soft check-in is due |
+| `checkInShownAt` | Since when check-in is visible |
+| `checkInHandled` | Already answered or timed out |
 
-Aktives Ja auf „Noch am Stehen?“ zählt als `desk_confirmed` (Analytics: Bestätigt). Sitz-Check-in zählt nicht.
+An active Yes on “Still standing?” counts as `desk_confirmed` (Analytics: Confirmed). Sit check-in does not.
 
-### Ritual / Momente / Copy
+### Ritual / moments / copy
 
-| Feld | Bedeutung |
-|------|-----------|
-| `momentChoiceIds` | Die drei Moment-Karten in der Pick-Phase |
-| `momentRerolled` | „Anderer Moment“ schon einmal genutzt |
-| `currentExerciseId` | Aktuell angezeigter Moment |
-| `currentMotivationId` | Aktuell angezeigte Motivationszeile |
-| `ambientMotivationId` | Ruhige Why-Zeile während Sit/Stand |
-| `recentMotivationIds` | Zuletzt gezeigte Motivationen (Anti-Wiederholung) |
-| `recentExerciseIds` | Zuletzt gezeigte Momente (Anti-Wiederholung) |
+| Field | Meaning |
+|------|---------|
+| `momentChoiceIds` | The three moment cards in pick phase |
+| `momentRerolled` | “Another moment” already used once |
+| `currentExerciseId` | Currently shown moment |
+| `currentMotivationId` | Currently shown motivation line |
+| `ambientMotivationId` | Quiet why-line during sit/stand |
+| `recentMotivationIds` | Recently shown motivations (anti-repeat) |
+| `recentExerciseIds` | Recently shown moments (anti-repeat) |

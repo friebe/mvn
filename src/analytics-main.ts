@@ -27,7 +27,7 @@ function summaryFor(period: Period): StatsSummary {
 function weekdayShort(dateKey: string): string {
   const [y, m, d] = dateKey.split('-').map(Number)
   const dt = new Date(y!, m! - 1, d!)
-  return dt.toLocaleDateString('de-DE', { weekday: 'short' })
+  return dt.toLocaleDateString('en-US', { weekday: 'short' })
 }
 
 function isEmpty(s: StatsSummary): boolean {
@@ -54,17 +54,17 @@ function render(period: Period): void {
   root.innerHTML = `
     <div class="analytics">
       <header class="analytics-top">
-        <a class="icon-link back-link" href="${appPath()}" aria-label="Zurück zur App" title="Zurück">
+        <a class="icon-link back-link" href="${appPath()}" aria-label="Back to app" title="Back">
           <svg class="icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
             <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
           </svg>
         </a>
         <div class="analytics-heading">
           <p class="analytics-brand">Analytics</p>
-          <p class="analytics-tag">MVN · nur lokal auf diesem Gerät</p>
+          <p class="analytics-tag">MVN · local on this device only</p>
         </div>
-        <nav class="analytics-nav" aria-label="Aktionen">
-          <button type="button" class="icon-link" id="btn-refresh" aria-label="Aktualisieren" title="Aktualisieren">
+        <nav class="analytics-nav" aria-label="Actions">
+          <button type="button" class="icon-link" id="btn-refresh" aria-label="Refresh" title="Refresh">
             <svg class="icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
               <path
                 fill="currentColor"
@@ -72,7 +72,7 @@ function render(period: Period): void {
               />
             </svg>
           </button>
-          <button type="button" class="icon-link" id="btn-clear" aria-label="Stats löschen" title="Stats löschen">
+          <button type="button" class="icon-link" id="btn-clear" aria-label="Clear stats" title="Clear stats">
             <svg class="icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
               <path
                 fill="currentColor"
@@ -83,8 +83,8 @@ function render(period: Period): void {
           <a
             class="icon-link"
             href="${appPath('settings.html')}"
-            aria-label="Einstellungen"
-            title="Einstellungen"
+            aria-label="Settings"
+            title="Settings"
           >
             <svg class="icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
               <path
@@ -96,37 +96,37 @@ function render(period: Period): void {
         </nav>
       </header>
 
-      <div class="period-tabs" role="tablist" aria-label="Zeitraum">
-        <button type="button" role="tab" data-period="today" class="${period === 'today' ? 'is-on' : ''}" aria-selected="${period === 'today'}">Heute</button>
-        <button type="button" role="tab" data-period="7d" class="${period === '7d' ? 'is-on' : ''}" aria-selected="${period === '7d'}">7 Tage</button>
-        <button type="button" role="tab" data-period="all" class="${period === 'all' ? 'is-on' : ''}" aria-selected="${period === 'all'}">Gesamt</button>
+      <div class="period-tabs" role="tablist" aria-label="Period">
+        <button type="button" role="tab" data-period="today" class="${period === 'today' ? 'is-on' : ''}" aria-selected="${period === 'today'}">Today</button>
+        <button type="button" role="tab" data-period="7d" class="${period === '7d' ? 'is-on' : ''}" aria-selected="${period === '7d'}">7 days</button>
+        <button type="button" role="tab" data-period="all" class="${period === 'all' ? 'is-on' : ''}" aria-selected="${period === 'all'}">All time</button>
       </div>
 
       ${
         empty
-          ? `<p class="empty">Noch keine Nutzung in diesem Zeitraum. Starte eine Session — hier wird daraus eine Tagesgeschichte.</p>`
+          ? `<p class="empty">No use in this period yet. Start a session — a day story will show up here.</p>`
           : `<p class="day-story">${buildDayStory(s)}</p>`
       }
 
-      <section class="hero-grid" aria-label="Kernzahlen">
+      <section class="hero-grid" aria-label="Core stats">
         <div class="stat" data-tone="sit">
           <p class="stat-value">${s.rise}</p>
-          <p class="stat-label">Tisch hoch</p>
+          <p class="stat-label">Desk up</p>
         </div>
         <div class="stat" data-tone="stand">
           <p class="stat-value">${s.rounds}</p>
-          <p class="stat-label">Bestätigt</p>
+          <p class="stat-label">Confirmed</p>
         </div>
         <div class="stat" data-tone="gap">
           <p class="stat-value">${open}</p>
-          <p class="stat-label">Ohne Steh-Check</p>
+          <p class="stat-label">No stand check</p>
         </div>
         <div class="stat" data-tone="gap">
           <p class="stat-value">${s.ritual_skip}</p>
-          <p class="stat-label">Ohne Bewegung</p>
+          <p class="stat-label">No movement</p>
         </div>
       </section>
-      <p class="section-note">Bestätigt = Ja auf „Noch am Stehen?“ mitten in der Stehphase.</p>
+      <p class="section-note">Confirmed = Yes on “Still standing?” mid stand phase.</p>
 
       ${
         s.freeze_total > 0
@@ -140,8 +140,8 @@ function render(period: Period): void {
       }
 
       <section>
-        <h2 class="section-title">Letzte 7 Tage</h2>
-        <p class="section-note">Balken = beendete Sitzphasen pro Tag.</p>
+        <h2 class="section-title">Last 7 days</h2>
+        <p class="section-note">Bars = finished sit phases per day.</p>
         <div class="bars" aria-hidden="${empty ? 'true' : 'false'}">
           ${spark
             .map((d) => {
@@ -161,13 +161,13 @@ function render(period: Period): void {
         s.lazy_choice > 0 ||
         s.ritual_done > 0 ||
         (activeDays != null && activeDays > 0)
-          ? `<section aria-label="Weitere Zahlen">
-        <h2 class="section-title">Weitere</h2>
-        ${activeDays != null && activeDays > 0 ? `<div class="detail-row"><span>Aktive Tage</span><span>${activeDays}</span></div>` : ''}
-        ${s.day_start > 0 ? `<div class="detail-row"><span>Tage gestartet</span><span>${s.day_start}</span></div>` : ''}
-        ${s.day_close > 0 ? `<div class="detail-row"><span>Tagesabschluss</span><span>${s.day_close}</span></div>` : ''}
-        ${s.ritual_done > 0 ? `<div class="detail-row"><span>Momente erledigt</span><span>${s.ritual_done}</span></div>` : ''}
-        ${s.lazy_choice > 0 ? `<div class="detail-row"><span>Lazy gewählt</span><span>${s.lazy_choice}</span></div>` : ''}
+          ? `<section aria-label="More stats">
+        <h2 class="section-title">More</h2>
+        ${activeDays != null && activeDays > 0 ? `<div class="detail-row"><span>Active days</span><span>${activeDays}</span></div>` : ''}
+        ${s.day_start > 0 ? `<div class="detail-row"><span>Days started</span><span>${s.day_start}</span></div>` : ''}
+        ${s.day_close > 0 ? `<div class="detail-row"><span>Day close</span><span>${s.day_close}</span></div>` : ''}
+        ${s.ritual_done > 0 ? `<div class="detail-row"><span>Moments done</span><span>${s.ritual_done}</span></div>` : ''}
+        ${s.lazy_choice > 0 ? `<div class="detail-row"><span>Lazy chosen</span><span>${s.lazy_choice}</span></div>` : ''}
       </section>`
           : ''
       }
@@ -182,7 +182,7 @@ function render(period: Period): void {
 
   root.querySelector('#btn-refresh')?.addEventListener('click', () => render(period))
   root.querySelector('#btn-clear')?.addEventListener('click', () => {
-    if (confirm('Alle lokalen Analytics löschen?')) {
+    if (confirm('Clear all local analytics?')) {
       clearStats()
       render(period)
     }
