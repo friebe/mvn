@@ -1,12 +1,12 @@
 import type { AppState } from './state'
 import { getMoment, kindLabel, MOMENTS } from './exercises'
 import { MOTIVATIONS } from './motivation'
-import { confirmCopy, nextPhaseVerb, phaseLabel, pickLead, skipMomentLabel, thresholdLead, thresholdSub } from './modes'
+import { confirmCopy, phaseLabel, pickLead, skipMomentLabel, thresholdLead, thresholdRiseLabel, thresholdSkipLabel, thresholdSub } from './modes'
 import { fillLevel, formatExactTime, formatRemainingPercent, softTimeLabel } from './atmosphere'
 import { intervalSummary, resolveIntervals } from './intervals'
 import { appPath } from './paths'
 import { isCheckInVisible } from './timer'
-import { buildDayCloseLine, buildDayStory, type StatsSummary } from './stats'
+import { buildDayStory, type StatsSummary } from './stats'
 import { shortcutHintLabel, type ShortcutId } from './shortcuts'
 
 export interface UiHandlers {
@@ -27,9 +27,7 @@ export interface UiHandlers {
   onDismissInstall: () => void
   onChooseRise: () => void
   onChooseLazyPath: () => void
-  onChooseFreezePath: () => void
   onConfirmDesk: () => void
-  onConfirmDeskLater: () => void
   onCloseDay: () => void
   onDismissDayClose: () => void
 }
@@ -40,6 +38,10 @@ let atmosphereDetail: AtmosphereDetail = 'soft'
 const WORDS_KEY = 'mvn-atmosphere-words-hidden'
 let wordsHidden = false
 let dayCloseSummary: StatsSummary | null = null
+const RETURN_AWAY_MS = 20_000
+const RETURN_PULSE_MS = 8_000
+let hiddenAt: number | null = null
+let returnOrientationUntil = 0
 
 try {
   wordsHidden = localStorage.getItem(WORDS_KEY) === '1'
@@ -98,6 +100,31 @@ function applyShortcutHints(root: HTMLElement, enabled: boolean): void {
       card.classList.remove('has-kbd')
     }
   })
+}
+
+export function isReturnOrientationActive(): boolean {
+  return Date.now() < returnOrientationUntil
+}
+
+function pulseReturnOrientation(): void {
+  returnOrientationUntil = Date.now() + RETURN_PULSE_MS
+}
+
+/** After being away, briefly show exact time and highlight status. */
+export function bindReturnOrientation(onPulse: () => void): () => void {
+  const onVisibility = () => {
+    if (document.visibilityState === 'hidden') {
+      hiddenAt = Date.now()
+      return
+    }
+    if (hiddenAt != null && Date.now() - hiddenAt >= RETURN_AWAY_MS) {
+      pulseReturnOrientation()
+      onPulse()
+    }
+    hiddenAt = null
+  }
+  document.addEventListener('visibilitychange', onVisibility)
+  return () => document.removeEventListener('visibilitychange', onVisibility)
 }
 
 export function showDayCloseReward(summary: StatsSummary): void {
@@ -254,7 +281,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
 
           <section class="confirm" id="confirm" hidden>
             <p class="threshold-lead" id="confirm-lead">Tisch steht?</p>
-            <p class="threshold-sub" id="confirm-sub">Ohne Bestätigung zählt die Runde nicht als echt. Ein Tap reicht.</p>
+            <p class="threshold-sub" id="confirm-sub">Bestätigen — oder einfach weiter.</p>
           </section>
 
           <section class="freeze-prompt" id="freeze-prompt" hidden>
@@ -276,7 +303,6 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
           <section class="day-close-reward" id="day-close-reward" hidden>
             <p class="day-close-kicker">Tag beendet</p>
             <p class="day-close-story" id="day-close-story"></p>
-            <p class="day-close-line" id="day-close-line"></p>
             <div class="day-close-stats" id="day-close-stats" aria-label="Tageszahlen"></div>
             <a class="day-close-more" id="day-close-more" href="${appPath('analytics.html')}">Alle Analytics</a>
           </section>
@@ -293,19 +319,17 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
               ${actionButton('btn-resume', 'btn btn-primary', 'Weiter', 'resume', true)}
             </div>
             <div class="row threshold-actions" id="threshold-actions" hidden>
-              ${actionButton('btn-rise', 'btn btn-primary', 'Tisch hoch', 'rise')}
+              ${actionButton('btn-rise', 'btn btn-primary', 'Kurz bewegen', 'rise')}
+              ${actionButton('btn-threshold-skip', 'btn btn-ghost', 'Einfach setzen', 'skipStanding')}
               <div class="row threshold-secondary">
                 ${actionButton('btn-lazy-path', 'btn btn-ghost', 'Lazy weiter', 'lazyPath')}
-                ${actionButton('btn-freeze-path', 'btn btn-danger', 'Freeze', 'freezePath')}
               </div>
             </div>
             <div class="row pick-actions" id="pick-actions" hidden>
               ${actionButton('btn-skip-standing', 'btn btn-primary', 'Heute reicht Stehen', 'skipStanding')}
-              ${actionButton('btn-freeze-pick', 'btn btn-danger', 'Freeze', 'freeze')}
             </div>
             <div class="row confirm-actions" id="confirm-actions" hidden>
               ${actionButton('btn-confirm-desk', 'btn btn-primary', 'Tisch steht', 'confirmDesk')}
-              ${actionButton('btn-confirm-later', 'btn btn-ghost', 'Später', 'confirmLater')}
             </div>
             <div class="row freeze-actions" id="freeze-actions" hidden>
               ${actionButton('btn-afterplay', 'btn btn-primary', 'Call-Nachspiel', 'afterplay')}
@@ -329,13 +353,13 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
 
   qs(root, 'btn-start').addEventListener('click', handlers.onStart)
   qs(root, 'btn-freeze').addEventListener('click', handlers.onFreeze)
-  qs(root, 'btn-freeze-pick').addEventListener('click', handlers.onFreeze)
   qs(root, 'btn-resume').addEventListener('click', handlers.onResume)
   qs(root, 'btn-call-done').addEventListener('click', handlers.onResume)
   qs(root, 'btn-afterplay').addEventListener('click', handlers.onAfterplay)
   qs(root, 'btn-extend').addEventListener('click', handlers.onExtendFreeze)
   qs(root, 'btn-skip-standing').addEventListener('click', handlers.onSkipStanding)
   qs(root, 'btn-skip-standing-ex').addEventListener('click', handlers.onSkipStanding)
+  qs(root, 'btn-threshold-skip').addEventListener('click', handlers.onSkipStanding)
   qs(root, 'btn-done-moment').addEventListener('click', handlers.onCompleteMoment)
   qs(root, 'btn-reroll').addEventListener('click', handlers.onRerollMoment)
   qs(root, 'btn-check-in').addEventListener('click', handlers.onConfirmCheckIn)
@@ -351,9 +375,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   qs(root, 'btn-install-dismiss').addEventListener('click', handlers.onDismissInstall)
   qs(root, 'btn-rise').addEventListener('click', handlers.onChooseRise)
   qs(root, 'btn-lazy-path').addEventListener('click', handlers.onChooseLazyPath)
-  qs(root, 'btn-freeze-path').addEventListener('click', handlers.onChooseFreezePath)
   qs(root, 'btn-confirm-desk').addEventListener('click', handlers.onConfirmDesk)
-  qs(root, 'btn-confirm-later').addEventListener('click', handlers.onConfirmDeskLater)
   qs(root, 'btn-day-close-done').addEventListener('click', handlers.onDismissDayClose)
 
   qs(root, 'moment-cards').addEventListener('click', (e) => {
@@ -402,6 +424,12 @@ export function renderUi(
     state.phase === 'sit' || state.phase === 'stand' || state.phase === 'reset'
   const checkInVisible = isCheckInVisible()
   const dayCloseVisible = dayCloseSummary != null
+  const momentChoiceAtThreshold =
+    isThreshold &&
+    (state.endedPhase === 'sit' || state.endedPhase === 'stand' || state.endedPhase === 'reset')
+  const thresholdTimerActive = momentChoiceAtThreshold && state.phaseEndsAt != null
+  const confirmTimerActive = isConfirm && state.phaseEndsAt != null
+  const waitTimerActive = thresholdTimerActive || confirmTimerActive
 
   shell.dataset.phase = state.phase
   shell.dataset.mode = state.mode
@@ -412,6 +440,13 @@ export function renderUi(
   shell.dataset.atmosphereDetail = atmosphereDetail
   shell.dataset.wordsHidden = wordsHidden ? 'true' : 'false'
   shell.dataset.dayClose = dayCloseVisible ? 'true' : 'false'
+  shell.dataset.returning = isReturnOrientationActive() ? 'true' : 'false'
+  shell.dataset.thresholdTimer = waitTimerActive ? 'true' : 'false'
+  if (waitTimerActive && state.pendingNextPhase) {
+    shell.dataset.pendingNext = state.pendingNextPhase
+  } else {
+    delete shell.dataset.pendingNext
+  }
   updateCompactMode(root)
 
   const phaseEl = qs(root, 'phase-label')
@@ -430,7 +465,8 @@ export function renderUi(
   const runControls = qs(root, 'run-controls')
   const btnFreeze = qs<HTMLButtonElement>(root, 'btn-freeze')
   const btnResume = qs<HTMLButtonElement>(root, 'btn-resume')
-  const btnRise = qs(root, 'btn-rise')
+  const btnRise = qs<HTMLButtonElement>(root, 'btn-rise')
+  const thresholdSkip = qs<HTMLButtonElement>(root, 'btn-threshold-skip')
   const btnReroll = qs<HTMLButtonElement>(root, 'btn-reroll')
   const thresholdActions = qs(root, 'threshold-actions')
   const pickActions = qs(root, 'pick-actions')
@@ -467,23 +503,19 @@ export function renderUi(
 
   if (dayCloseVisible && dayCloseSummary) {
     qs(root, 'day-close-story').textContent = buildDayStory(dayCloseSummary)
-    qs(root, 'day-close-line').textContent = buildDayCloseLine(dayCloseSummary)
+    const open = Math.max(0, dayCloseSummary.rise - dayCloseSummary.rounds)
     qs(root, 'day-close-stats').innerHTML = `
       <div class="day-close-stat" data-tone="stand">
         <p class="day-close-stat-value">${dayCloseSummary.rounds}</p>
-        <p class="day-close-stat-label">Tisch bestätigt</p>
-      </div>
-      <div class="day-close-stat" data-tone="sit">
-        <p class="day-close-stat-value">${dayCloseSummary.rise}</p>
-        <p class="day-close-stat-label">Tisch hoch</p>
+        <p class="day-close-stat-label">Bestätigt</p>
       </div>
       <div class="day-close-stat">
-        <p class="day-close-stat-value">${dayCloseSummary.ritual_done}</p>
-        <p class="day-close-stat-label">Momente</p>
+        <p class="day-close-stat-value">${open}</p>
+        <p class="day-close-stat-label">Ohne Beweis</p>
       </div>
-      <div class="day-close-stat" data-tone="freeze">
-        <p class="day-close-stat-value">${dayCloseSummary.freeze_total}</p>
-        <p class="day-close-stat-label">Freeze</p>
+      <div class="day-close-stat">
+        <p class="day-close-stat-value">${dayCloseSummary.ritual_skip}</p>
+        <p class="day-close-stat-label">Ohne Bewegung</p>
       </div>
     `
   }
@@ -494,16 +526,44 @@ export function renderUi(
   setButtonLabel(skipStand, skipLabel)
   setButtonLabel(skipStandEx, skipLabel)
 
-  phaseEl.textContent = dayCloseVisible ? 'Tagesabschluss' : phaseLabel(state.phase)
+  thresholdSkip.hidden = !momentChoiceAtThreshold || dayCloseVisible
+  if (momentChoiceAtThreshold) {
+    setButtonLabel(thresholdSkip, thresholdSkipLabel(state.pendingNextPhase))
+    setButtonLabel(btnRise, thresholdRiseLabel(state.endedPhase))
+    btnRise.classList.add('btn-primary')
+    btnRise.classList.remove('btn-ghost')
+    thresholdSkip.classList.remove('btn-primary')
+    thresholdSkip.classList.add('btn-ghost')
+  } else if (isThreshold) {
+    setButtonLabel(btnRise, thresholdRiseLabel(state.endedPhase))
+    btnRise.classList.add('btn-primary')
+    btnRise.classList.remove('btn-ghost')
+  }
 
-  const level = isRunning || isExercise ? fillLevel(remainingMs, state.phaseDurationMs) : isSetup ? 0.85 : 0.4
+  phaseEl.textContent = dayCloseVisible ? 'Tagesabschluss' : phaseLabel(state.phase)
+  phaseEl.hidden = isConfirm || isThreshold || dayCloseVisible
+
+  const level =
+    isRunning || isExercise || waitTimerActive
+      ? fillLevel(remainingMs, state.phaseDurationMs)
+      : isSetup
+        ? 0.85
+        : 0.4
   shell.style.setProperty('--atmosphere-fill', String(level))
   const edgeFill = qs(root, 'desk-edge-fill')
-  edgeFill.style.transform = `scaleX(${level})`
-  atmo.hidden = isPick || isThreshold || isConfirm || checkInVisible || dayCloseVisible
+  edgeFill.style.transform = `scaleX(${isRunning || isExercise ? level : 1})`
+
+  // Wait screens: no edge bar under the headline — only shell atmosphere animation.
+  atmo.hidden =
+    isPick ||
+    isThreshold ||
+    isConfirm ||
+    checkInVisible ||
+    dayCloseVisible
   atmo.classList.toggle('is-timed', isRunning || isExercise)
   atmo.classList.toggle('is-words-hidden', wordsHidden)
   qs(root, 'btn-atmosphere-label').hidden = wordsHidden
+  atmoMin.hidden = false
   atmoMin.textContent = wordsHidden ? 'Text an' : 'nur Progress'
   atmoMin.setAttribute('aria-pressed', wordsHidden ? 'true' : 'false')
 
@@ -511,7 +571,10 @@ export function renderUi(
     atmoLabel.textContent = 'bereit'
   } else if (isFrozen) {
     atmoLabel.textContent = showFreezePrompt ? 'Call vorbei?' : 'Freeze'
-  } else if (atmosphereDetail === 'clock' && (isRunning || isExercise)) {
+  } else if (
+    (atmosphereDetail === 'clock' || isReturnOrientationActive()) &&
+    (isRunning || isExercise)
+  ) {
     atmoLabel.textContent = formatExactTime(remainingMs)
   } else if (atmosphereDetail === 'percent' && (isRunning || isExercise)) {
     atmoLabel.textContent = formatRemainingPercent(remainingMs, state.phaseDurationMs)
@@ -532,12 +595,6 @@ export function renderUi(
     muteHint.hidden = true
   }
 
-  if (state.endedPhase) {
-    setButtonLabel(btnRise, nextPhaseVerb(state.endedPhase))
-  } else {
-    setButtonLabel(btnRise, 'Tisch hoch')
-  }
-
   const ambientMot = MOTIVATIONS.find((m) => m.id === state.ambientMotivationId)
   if (isRunning && ambientMot?.kind === 'north' && !compact && !dayCloseVisible) {
     ambient.hidden = false
@@ -548,7 +605,7 @@ export function renderUi(
   }
 
   if (dayCloseVisible) {
-    hint.textContent = 'Kurzer Blick auf den Tag — der Tisch hat mitgehalten.'
+    // hint hidden — story + stats carry the message
   } else if (checkInVisible) {
     qs(root, 'check-in-q').textContent =
       state.phase === 'stand' ? 'Noch am Stehen?' : 'Noch am Tisch?'
@@ -597,11 +654,6 @@ export function renderUi(
       : 'Kurz. Erledigt, wenn du fertig bist.'
   } else if (approaching) {
     hint.textContent = 'Gleich. Der Tisch meldet sich — kein Überraschungsalarm.'
-  } else if (isConfirm) {
-    const copy = confirmCopy(state.endedPhase)
-    qs(root, 'confirm-lead').textContent = copy.lead
-    qs(root, 'confirm-sub').textContent = copy.sub
-    hint.textContent = 'Ein Tap reicht. (Du kannst auch später bestätigen.)'
   } else {
     hint.textContent = state.demo
       ? 'Demo — Atmosphäre, Moment, Tisch.'
@@ -610,7 +662,19 @@ export function renderUi(
         : 'Der Tisch hält den Rhythmus. Du entscheidest die Wechsel.'
   }
 
-  if (wordsHidden && (isRunning || isExercise || isFrozen) && !checkInVisible && !dayCloseVisible) {
+  if (isConfirm) {
+    const copy = confirmCopy(state.endedPhase)
+    qs(root, 'confirm-lead').textContent = copy.lead
+    qs(root, 'confirm-sub').textContent = copy.sub
+    setButtonLabel(qs(root, 'btn-confirm-desk'), copy.yes)
+  }
+
+  if (
+    isConfirm ||
+    isThreshold ||
+    dayCloseVisible ||
+    (wordsHidden && (isRunning || isExercise || isFrozen) && !checkInVisible && !dayCloseVisible)
+  ) {
     hint.hidden = true
   } else {
     hint.hidden = false

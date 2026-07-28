@@ -16,7 +16,6 @@ export const DEMO_FREEZE_EXTEND_MS = 10 * SEC
 
 export function nextActivePhase(phase: ActivePhase): ActivePhase {
   if (phase === 'sit') return 'stand'
-  if (phase === 'stand') return 'reset'
   return 'sit'
 }
 
@@ -41,7 +40,7 @@ export function phaseLabel(
     case 'threshold':
       return 'Tisch'
     case 'confirm':
-      return 'Beweis'
+      return 'Bestätigen'
     case 'pick':
       return 'Moment'
     case 'exercise':
@@ -57,43 +56,33 @@ export function phaseLabel(
 
 export function nextPhaseVerb(phase: ActivePhase): string {
   if (phase === 'sit') return 'Tisch hoch'
-  if (phase === 'stand') return 'Reset'
   return 'Wieder setzen'
 }
 
 export function confirmCopy(ended: ActivePhase | null): { lead: string; sub: string; yes: string } {
-  if (ended === 'stand') {
-    return {
-      lead: 'Reset erledigt?',
-      sub: 'Ein Tap — der Tisch merkt den Unterschied zum reinen Timer-Klick.',
-      yes: 'Erledigt',
-    }
-  }
-  if (ended === 'reset') {
+  if (ended === 'stand' || ended === 'reset') {
     return {
       lead: 'Wieder gesetzt?',
-      sub: 'Kurzer Beweis, dass der Wechsel echt war.',
+      sub: 'Bestätigen — oder einfach weiter.',
       yes: 'Gesetzt',
     }
   }
   return {
     lead: 'Tisch steht?',
-    sub: 'Ohne Bestätigung zählt die Runde nicht als echt. Ein Tap reicht.',
+    sub: 'Bestätigen — oder einfach weiter.',
     yes: 'Tisch steht',
   }
 }
 
 export function thresholdLead(ended: ActivePhase | null): string {
   if (ended === 'sit') return 'Tisch will hoch.'
-  if (ended === 'stand') return 'Tisch wartet auf Reset.'
-  if (ended === 'reset') return 'Wieder setzen?'
+  if (ended === 'stand' || ended === 'reset') return 'Wieder setzen?'
   return 'Tisch wartet.'
 }
 
 export function thresholdSub(ended: ActivePhase | null): string {
-  if (ended === 'sit') return 'Kurz bewegen — oder einfach stehen.'
-  if (ended === 'stand') return 'Kurze Reset-Phase. Kein Moment nötig.'
-  if (ended === 'reset') return 'Kurz bewegen — oder direkt setzen.'
+  if (ended === 'sit') return 'Kurz bewegen — oder gleich stehen.'
+  if (ended === 'stand' || ended === 'reset') return 'Kurz bewegen — oder gleich setzen.'
   return 'Du musst nichts beweisen. Wähl den Weg, der heute geht.'
 }
 
@@ -105,4 +94,15 @@ export function pickLead(pendingNext: ActivePhase | null): string {
 export function skipMomentLabel(pendingNext: ActivePhase | null): string {
   if (pendingNext === 'sit') return 'Heute reicht Sitzen'
   return 'Heute reicht Stehen'
+}
+
+/** Direct path at threshold — matches „oder direkt setzen/stehen“. */
+export function thresholdSkipLabel(pendingNext: ActivePhase | null): string {
+  if (pendingNext === 'sit') return 'Einfach setzen'
+  return 'Einfach stehen'
+}
+
+export function thresholdRiseLabel(ended: ActivePhase | null): string {
+  if (ended === 'sit' || ended === 'stand' || ended === 'reset') return 'Kurz bewegen'
+  return 'Weiter'
 }

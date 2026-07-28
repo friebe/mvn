@@ -6,10 +6,8 @@ export type ShortcutId =
   | 'resume'
   | 'rise'
   | 'lazyPath'
-  | 'freezePath'
   | 'skipStanding'
   | 'confirmDesk'
-  | 'confirmLater'
   | 'afterplay'
   | 'extendFreeze'
   | 'doneMoment'
@@ -31,16 +29,20 @@ export interface ShortcutDef {
 
 export const SHORTCUTS: ShortcutDef[] = [
   { id: 'start', keys: ['Enter', ' '], label: '↵', action: 'Start', context: 'Bereit' },
-  { id: 'rise', keys: ['Enter', ' '], label: '↵', action: 'Tisch hoch / Weiter', context: 'Schwelle' },
+  { id: 'rise', keys: ['Enter', ' '], label: '↵', action: 'Kurz bewegen / Reset', context: 'Schwelle' },
+  {
+    id: 'skipStanding',
+    keys: ['s', 'S'],
+    label: 'S',
+    action: 'Einfach setzen / Heute reicht',
+    context: 'Schwelle / Moment wählen',
+  },
   { id: 'lazyPath', keys: ['l', 'L'], label: 'L', action: 'Lazy weiter', context: 'Schwelle' },
-  { id: 'freezePath', keys: ['f', 'F'], label: 'F', action: 'Freeze', context: 'Schwelle' },
   { id: 'pick1', keys: ['1'], label: '1', action: 'Moment 1', context: 'Moment wählen' },
   { id: 'pick2', keys: ['2'], label: '2', action: 'Moment 2', context: 'Moment wählen' },
   { id: 'pick3', keys: ['3'], label: '3', action: 'Moment 3', context: 'Moment wählen' },
-  { id: 'skipStanding', keys: ['s', 'S'], label: 'S', action: 'Heute reicht', context: 'Moment wählen / Übung' },
-  { id: 'freeze', keys: ['f', 'F'], label: 'F', action: 'Freeze', context: 'Laufend / Moment wählen' },
-  { id: 'confirmDesk', keys: ['Enter', ' '], label: '↵', action: 'Tisch steht', context: 'Bestätigen' },
-  { id: 'confirmLater', keys: ['Escape'], label: 'Esc', action: 'Später', context: 'Bestätigen' },
+  { id: 'freeze', keys: ['f', 'F'], label: 'F', action: 'Freeze', context: 'Sitzen / Stehen / Reset' },
+  { id: 'confirmDesk', keys: ['Enter', ' '], label: '↵', action: 'Bestätigen', context: 'Bestätigen' },
   { id: 'doneMoment', keys: ['Enter', ' '], label: '↵', action: 'Erledigt', context: 'Moment' },
   { id: 'reroll', keys: ['r', 'R'], label: 'R', action: 'Anderer Moment', context: 'Moment' },
   { id: 'resume', keys: ['Enter', ' '], label: '↵', action: 'Weiter', context: 'Freeze' },
@@ -83,19 +85,18 @@ export function availableShortcuts(ctx: ShortcutContext): Set<ShortcutId> {
   if (phase === 'setup') {
     active.add('start')
   } else if (phase === 'threshold') {
+    const momentChoice = state.endedPhase === 'sit' || state.endedPhase === 'stand' || state.endedPhase === 'reset'
+    if (momentChoice) active.add('skipStanding')
     active.add('rise')
     active.add('lazyPath')
-    active.add('freezePath')
   } else if (phase === 'pick') {
     const count = state.momentChoiceIds?.length ?? 0
     if (count >= 1) active.add('pick1')
     if (count >= 2) active.add('pick2')
     if (count >= 3) active.add('pick3')
     active.add('skipStanding')
-    active.add('freeze')
   } else if (phase === 'confirm') {
     active.add('confirmDesk')
-    active.add('confirmLater')
   } else if (phase === 'frozen') {
     if (showFreezePrompt) {
       active.add('afterplay')
@@ -151,9 +152,7 @@ export interface ShortcutHandlers {
   onToggleLazy: () => void
   onChooseRise: () => void
   onChooseLazyPath: () => void
-  onChooseFreezePath: () => void
   onConfirmDesk: () => void
-  onConfirmDeskLater: () => void
   onDismissDayClose: () => void
 }
 
@@ -186,17 +185,11 @@ export function bindShortcuts(
       case 'lazyPath':
         handlers.onChooseLazyPath()
         break
-      case 'freezePath':
-        handlers.onChooseFreezePath()
-        break
       case 'skipStanding':
         handlers.onSkipStanding()
         break
       case 'confirmDesk':
         handlers.onConfirmDesk()
-        break
-      case 'confirmLater':
-        handlers.onConfirmDeskLater()
         break
       case 'afterplay':
         handlers.onAfterplay()

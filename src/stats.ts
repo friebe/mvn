@@ -54,6 +54,37 @@ export interface StatsSummary {
   rounds: number
 }
 
+/** Hochgefahren, aber nicht bestätigt (Countdown ohne Tap). */
+export function unconfirmedRises(s: StatsSummary): number {
+  return Math.max(0, s.rise - s.rounds)
+}
+
+/** Tage mit irgendwelcher Nutzung im Store (für 7d / Gesamt). */
+export function activeDayCount(n?: number): number {
+  const store = loadStats()
+  const keys = Object.keys(store.days).filter((key) => {
+    const d = store.days[key]
+    if (!d) return false
+    return (
+      d.day_start > 0 ||
+      d.rise > 0 ||
+      d.desk_confirmed > 0 ||
+      d.sit_done > 0 ||
+      d.stand_done > 0 ||
+      d.ritual_done > 0 ||
+      d.ritual_skip > 0 ||
+      d.freeze_choice > 0 ||
+      d.freeze_manual > 0
+    )
+  })
+  if (n == null) return keys.length
+  const end = todayKey()
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - (n - 1))
+  const start = todayKey(startDate)
+  return keys.filter((k) => k >= start && k <= end).length
+}
+
 const STORAGE_KEY = 'mvn.stats.v1'
 
 function emptyDay(date: string): DayBucket {
@@ -204,26 +235,32 @@ export function buildDayCloseLine(s: StatsSummary): string {
     parts.push('Heute kaum Bewegung')
   }
   if (s.ritual_done > 0) parts.push(`${s.ritual_done}× Moment`)
-  if (s.ritual_skip > 0) parts.push(`${s.ritual_skip}× nur Stehen`)
+  if (s.ritual_skip > 0) parts.push(`${s.ritual_skip}× ohne Bewegung`)
   if (s.lazy_choice > 0) parts.push(`Lazy ${s.lazy_choice}×`)
   if (s.freeze_total > 0) parts.push(`${s.freeze_total}× Freeze wegen Call`)
   return `${parts.join(', ')}. Der Tisch hat mitgehalten — das zählt fürs Mitspielen.`
 }
 
-/** Short narrative for analytics hero. */
+/** Short narrative for analytics — no number dump (hero grid has the counts). */
 export function buildDayStory(s: StatsSummary): string {
   if (s.day_start === 0 && s.rounds === 0 && s.sit_done === 0) {
     return 'Noch kein Tag gestartet. Der Tisch wartet.'
   }
-  const bits: string[] = []
-  if (s.rounds > 0) bits.push(`${s.rounds} echte Hochfahrt${s.rounds === 1 ? '' : 'en'}`)
-  else if (s.rise > 0) bits.push(`${s.rise}× angesetzt`)
-  if (s.freeze_total > 0) bits.push(`${s.freeze_total}× Freeze`)
-  if (s.lazy_choice > 0) bits.push('Lazy unterwegs')
-  if (s.ritual_done > 0 && s.ritual_skip === 0) bits.push('Momente mitgemacht')
-  else if (s.ritual_skip > s.ritual_done) bits.push('öfter nur gestanden')
-  if (bits.length === 0) return 'Der Tag läuft. Noch keine Wechsel — ok.'
-  return bits.join(' · ') + '.'
+  const open = unconfirmedRises(s)
+  if (s.ritual_skip > 0 && s.ritual_skip >= s.ritual_done) {
+    return 'Oft direkt weiter — ohne kurzen Moment dazwischen.'
+  }
+  if (open > 0) {
+    return 'Oft hochgefahren — Bestätigung manchmal ausgelassen.'
+  }
+  if (s.rounds > 0 && s.ritual_done > s.ritual_skip) {
+    return 'Wechsel bestätigt und Momente mitgenommen.'
+  }
+  if (s.rounds > 0) return 'Tisch-Wechsel bestätigt — der Rhythmus hat gehalten.'
+  if (s.rise > 0) return 'Tisch hoch angesetzt — oft ohne Bestätigung weiter.'
+  if (s.freeze_total > 0) return 'Calls unterbrochen den Flow — Freeze hat geschützt.'
+  if (s.lazy_choice > 0) return 'Lazy Mode war im Spiel.'
+  return 'Der Tag läuft. Noch keine Wechsel — ok.'
 }
 
 export function clearStats(): void {

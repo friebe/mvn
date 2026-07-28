@@ -12,7 +12,6 @@ import {
 } from './preferences'
 import { appPath } from './paths'
 import {
-  RESET_OPTIONS,
   SIT_OPTIONS,
   STAND_OPTIONS,
   intervalSummary,
@@ -25,7 +24,7 @@ import {
 } from './shortcuts'
 import type { EnergyMode } from './state'
 
-type IntervalPhase = 'sit' | 'stand' | 'reset'
+type IntervalPhase = 'sit' | 'stand'
 
 function intervalSelect(
   mode: EnergyMode,
@@ -111,7 +110,9 @@ function render(): void {
 
       <section class="settings-group" aria-label="Intervalle">
         <h2 class="settings-group-title">Intervalle</h2>
-        <p class="settings-hint">Gilt ab der nächsten Phase. Im Demo-Modus gelten Kurzzeiten.</p>
+        <p class="settings-hint">
+          Sitzen und Stehen. Beim Wechsel gibt’s jeweils einen kurzen Moment — oder direkt weiter.
+        </p>
 
         <div class="interval-block">
           <h3 class="interval-mode">High Mode</h3>
@@ -127,12 +128,6 @@ function render(): void {
               <p class="setting-label">Stehen</p>
             </div>
             ${intervalSelect('high', 'stand', STAND_OPTIONS.high, intervals)}
-          </div>
-          <div class="setting-row">
-            <div class="setting-copy">
-              <p class="setting-label">Reset</p>
-            </div>
-            ${intervalSelect('high', 'reset', RESET_OPTIONS.high, intervals)}
           </div>
         </div>
 
@@ -150,12 +145,6 @@ function render(): void {
               <p class="setting-label">Stehen</p>
             </div>
             ${intervalSelect('lazy', 'stand', STAND_OPTIONS.lazy, intervals)}
-          </div>
-          <div class="setting-row">
-            <div class="setting-copy">
-              <p class="setting-label">Reset</p>
-            </div>
-            ${intervalSelect('lazy', 'reset', RESET_OPTIONS.lazy, intervals)}
           </div>
         </div>
       </section>

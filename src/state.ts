@@ -85,6 +85,9 @@ export const FORESHADOW_RATIO = 0.1
 export const CHECKIN_RATIO = 0.5
 export const CHECKIN_TIMEOUT_MS = 60 * 1000
 export const DEMO_CHECKIN_TIMEOUT_MS = 8 * 1000
+/** Auto-advance to moment pick at threshold unless user opts out */
+export const THRESHOLD_MOMENT_MS = 15 * 1000
+export const DEMO_THRESHOLD_MOMENT_MS = 5 * 1000
 
 export function defaultState(): AppState {
   return {

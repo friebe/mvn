@@ -11,10 +11,12 @@ import {
   CHECKIN_RATIO,
   CHECKIN_TIMEOUT_MS,
   DEMO_CHECKIN_TIMEOUT_MS,
+  DEMO_THRESHOLD_MOMENT_MS,
   EXERCISE_MS,
   FORESHADOW_RATIO,
   FREEZE_EXTEND_MS,
   FREEZE_PROMPT_MS,
+  THRESHOLD_MOMENT_MS,
   type ActivePhase,
   type AppState,
   type EnergyMode,
@@ -32,6 +34,7 @@ import { getMoment, pickMoment, pickMomentCards, rememberId } from './exercises'
 import { pickAmbient, pickMotivation, rememberMotivation } from './motivation'
 import { notifyPhase } from './notify'
 import { buildDayCloseLine, recordStat, summarizeToday, todayKey } from './stats'
+import { isLocalDebugHost } from './debug-host'
 
 export type TimerListener = (
   state: AppState,
@@ -44,6 +47,62 @@ let state: AppState
 let tickId: number | null = null
 let listeners: TimerListener[] = []
 let motivationPickCount = 0
+
+/** Localhost-only: freeze wall-clock deadlines for screen debugging. */
+let debugPaused = false
+let debugPausedRemaining: number | null = null
+let debugPausedAt: number | null = null
+const pauseListeners = new Set<() => void>()
+
+export function isTimerPaused(): boolean {
+  return debugPaused
+}
+
+export function subscribeTimerPause(fn: () => void): () => void {
+  pauseListeners.add(fn)
+  return () => pauseListeners.delete(fn)
+}
+
+function emitPauseChange(): void {
+  for (const fn of pauseListeners) fn()
+}
+
+function shiftDeadlines(deltaMs: number): void {
+  if (deltaMs <= 0) return
+  state = {
+    ...state,
+    phaseEndsAt: state.phaseEndsAt != null ? state.phaseEndsAt + deltaMs : null,
+    checkInAt: state.checkInAt != null ? state.checkInAt + deltaMs : null,
+    checkInShownAt: state.checkInShownAt != null ? state.checkInShownAt + deltaMs : null,
+    freezeExtendUntil: state.freezeExtendUntil != null ? state.freezeExtendUntil + deltaMs : null,
+    frozenAt: state.frozenAt != null ? state.frozenAt + deltaMs : null,
+  }
+}
+
+export function setTimerPaused(paused: boolean): void {
+  if (!isLocalDebugHost()) return
+  if (paused === debugPaused) {
+    emit()
+    return
+  }
+  if (paused) {
+    debugPaused = true
+    debugPausedRemaining = remainingMs()
+    debugPausedAt = Date.now()
+  } else {
+    const delta = Date.now() - (debugPausedAt ?? Date.now())
+    shiftDeadlines(delta)
+    debugPaused = false
+    debugPausedRemaining = null
+    debugPausedAt = null
+  }
+  emitPauseChange()
+  emit()
+}
+
+export function toggleTimerPaused(): void {
+  setTimerPaused(!debugPaused)
+}
 
 export function getState(): AppState {
   return state
@@ -64,16 +123,18 @@ function emit(): void {
 }
 
 function remainingMs(): number {
+  if (debugPaused && debugPausedRemaining != null) {
+    return debugPausedRemaining
+  }
   if (state.phase === 'frozen') {
     return state.frozenRemainingMs ?? 0
   }
-  if (
-    state.phase === 'threshold' ||
-    state.phase === 'setup' ||
-    state.phase === 'pick' ||
-    state.phase === 'confirm'
-  ) {
+  if (state.phase === 'setup' || state.phase === 'pick') {
     return 0
+  }
+  if (state.phase === 'threshold' || state.phase === 'confirm') {
+    if (state.phaseEndsAt == null) return 0
+    return Math.max(0, state.phaseEndsAt - Date.now())
   }
   if (state.phaseEndsAt == null) return 0
   return Math.max(0, state.phaseEndsAt - Date.now())
@@ -104,6 +165,53 @@ function checkInTimeoutMs(): number {
   return state.demo ? DEMO_CHECKIN_TIMEOUT_MS : CHECKIN_TIMEOUT_MS
 }
 
+function thresholdMomentMs(): number {
+  return state.demo ? DEMO_THRESHOLD_MOMENT_MS : THRESHOLD_MOMENT_MS
+}
+
+function thresholdMomentChoice(ended: ActivePhase | null = state.endedPhase): boolean {
+  // Desk up (sit→stand) and desk down (stand→sit). Legacy reset phase also gets a moment.
+  return ended === 'sit' || ended === 'stand' || ended === 'reset'
+}
+
+function clearThresholdMomentTimer(): void {
+  if (state.phaseEndsAt == null && state.phaseDurationMs == null) return
+  state = { ...state, phaseEndsAt: null, phaseDurationMs: null }
+}
+
+function autoThresholdToMoment(): void {
+  if (state.phase !== 'threshold' || !thresholdMomentChoice()) return
+  recordStat('rise')
+  clearThresholdMomentTimer()
+  enterPick()
+}
+
+function enterConfirm(): void {
+  const duration = thresholdMomentMs()
+  clearAttention()
+  state = {
+    ...state,
+    phase: 'confirm',
+    phaseEndsAt: Date.now() + duration,
+    phaseDurationMs: duration,
+    foreshadowFired: false,
+    currentExerciseId: null,
+    currentMotivationId: null,
+    momentChoiceIds: null,
+    resumeToThreshold: false,
+    resumeToConfirm: false,
+  }
+  signalAttention('threshold', 'Bestätigen', 'Tisch steht? Nur der Tap zählt.')
+  emit()
+}
+
+/** Default: continue without counting desk_confirmed. */
+function autoConfirmSkip(): void {
+  if (state.phase !== 'confirm') return
+  clearAttention()
+  enterActivePhase(state.pendingNextPhase ?? 'sit', { soft: true })
+}
+
 function shouldShowFreezePrompt(): boolean {
   if (state.phase !== 'frozen' || state.frozenAt == null) return false
   if (state.freezeExtendUntil != null && Date.now() < state.freezeExtendUntil) return false
@@ -113,6 +221,20 @@ function shouldShowFreezePrompt(): boolean {
 export function initTimer(initial: AppState): void {
   state = initial
   motivationPickCount = initial.recentMotivationIds.length
+  if (
+    state.phase === 'threshold' &&
+    state.phaseEndsAt != null &&
+    Date.now() >= state.phaseEndsAt &&
+    thresholdMomentChoice()
+  ) {
+    autoThresholdToMoment()
+  } else if (
+    state.phase === 'confirm' &&
+    state.phaseEndsAt != null &&
+    Date.now() >= state.phaseEndsAt
+  ) {
+    autoConfirmSkip()
+  }
   startTicking()
   emit()
 }
@@ -125,13 +247,28 @@ function startTicking(): void {
 }
 
 function onTick(): void {
-  if (
-    state.phase === 'setup' ||
-    state.phase === 'frozen' ||
-    state.phase === 'threshold' ||
-    state.phase === 'pick' ||
-    state.phase === 'confirm'
-  ) {
+  if (debugPaused) {
+    emit()
+    return
+  }
+
+  if (state.phase === 'setup' || state.phase === 'frozen' || state.phase === 'pick') {
+    emit()
+    return
+  }
+
+  if (state.phase === 'threshold') {
+    if (state.phaseEndsAt != null && Date.now() >= state.phaseEndsAt) {
+      autoThresholdToMoment()
+    }
+    emit()
+    return
+  }
+
+  if (state.phase === 'confirm') {
+    if (state.phaseEndsAt != null && Date.now() >= state.phaseEndsAt) {
+      autoConfirmSkip()
+    }
     emit()
     return
   }
@@ -230,20 +367,7 @@ function onPhaseComplete(): void {
     }
 
     if (state.pendingNextPhase === 'stand') {
-      state = {
-        ...state,
-        phase: 'confirm',
-        phaseEndsAt: null,
-        phaseDurationMs: null,
-        foreshadowFired: false,
-        currentExerciseId: null,
-        currentMotivationId: null,
-        momentChoiceIds: null,
-        resumeToThreshold: false,
-        resumeToConfirm: false,
-      }
-      signalAttention('threshold', 'Beweis', 'Tisch steht? Ein Tap reicht.')
-      emit()
+      enterConfirm()
       return
     }
 
@@ -283,11 +407,14 @@ function enterThreshold(ended: ActivePhase): void {
   else if (ended === 'stand') recordStat('stand_done')
   else recordStat('reset_done')
 
+  const momentChoice = thresholdMomentChoice(ended)
+  const duration = momentChoice ? thresholdMomentMs() : null
+
   state = {
     ...state,
     phase: 'threshold',
-    phaseEndsAt: null,
-    phaseDurationMs: null,
+    phaseEndsAt: momentChoice ? Date.now() + duration! : null,
+    phaseDurationMs: duration,
     foreshadowFired: false,
     endedPhase: ended,
     pendingNextPhase: next,
@@ -303,7 +430,7 @@ function enterThreshold(ended: ActivePhase): void {
   signalAttention(
     'threshold',
     'Tisch',
-    ended === 'sit' ? 'Tisch will hoch.' : 'Tisch wartet.',
+    ended === 'sit' ? 'Tisch will hoch.' : 'Wieder setzen?',
   )
   emit()
 }
@@ -396,42 +523,28 @@ function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): vo
   emit()
 }
 
-/** Threshold → next phase without moment pick (stand → reset). */
+/** Threshold → next phase without moment (or after skip). */
 function advanceThresholdNext(): void {
+  clearThresholdMomentTimer()
   clearAttention()
   const next = state.pendingNextPhase ?? 'sit'
   if (next === 'stand') {
-    state = {
-      ...state,
-      phase: 'confirm',
-      phaseEndsAt: null,
-      phaseDurationMs: null,
-      foreshadowFired: false,
-      currentExerciseId: null,
-      currentMotivationId: null,
-      momentChoiceIds: null,
-      resumeToThreshold: false,
-      resumeToConfirm: false,
-    }
-    signalAttention('threshold', 'Beweis', 'Tisch steht? Ein Tap reicht.')
-    emit()
+    enterConfirm()
     return
   }
   enterActivePhase(next, { soft: true })
 }
 
-/** Threshold primary — moment only on desk up (sit) or down (reset). */
+/** Threshold primary — moment on desk up and desk down. */
 export function chooseRise(): void {
   if (state.phase !== 'threshold') return
-  const ended = state.endedPhase
-
-  if (ended === 'sit' || ended === 'reset') {
-    recordStat('rise')
-    enterPick()
+  if (!thresholdMomentChoice()) {
+    advanceThresholdNext()
     return
   }
-
-  advanceThresholdNext()
+  recordStat('rise')
+  clearThresholdMomentTimer()
+  enterPick()
 }
 
 export function chooseMoment(momentId: string): void {
@@ -440,8 +553,14 @@ export function chooseMoment(momentId: string): void {
   enterRitualWithMoment(momentId)
 }
 
-/** Skip ritual — standing is enough */
+/** Skip ritual — at threshold (direct) or after opening the moment pick. */
 export function skipStanding(): void {
+  if (state.phase === 'threshold') {
+    if (!thresholdMomentChoice()) return
+    recordStat('ritual_skip')
+    advanceThresholdNext()
+    return
+  }
   if (state.phase !== 'pick' && state.phase !== 'exercise') return
   recordStat('ritual_skip')
   clearAttention()
@@ -453,17 +572,7 @@ export function skipStanding(): void {
     currentMotivationId: null,
   }
   if (next === 'stand') {
-    state = {
-      ...state,
-      phase: 'confirm',
-      phaseEndsAt: null,
-      phaseDurationMs: null,
-      foreshadowFired: false,
-      resumeToThreshold: false,
-      resumeToConfirm: false,
-    }
-    signalAttention('threshold', 'Beweis', 'Tisch steht? Ein Tap reicht.')
-    emit()
+    enterConfirm()
     return
   }
   enterActivePhase(next, { soft: true })
@@ -506,47 +615,15 @@ export function confirmCheckIn(): void {
 export function chooseLazyPath(): void {
   if (state.phase !== 'threshold') return
   recordStat('lazy_choice')
+  clearThresholdMomentTimer()
   clearAttention()
   const next = state.pendingNextPhase ?? 'sit'
   state = { ...state, mode: 'lazy' }
   if (next === 'stand') {
-    state = {
-      ...state,
-      phase: 'confirm',
-      phaseEndsAt: null,
-      phaseDurationMs: null,
-      foreshadowFired: false,
-      currentExerciseId: null,
-      currentMotivationId: null,
-      momentChoiceIds: null,
-      resumeToThreshold: false,
-      resumeToConfirm: false,
-    }
-    signalAttention('threshold', 'Beweis', 'Tisch steht? Ein Tap reicht.')
-    emit()
+    enterConfirm()
     return
   }
   enterActivePhase(next, { soft: true })
-}
-
-/** Threshold → Freeze (call) */
-export function chooseFreezePath(): void {
-  if (state.phase !== 'threshold') return
-  recordStat('freeze_choice')
-  clearAttention()
-  state = {
-    ...state,
-    phase: 'frozen',
-    phaseEndsAt: null,
-    frozenRemainingMs: 0,
-    frozenAt: Date.now(),
-    freezeExtendUntil: null,
-    frozenPhase: null,
-    resumeToThreshold: true,
-    momentChoiceIds: null,
-  }
-  setBaseTitle('MVN · Freeze')
-  emit()
 }
 
 export function startDay(mode: EnergyMode = state.mode): void {
@@ -610,12 +687,6 @@ export function confirmDesk(): void {
   enterActivePhase(state.pendingNextPhase ?? 'sit', { soft: true })
 }
 
-export function confirmDeskLater(): void {
-  if (state.phase !== 'confirm') return
-  clearAttention()
-  enterActivePhase(state.pendingNextPhase ?? 'sit', { soft: true })
-}
-
 export function setMode(mode: EnergyMode): void {
   if (state.mode === mode) return
   state = { ...state, mode }
@@ -652,44 +723,14 @@ export function setNotificationsEnabled(enabled: boolean): void {
 
 export function freeze(): void {
   if (state.phase === 'frozen' || state.phase === 'setup') return
-
-  if (state.phase === 'threshold') {
-    chooseFreezePath()
-    return
-  }
-
-  if (state.phase === 'pick') {
-    recordStat('freeze_choice')
-    clearAttention()
-    state = {
-      ...state,
-      phase: 'frozen',
-      phaseEndsAt: null,
-      frozenRemainingMs: 0,
-      frozenAt: Date.now(),
-      freezeExtendUntil: null,
-      frozenPhase: null,
-      resumeToThreshold: true,
-      momentChoiceIds: null,
-    }
-    setBaseTitle('MVN · Freeze')
-    emit()
+  if (state.phase !== 'sit' && state.phase !== 'stand' && state.phase !== 'reset') {
     return
   }
 
   recordStat('freeze_manual')
 
-  const rem =
-    state.phase === 'exercise' ||
-    state.phase === 'sit' ||
-    state.phase === 'stand' ||
-    state.phase === 'reset'
-      ? remainingMs()
-      : 0
-  const frozenPhase: ActivePhase | null =
-    state.phase === 'sit' || state.phase === 'stand' || state.phase === 'reset'
-      ? state.phase
-      : state.pendingNextPhase
+  const rem = remainingMs()
+  const frozenPhase: ActivePhase = state.phase
 
   state = {
     ...state,

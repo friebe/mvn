@@ -4,12 +4,14 @@ import '@fontsource/source-sans-3/600.css'
 import './analytics.css'
 
 import {
+  activeDayCount,
   buildDayStory,
   clearStats,
   lastDayBuckets,
   summarizeAll,
   summarizeLastDays,
   summarizeToday,
+  unconfirmedRises,
   type StatsSummary,
 } from './stats'
 import { appPath } from './paths'
@@ -45,6 +47,9 @@ function render(period: Period): void {
   const spark = lastDayBuckets(7)
   const maxRounds = Math.max(1, ...spark.map((d) => d.sit_done))
   const empty = isEmpty(s)
+  const open = unconfirmedRises(s)
+  const activeDays =
+    period === 'today' ? null : period === '7d' ? activeDayCount(7) : activeDayCount()
 
   root.innerHTML = `
     <div class="analytics">
@@ -91,10 +96,10 @@ function render(period: Period): void {
         </nav>
       </header>
 
-      <div class="period-tabs" role="tablist">
-        <button type="button" data-period="today" class="${period === 'today' ? 'is-on' : ''}">Heute</button>
-        <button type="button" data-period="7d" class="${period === '7d' ? 'is-on' : ''}">7 Tage</button>
-        <button type="button" data-period="all" class="${period === 'all' ? 'is-on' : ''}">Gesamt</button>
+      <div class="period-tabs" role="tablist" aria-label="Zeitraum">
+        <button type="button" role="tab" data-period="today" class="${period === 'today' ? 'is-on' : ''}" aria-selected="${period === 'today'}">Heute</button>
+        <button type="button" role="tab" data-period="7d" class="${period === '7d' ? 'is-on' : ''}" aria-selected="${period === '7d'}">7 Tage</button>
+        <button type="button" role="tab" data-period="all" class="${period === 'all' ? 'is-on' : ''}" aria-selected="${period === 'all'}">Gesamt</button>
       </div>
 
       ${
@@ -104,23 +109,34 @@ function render(period: Period): void {
       }
 
       <section class="hero-grid" aria-label="Kernzahlen">
-        <div class="stat" data-tone="stand">
-          <p class="stat-value">${s.rounds}</p>
-          <p class="stat-label">Tisch bestätigt</p>
-        </div>
         <div class="stat" data-tone="sit">
           <p class="stat-value">${s.rise}</p>
           <p class="stat-label">Tisch hoch</p>
         </div>
-        <div class="stat">
-          <p class="stat-value">${s.ritual_done}</p>
-          <p class="stat-label">Momente</p>
+        <div class="stat" data-tone="stand">
+          <p class="stat-value">${s.rounds}</p>
+          <p class="stat-label">Bestätigt</p>
         </div>
+        <div class="stat" data-tone="gap">
+          <p class="stat-value">${open}</p>
+          <p class="stat-label">Ohne Beweis</p>
+        </div>
+        <div class="stat" data-tone="gap">
+          <p class="stat-value">${s.ritual_skip}</p>
+          <p class="stat-label">Ohne Bewegung</p>
+        </div>
+      </section>
+
+      ${
+        s.freeze_total > 0
+          ? `<section class="hero-grid hero-grid-secondary" aria-label="Freeze">
         <div class="stat" data-tone="freeze">
           <p class="stat-value">${s.freeze_total}</p>
           <p class="stat-label">Freeze</p>
         </div>
-      </section>
+      </section>`
+          : ''
+      }
 
       <section>
         <h2 class="section-title">Letzte 7 Tage</h2>
@@ -138,18 +154,22 @@ function render(period: Period): void {
         </div>
       </section>
 
-      <section>
-        <h2 class="section-title">Details</h2>
-        <div class="detail-row"><span>Tage gestartet</span><span>${s.day_start}</span></div>
-        <div class="detail-row"><span>Tagesabschluss</span><span>${s.day_close}</span></div>
-        <div class="detail-row"><span>Sitzphasen beendet</span><span>${s.sit_done}</span></div>
-        <div class="detail-row"><span>Stehphasen beendet</span><span>${s.stand_done}</span></div>
-        <div class="detail-row"><span>Reset-Phasen beendet</span><span>${s.reset_done}</span></div>
-        <div class="detail-row"><span>Lazy gewählt</span><span>${s.lazy_choice}</span></div>
-        <div class="detail-row"><span>Momente übersprungen</span><span>${s.ritual_skip}</span></div>
-        <div class="detail-row"><span>Freeze an Schwelle</span><span>${s.freeze_choice}</span></div>
-        <div class="detail-row"><span>Freeze manuell</span><span>${s.freeze_manual}</span></div>
-      </section>
+      ${
+        s.day_start > 0 ||
+        s.day_close > 0 ||
+        s.lazy_choice > 0 ||
+        s.ritual_done > 0 ||
+        (activeDays != null && activeDays > 0)
+          ? `<section aria-label="Weitere Zahlen">
+        <h2 class="section-title">Weitere</h2>
+        ${activeDays != null && activeDays > 0 ? `<div class="detail-row"><span>Aktive Tage</span><span>${activeDays}</span></div>` : ''}
+        ${s.day_start > 0 ? `<div class="detail-row"><span>Tage gestartet</span><span>${s.day_start}</span></div>` : ''}
+        ${s.day_close > 0 ? `<div class="detail-row"><span>Tagesabschluss</span><span>${s.day_close}</span></div>` : ''}
+        ${s.ritual_done > 0 ? `<div class="detail-row"><span>Momente erledigt</span><span>${s.ritual_done}</span></div>` : ''}
+        ${s.lazy_choice > 0 ? `<div class="detail-row"><span>Lazy gewählt</span><span>${s.lazy_choice}</span></div>` : ''}
+      </section>`
+          : ''
+      }
     </div>
   `
 

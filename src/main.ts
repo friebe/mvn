@@ -14,6 +14,7 @@ import {
 } from './pwa'
 import {
   bindCompactMode,
+  bindReturnOrientation,
   dismissDayCloseReward,
   isDayCloseRewardVisible,
   mountUi,
@@ -24,15 +25,14 @@ import {
   toggleAtmosphereWords,
 } from './ui'
 import { bindShortcuts } from './shortcuts'
+import { isLocalDebugHost } from './debug-host'
 import {
-  chooseFreezePath,
   chooseLazyPath,
   chooseMoment,
   chooseRise,
   completeMoment,
   confirmCheckIn,
   confirmDesk,
-  confirmDeskLater,
   extendFreeze,
   freeze,
   getState,
@@ -79,9 +79,7 @@ const shortcutHandlers = {
   },
   onChooseRise: () => chooseRise(),
   onChooseLazyPath: () => chooseLazyPath(),
-  onChooseFreezePath: () => chooseFreezePath(),
   onConfirmDesk: () => confirmDesk(),
-  onConfirmDeskLater: () => confirmDeskLater(),
   onDismissDayClose: () => {
     dismissDayCloseReward()
     refreshUi()
@@ -125,6 +123,10 @@ mountUi(app, {
 
 bindCompactMode(app)
 
+bindReturnOrientation(() => {
+  refreshUi()
+})
+
 function updateInstallBanner(): void {
   setInstallVisible(app, shouldShowInstallBanner())
 }
@@ -139,6 +141,10 @@ subscribe((state, remaining, showFreezePrompt, approaching) => {
 })
 
 initTimer(initial)
+
+if (isLocalDebugHost()) {
+  void import('./debug').then(({ mountDebugToolbar }) => mountDebugToolbar())
+}
 
 if ((params.get('demo') === '1' || params.get('demo') === 'true') && !getState().demo) {
   setDemo(true)
