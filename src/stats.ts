@@ -50,11 +50,11 @@ export interface StatsSummary {
   ritual_skip: number
   /** Freeze gesamt (Schwelle + manuell) */
   freeze_total: number
-  /** Echte Wechsel = Tisch bestätigt */
+  /** Echte Wechsel = Steh-Check-in bestätigt */
   rounds: number
 }
 
-/** Hochgefahren, aber nicht bestätigt (Countdown ohne Tap). */
+/** Hochgefahren, aber ohne späteren Steh-Check-in-Tap. */
 export function unconfirmedRises(s: StatsSummary): number {
   return Math.max(0, s.rise - s.rounds)
 }
@@ -226,9 +226,9 @@ export function lastDayBuckets(n: number): DayBucket[] {
 export function buildDayCloseLine(s: StatsSummary): string {
   const parts: string[] = []
   if (s.desk_confirmed > 0) {
-    parts.push(`${s.desk_confirmed}× hochgefahren`)
+    parts.push(`${s.desk_confirmed}× im Stehen bestätigt`)
   } else if (s.rise > 0) {
-    parts.push(`${s.rise}× Tisch hoch ohne Beweis`)
+    parts.push(`${s.rise}× Tisch hoch ohne Steh-Check`)
   } else if (s.sit_done > 0) {
     parts.push(`${s.sit_done} Sitzblöcke beendet`)
   } else {
@@ -251,13 +251,13 @@ export function buildDayStory(s: StatsSummary): string {
     return 'Oft direkt weiter — ohne kurzen Moment dazwischen.'
   }
   if (open > 0) {
-    return 'Oft hochgefahren — Bestätigung manchmal ausgelassen.'
+    return 'Oft hochgefahren — Steh-Check manchmal ausgelassen.'
   }
   if (s.rounds > 0 && s.ritual_done > s.ritual_skip) {
-    return 'Wechsel bestätigt und Momente mitgenommen.'
+    return 'Stehen bestätigt und Momente mitgenommen.'
   }
-  if (s.rounds > 0) return 'Tisch-Wechsel bestätigt — der Rhythmus hat gehalten.'
-  if (s.rise > 0) return 'Tisch hoch angesetzt — oft ohne Bestätigung weiter.'
+  if (s.rounds > 0) return 'Im Stehen bestätigt — der Rhythmus hat gehalten.'
+  if (s.rise > 0) return 'Tisch hoch angesetzt — Steh-Check oft ohne Tap.'
   if (s.freeze_total > 0) return 'Calls unterbrochen den Flow — Freeze hat geschützt.'
   if (s.lazy_choice > 0) return 'Lazy Mode war im Spiel.'
   return 'Der Tag läuft. Noch keine Wechsel — ok.'

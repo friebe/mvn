@@ -132,7 +132,7 @@ function remainingMs(): number {
   if (state.phase === 'setup' || state.phase === 'pick') {
     return 0
   }
-  if (state.phase === 'threshold' || state.phase === 'confirm') {
+  if (state.phase === 'threshold') {
     if (state.phaseEndsAt == null) return 0
     return Math.max(0, state.phaseEndsAt - Date.now())
   }
@@ -186,32 +186,6 @@ function autoThresholdToMoment(): void {
   enterPick()
 }
 
-function enterConfirm(): void {
-  const duration = thresholdMomentMs()
-  clearAttention()
-  state = {
-    ...state,
-    phase: 'confirm',
-    phaseEndsAt: Date.now() + duration,
-    phaseDurationMs: duration,
-    foreshadowFired: false,
-    currentExerciseId: null,
-    currentMotivationId: null,
-    momentChoiceIds: null,
-    resumeToThreshold: false,
-    resumeToConfirm: false,
-  }
-  signalAttention('threshold', 'Bestätigen', 'Tisch steht? Nur der Tap zählt.')
-  emit()
-}
-
-/** Default: continue without counting desk_confirmed. */
-function autoConfirmSkip(): void {
-  if (state.phase !== 'confirm') return
-  clearAttention()
-  enterActivePhase(state.pendingNextPhase ?? 'sit', { soft: true })
-}
-
 function shouldShowFreezePrompt(): boolean {
   if (state.phase !== 'frozen' || state.frozenAt == null) return false
   if (state.freezeExtendUntil != null && Date.now() < state.freezeExtendUntil) return false
@@ -219,6 +193,14 @@ function shouldShowFreezePrompt(): boolean {
 }
 
 export function initTimer(initial: AppState): void {
+  // Legacy: desk-confirm phase removed — resume into stand.
+  if ((initial.phase as string) === 'confirm') {
+    state = { ...initial, phase: 'setup' }
+    motivationPickCount = initial.recentMotivationIds.length
+    enterActivePhase('stand', { soft: true })
+    startTicking()
+    return
+  }
   state = initial
   motivationPickCount = initial.recentMotivationIds.length
   if (
@@ -228,12 +210,6 @@ export function initTimer(initial: AppState): void {
     thresholdMomentChoice()
   ) {
     autoThresholdToMoment()
-  } else if (
-    state.phase === 'confirm' &&
-    state.phaseEndsAt != null &&
-    Date.now() >= state.phaseEndsAt
-  ) {
-    autoConfirmSkip()
   }
   startTicking()
   emit()
@@ -260,14 +236,6 @@ function onTick(): void {
   if (state.phase === 'threshold') {
     if (state.phaseEndsAt != null && Date.now() >= state.phaseEndsAt) {
       autoThresholdToMoment()
-    }
-    emit()
-    return
-  }
-
-  if (state.phase === 'confirm') {
-    if (state.phaseEndsAt != null && Date.now() >= state.phaseEndsAt) {
-      autoConfirmSkip()
     }
     emit()
     return
@@ -363,11 +331,6 @@ function onPhaseComplete(): void {
 
     if (state.resumeAfterAfterplay) {
       finishAfterplay()
-      return
-    }
-
-    if (state.pendingNextPhase === 'stand') {
-      enterConfirm()
       return
     }
 
@@ -527,12 +490,7 @@ function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): vo
 function advanceThresholdNext(): void {
   clearThresholdMomentTimer()
   clearAttention()
-  const next = state.pendingNextPhase ?? 'sit'
-  if (next === 'stand') {
-    enterConfirm()
-    return
-  }
-  enterActivePhase(next, { soft: true })
+  enterActivePhase(state.pendingNextPhase ?? 'sit', { soft: true })
 }
 
 /** Threshold primary — moment on desk up and desk down. */
@@ -571,10 +529,6 @@ export function skipStanding(): void {
     currentExerciseId: null,
     currentMotivationId: null,
   }
-  if (next === 'stand') {
-    enterConfirm()
-    return
-  }
   enterActivePhase(next, { soft: true })
 }
 
@@ -601,6 +555,9 @@ export function rerollMoment(): void {
 
 export function confirmCheckIn(): void {
   if (state.checkInShownAt == null || state.checkInHandled) return
+  if (state.phase === 'stand') {
+    recordStat('desk_confirmed')
+  }
   state = {
     ...state,
     checkInHandled: true,
@@ -619,10 +576,6 @@ export function chooseLazyPath(): void {
   clearAttention()
   const next = state.pendingNextPhase ?? 'sit'
   state = { ...state, mode: 'lazy' }
-  if (next === 'stand') {
-    enterConfirm()
-    return
-  }
   enterActivePhase(next, { soft: true })
 }
 
@@ -661,7 +614,6 @@ export function resetDay(): string {
     freezeExtendUntil: null,
     frozenPhase: null,
     resumeToThreshold: false,
-    resumeToConfirm: false,
     resumeAfterAfterplay: false,
     startedAt: null,
     pendingNextPhase: null,
@@ -678,13 +630,6 @@ export function resetDay(): string {
   setBaseTitle('MVN')
   emit()
   return story
-}
-
-export function confirmDesk(): void {
-  if (state.phase !== 'confirm') return
-  recordStat('desk_confirmed')
-  clearAttention()
-  enterActivePhase(state.pendingNextPhase ?? 'sit', { soft: true })
 }
 
 export function setMode(mode: EnergyMode): void {

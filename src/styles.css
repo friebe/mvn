@@ -100,7 +100,6 @@ body {
 }
 
 .shell[data-phase='threshold'],
-.shell[data-phase='confirm'],
 .shell[data-phase='setup'] {
   --atmosphere-hue: var(--color-accent);
 }
@@ -399,7 +398,6 @@ body {
 }
 
 .shell[data-compact='true'] .threshold,
-.shell[data-compact='true'] .confirm,
 .shell[data-compact='true'] .freeze-prompt {
   padding: 0.25rem 0 0;
   border-top: none;
@@ -682,7 +680,6 @@ body {
 .threshold,
 .exercise,
 .freeze-prompt,
-.confirm,
 .pick,
 .check-in,
 .day-close-reward {
@@ -697,7 +694,6 @@ body {
 .install-banner[hidden],
 .threshold[hidden],
 .exercise[hidden],
-.confirm[hidden],
 .freeze-prompt[hidden],
 .pick[hidden],
 .check-in[hidden],
@@ -727,7 +723,6 @@ button[hidden] {
 }
 
 .threshold-actions,
-.confirm-actions,
 .freeze-actions,
 .exercise-actions,
 .pick-actions {

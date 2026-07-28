@@ -32,7 +32,6 @@ import {
   chooseRise,
   completeMoment,
   confirmCheckIn,
-  confirmDesk,
   extendFreeze,
   freeze,
   getState,
@@ -79,7 +78,6 @@ const shortcutHandlers = {
   },
   onChooseRise: () => chooseRise(),
   onChooseLazyPath: () => chooseLazyPath(),
-  onConfirmDesk: () => confirmDesk(),
   onDismissDayClose: () => {
     dismissDayCloseReward()
     refreshUi()

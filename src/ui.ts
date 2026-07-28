@@ -1,7 +1,16 @@
 import type { AppState } from './state'
 import { getMoment, kindLabel, MOMENTS } from './exercises'
 import { MOTIVATIONS } from './motivation'
-import { confirmCopy, phaseLabel, pickLead, skipMomentLabel, thresholdLead, thresholdRiseLabel, thresholdSkipLabel, thresholdSub } from './modes'
+import {
+  momentOrderHint,
+  phaseLabel,
+  pickLead,
+  skipMomentLabel,
+  thresholdLead,
+  thresholdRiseLabel,
+  thresholdSkipLabel,
+  thresholdSub,
+} from './modes'
 import { fillLevel, formatExactTime, formatRemainingPercent, softTimeLabel } from './atmosphere'
 import { intervalSummary, resolveIntervals } from './intervals'
 import { appPath } from './paths'
@@ -27,7 +36,6 @@ export interface UiHandlers {
   onDismissInstall: () => void
   onChooseRise: () => void
   onChooseLazyPath: () => void
-  onConfirmDesk: () => void
   onCloseDay: () => void
   onDismissDayClose: () => void
 }
@@ -279,17 +287,12 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             <p class="threshold-sub" id="threshold-sub">Kein Zwang. Wähl den Weg, der heute geht.</p>
           </section>
 
-          <section class="confirm" id="confirm" hidden>
-            <p class="threshold-lead" id="confirm-lead">Tisch steht?</p>
-            <p class="threshold-sub" id="confirm-sub">Bestätigen — oder einfach weiter.</p>
-          </section>
-
           <section class="freeze-prompt" id="freeze-prompt" hidden>
             <p class="freeze-q">Call vorbei?</p>
           </section>
 
           <section class="pick" id="pick" hidden>
-            <p class="pick-lead" id="pick-lead">Kurz bewegen, bevor du hochgehst.</p>
+            <p class="pick-lead" id="pick-lead">Tisch hochfahren und kurz bewegen.</p>
             <div class="moment-list" id="moment-cards"></div>
           </section>
 
@@ -327,9 +330,6 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             </div>
             <div class="row pick-actions" id="pick-actions" hidden>
               ${actionButton('btn-skip-standing', 'btn btn-primary', 'Heute reicht Stehen', 'skipStanding')}
-            </div>
-            <div class="row confirm-actions" id="confirm-actions" hidden>
-              ${actionButton('btn-confirm-desk', 'btn btn-primary', 'Tisch steht', 'confirmDesk')}
             </div>
             <div class="row freeze-actions" id="freeze-actions" hidden>
               ${actionButton('btn-afterplay', 'btn btn-primary', 'Call-Nachspiel', 'afterplay')}
@@ -375,7 +375,6 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   qs(root, 'btn-install-dismiss').addEventListener('click', handlers.onDismissInstall)
   qs(root, 'btn-rise').addEventListener('click', handlers.onChooseRise)
   qs(root, 'btn-lazy-path').addEventListener('click', handlers.onChooseLazyPath)
-  qs(root, 'btn-confirm-desk').addEventListener('click', handlers.onConfirmDesk)
   qs(root, 'btn-day-close-done').addEventListener('click', handlers.onDismissDayClose)
 
   qs(root, 'moment-cards').addEventListener('click', (e) => {
@@ -415,7 +414,6 @@ export function renderUi(
 ): void {
   const shell = root.querySelector('.shell') as HTMLElement
   const isSetup = state.phase === 'setup'
-  const isConfirm = state.phase === 'confirm'
   const isFrozen = state.phase === 'frozen'
   const isExercise = state.phase === 'exercise'
   const isPick = state.phase === 'pick'
@@ -428,8 +426,6 @@ export function renderUi(
     isThreshold &&
     (state.endedPhase === 'sit' || state.endedPhase === 'stand' || state.endedPhase === 'reset')
   const thresholdTimerActive = momentChoiceAtThreshold && state.phaseEndsAt != null
-  const confirmTimerActive = isConfirm && state.phaseEndsAt != null
-  const waitTimerActive = thresholdTimerActive || confirmTimerActive
 
   shell.dataset.phase = state.phase
   shell.dataset.mode = state.mode
@@ -441,8 +437,8 @@ export function renderUi(
   shell.dataset.wordsHidden = wordsHidden ? 'true' : 'false'
   shell.dataset.dayClose = dayCloseVisible ? 'true' : 'false'
   shell.dataset.returning = isReturnOrientationActive() ? 'true' : 'false'
-  shell.dataset.thresholdTimer = waitTimerActive ? 'true' : 'false'
-  if (waitTimerActive && state.pendingNextPhase) {
+  shell.dataset.thresholdTimer = thresholdTimerActive ? 'true' : 'false'
+  if (thresholdTimerActive && state.pendingNextPhase) {
     shell.dataset.pendingNext = state.pendingNextPhase
   } else {
     delete shell.dataset.pendingNext
@@ -457,7 +453,6 @@ export function renderUi(
   const ambient = qs(root, 'ambient')
   const threshold = qs(root, 'threshold')
   const exercise = qs(root, 'exercise')
-  const confirm = qs(root, 'confirm')
   const freezePrompt = qs(root, 'freeze-prompt')
   const pick = qs(root, 'pick')
   const checkIn = qs(root, 'check-in')
@@ -470,7 +465,6 @@ export function renderUi(
   const btnReroll = qs<HTMLButtonElement>(root, 'btn-reroll')
   const thresholdActions = qs(root, 'threshold-actions')
   const pickActions = qs(root, 'pick-actions')
-  const confirmActions = qs(root, 'confirm-actions')
   const freezeActions = qs(root, 'freeze-actions')
   const exerciseActions = qs(root, 'exercise-actions')
   const dayCloseReward = qs(root, 'day-close-reward')
@@ -479,24 +473,22 @@ export function renderUi(
 
   setupControls.hidden = !isSetup || dayCloseVisible
   runControls.hidden =
-    isSetup || isThreshold || isConfirm || isExercise || isPick || checkInVisible || dayCloseVisible
+    isSetup || isThreshold || isExercise || isPick || checkInVisible || dayCloseVisible
   thresholdActions.hidden = !isThreshold || dayCloseVisible
   pickActions.hidden = !isPick || dayCloseVisible
-  confirmActions.hidden = !isConfirm || dayCloseVisible
   freezeActions.hidden = !(isFrozen && showFreezePrompt) || dayCloseVisible
   exerciseActions.hidden = !isExercise || dayCloseVisible
   dayCloseActions.hidden = !dayCloseVisible
-  btnFreeze.hidden = isFrozen || isThreshold || isConfirm || isExercise || isPick || dayCloseVisible
+  btnFreeze.hidden = isFrozen || isThreshold || isExercise || isPick || dayCloseVisible
   btnResume.hidden = !isFrozen || showFreezePrompt || dayCloseVisible
   freezePrompt.hidden = !(isFrozen && showFreezePrompt) || dayCloseVisible
   exercise.hidden = !isExercise || dayCloseVisible
   threshold.hidden = !isThreshold || dayCloseVisible
-  confirm.hidden = !isConfirm || dayCloseVisible
   pick.hidden = !isPick || dayCloseVisible
   checkIn.hidden = !checkInVisible || dayCloseVisible
   dayCloseReward.hidden = !dayCloseVisible
 
-  btnLazy.hidden = isThreshold || isConfirm || isExercise || isPick || dayCloseVisible
+  btnLazy.hidden = isThreshold || isExercise || isPick || dayCloseVisible
   setButtonLabel(btnLazy, state.mode === 'lazy' ? 'Lazy an' : 'Lazy Mode')
   btnLazy.classList.toggle('is-on', state.mode === 'lazy')
   btnReroll.hidden = state.momentRerolled
@@ -511,7 +503,7 @@ export function renderUi(
       </div>
       <div class="day-close-stat">
         <p class="day-close-stat-value">${open}</p>
-        <p class="day-close-stat-label">Ohne Beweis</p>
+        <p class="day-close-stat-label">Ohne Steh-Check</p>
       </div>
       <div class="day-close-stat">
         <p class="day-close-stat-value">${dayCloseSummary.ritual_skip}</p>
@@ -541,10 +533,10 @@ export function renderUi(
   }
 
   phaseEl.textContent = dayCloseVisible ? 'Tagesabschluss' : phaseLabel(state.phase)
-  phaseEl.hidden = isConfirm || isThreshold || dayCloseVisible
+  phaseEl.hidden = isThreshold || dayCloseVisible
 
   const level =
-    isRunning || isExercise || waitTimerActive
+    isRunning || isExercise || thresholdTimerActive
       ? fillLevel(remainingMs, state.phaseDurationMs)
       : isSetup
         ? 0.85
@@ -557,7 +549,6 @@ export function renderUi(
   atmo.hidden =
     isPick ||
     isThreshold ||
-    isConfirm ||
     checkInVisible ||
     dayCloseVisible
   atmo.classList.toggle('is-timed', isRunning || isExercise)
@@ -609,7 +600,10 @@ export function renderUi(
   } else if (checkInVisible) {
     qs(root, 'check-in-q').textContent =
       state.phase === 'stand' ? 'Noch am Stehen?' : 'Noch am Tisch?'
-    hint.textContent = 'Kurzer Check — kein Alarm. Ein Tap reicht.'
+    hint.textContent =
+      state.phase === 'stand'
+        ? 'Ja tippen — das zählt als Beweis, dass du stehst.'
+        : 'Kurzer Check — kein Alarm. Ein Tap reicht.'
   } else if (isSetup) {
     const intervals = resolveIntervals(state.intervals)
     if (state.demo) {
@@ -629,8 +623,8 @@ export function renderUi(
     qs(root, 'pick-lead').textContent = pickLead(state.pendingNextPhase)
     hint.textContent =
       state.pendingNextPhase === 'sit'
-        ? 'Tippen — oder direkt setzen.'
-        : 'Tippen — oder einfach stehen.'
+        ? 'Tischknopf runter und Moment — oder direkt setzen.'
+        : 'Tischknopf hoch und Moment — oder direkt stehen.'
     const cards = qs(root, 'moment-cards')
     const ids = state.momentChoiceIds ?? []
     cards.innerHTML = ids
@@ -651,7 +645,7 @@ export function renderUi(
   } else if (isExercise) {
     hint.textContent = state.resumeAfterAfterplay
       ? 'Kurzes Nachspiel nach dem Call.'
-      : 'Kurz. Erledigt, wenn du fertig bist.'
+      : momentOrderHint(state.pendingNextPhase)
   } else if (approaching) {
     hint.textContent = 'Gleich. Der Tisch meldet sich — kein Überraschungsalarm.'
   } else {
@@ -662,15 +656,7 @@ export function renderUi(
         : 'Der Tisch hält den Rhythmus. Du entscheidest die Wechsel.'
   }
 
-  if (isConfirm) {
-    const copy = confirmCopy(state.endedPhase)
-    qs(root, 'confirm-lead').textContent = copy.lead
-    qs(root, 'confirm-sub').textContent = copy.sub
-    setButtonLabel(qs(root, 'btn-confirm-desk'), copy.yes)
-  }
-
   if (
-    isConfirm ||
     isThreshold ||
     dayCloseVisible ||
     (wordsHidden && (isRunning || isExercise || isFrozen) && !checkInVisible && !dayCloseVisible)

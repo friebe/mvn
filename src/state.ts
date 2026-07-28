@@ -5,7 +5,6 @@ export type ActivePhase = 'sit' | 'stand' | 'reset'
 export type Phase =
   | ActivePhase
   | 'threshold'
-  | 'confirm'
   | 'pick'
   | 'exercise'
   | 'frozen'
@@ -33,8 +32,6 @@ export interface AppState {
   frozenPhase: ActivePhase | null
   /** Resume back into threshold choice after freeze */
   resumeToThreshold: boolean
-  /** Resume back into desk-confirm after freeze */
-  resumeToConfirm: boolean
   /** After freeze afterplay moment, resume interrupted phase */
   resumeAfterAfterplay: boolean
   soundEnabled: boolean
@@ -57,7 +54,7 @@ export interface AppState {
   checkInShownAt: number | null
   /** Check-in answered or dismissed for this phase */
   checkInHandled: boolean
-  /** Which active phase just ended (threshold/confirm context) */
+  /** Which active phase just ended (threshold context) */
   endedPhase: ActivePhase | null
   /** Next phase after ritual / lazy skip */
   pendingNextPhase: ActivePhase | null
@@ -102,7 +99,6 @@ export function defaultState(): AppState {
     freezeExtendUntil: null,
     frozenPhase: null,
     resumeToThreshold: false,
-    resumeToConfirm: false,
     resumeAfterAfterplay: false,
     soundEnabled: false,
     notificationsEnabled: false,

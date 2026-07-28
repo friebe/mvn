@@ -94,7 +94,6 @@ Alles bleibt auf dem Gerät. Die App speichert unter mehreren Keys:
 | `frozenPhase` | Unterbrochene aktive Phase |
 | `freezeExtendUntil` | „Noch 15 Min“ — Prompt unterdrücken bis dahin |
 | `resumeToThreshold` | Nach Freeze zurück zur Schwelle |
-| `resumeToConfirm` | Nach Freeze zurück zur Tisch-Bestätigung |
 | `resumeAfterAfterplay` | Nach Call-Nachspiel zurück zur unterbrochenen Phase |
 
 ### Check-in
@@ -104,6 +103,8 @@ Alles bleibt auf dem Gerät. Die App speichert unter mehreren Keys:
 | `checkInAt` | Wann der Soft-Check-in fällig ist |
 | `checkInShownAt` | Seit wann der Check-in sichtbar ist |
 | `checkInHandled` | Schon beantwortet oder abgelaufen |
+
+Aktives Ja auf „Noch am Stehen?“ zählt als `desk_confirmed` (Analytics: Bestätigt). Sitz-Check-in zählt nicht.
 
 ### Ritual / Momente / Copy
 

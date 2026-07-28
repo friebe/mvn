@@ -57,7 +57,6 @@ export function closeDayInStorage(): { state: AppState; story: string } {
     freezeExtendUntil: null,
     frozenPhase: null,
     resumeToThreshold: false,
-    resumeToConfirm: false,
     resumeAfterAfterplay: false,
     startedAt: null,
     pendingNextPhase: null,

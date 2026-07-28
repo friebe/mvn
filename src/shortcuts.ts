@@ -7,7 +7,6 @@ export type ShortcutId =
   | 'rise'
   | 'lazyPath'
   | 'skipStanding'
-  | 'confirmDesk'
   | 'afterplay'
   | 'extendFreeze'
   | 'doneMoment'
@@ -42,13 +41,12 @@ export const SHORTCUTS: ShortcutDef[] = [
   { id: 'pick2', keys: ['2'], label: '2', action: 'Moment 2', context: 'Moment wählen' },
   { id: 'pick3', keys: ['3'], label: '3', action: 'Moment 3', context: 'Moment wählen' },
   { id: 'freeze', keys: ['f', 'F'], label: 'F', action: 'Freeze', context: 'Sitzen / Stehen / Reset' },
-  { id: 'confirmDesk', keys: ['Enter', ' '], label: '↵', action: 'Bestätigen', context: 'Bestätigen' },
   { id: 'doneMoment', keys: ['Enter', ' '], label: '↵', action: 'Erledigt', context: 'Moment' },
   { id: 'reroll', keys: ['r', 'R'], label: 'R', action: 'Anderer Moment', context: 'Moment' },
   { id: 'resume', keys: ['Enter', ' '], label: '↵', action: 'Weiter', context: 'Freeze' },
   { id: 'afterplay', keys: ['a', 'A'], label: 'A', action: 'Call-Nachspiel', context: 'Freeze-Prompt' },
   { id: 'extendFreeze', keys: ['e', 'E'], label: 'E', action: 'Noch 15 Min', context: 'Freeze-Prompt' },
-  { id: 'checkIn', keys: ['Enter', ' '], label: '↵', action: 'Check-in Ja', context: 'Check-in' },
+  { id: 'checkIn', keys: ['Enter', ' '], label: '↵', action: 'Noch am Stehen / Tisch', context: 'Check-in' },
   { id: 'toggleLazy', keys: ['m', 'M'], label: 'M', action: 'Lazy Mode', context: 'Schnellzugriff' },
   { id: 'dayCloseDone', keys: ['Enter', ' '], label: '↵', action: 'Weiter', context: 'Tagesabschluss' },
 ]
@@ -95,8 +93,6 @@ export function availableShortcuts(ctx: ShortcutContext): Set<ShortcutId> {
     if (count >= 2) active.add('pick2')
     if (count >= 3) active.add('pick3')
     active.add('skipStanding')
-  } else if (phase === 'confirm') {
-    active.add('confirmDesk')
   } else if (phase === 'frozen') {
     if (showFreezePrompt) {
       active.add('afterplay')
@@ -113,7 +109,7 @@ export function availableShortcuts(ctx: ShortcutContext): Set<ShortcutId> {
     active.add('freeze')
   }
 
-  if (phase !== 'threshold' && phase !== 'confirm' && phase !== 'exercise' && phase !== 'pick') {
+  if (phase !== 'threshold' && phase !== 'exercise' && phase !== 'pick') {
     active.add('toggleLazy')
   }
 
@@ -152,7 +148,6 @@ export interface ShortcutHandlers {
   onToggleLazy: () => void
   onChooseRise: () => void
   onChooseLazyPath: () => void
-  onConfirmDesk: () => void
   onDismissDayClose: () => void
 }
 
@@ -187,9 +182,6 @@ export function bindShortcuts(
         break
       case 'skipStanding':
         handlers.onSkipStanding()
-        break
-      case 'confirmDesk':
-        handlers.onConfirmDesk()
         break
       case 'afterplay':
         handlers.onAfterplay()

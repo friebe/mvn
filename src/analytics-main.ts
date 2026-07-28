@@ -119,13 +119,14 @@ function render(period: Period): void {
         </div>
         <div class="stat" data-tone="gap">
           <p class="stat-value">${open}</p>
-          <p class="stat-label">Ohne Beweis</p>
+          <p class="stat-label">Ohne Steh-Check</p>
         </div>
         <div class="stat" data-tone="gap">
           <p class="stat-value">${s.ritual_skip}</p>
           <p class="stat-label">Ohne Bewegung</p>
         </div>
       </section>
+      <p class="section-note">Bestätigt = Ja auf „Noch am Stehen?“ mitten in der Stehphase.</p>
 
       ${
         s.freeze_total > 0

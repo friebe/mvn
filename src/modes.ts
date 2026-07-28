@@ -23,7 +23,6 @@ export function phaseLabel(
   phase:
     | ActivePhase
     | 'threshold'
-    | 'confirm'
     | 'pick'
     | 'exercise'
     | 'frozen'
@@ -39,8 +38,6 @@ export function phaseLabel(
       return 'Reset'
     case 'threshold':
       return 'Tisch'
-    case 'confirm':
-      return 'Bestätigen'
     case 'pick':
       return 'Moment'
     case 'exercise':
@@ -59,21 +56,6 @@ export function nextPhaseVerb(phase: ActivePhase): string {
   return 'Wieder setzen'
 }
 
-export function confirmCopy(ended: ActivePhase | null): { lead: string; sub: string; yes: string } {
-  if (ended === 'stand' || ended === 'reset') {
-    return {
-      lead: 'Wieder gesetzt?',
-      sub: 'Bestätigen — oder einfach weiter.',
-      yes: 'Gesetzt',
-    }
-  }
-  return {
-    lead: 'Tisch steht?',
-    sub: 'Bestätigen — oder einfach weiter.',
-    yes: 'Tisch steht',
-  }
-}
-
 export function thresholdLead(ended: ActivePhase | null): string {
   if (ended === 'sit') return 'Tisch will hoch.'
   if (ended === 'stand' || ended === 'reset') return 'Wieder setzen?'
@@ -81,14 +63,21 @@ export function thresholdLead(ended: ActivePhase | null): string {
 }
 
 export function thresholdSub(ended: ActivePhase | null): string {
-  if (ended === 'sit') return 'Kurz bewegen — oder gleich stehen.'
-  if (ended === 'stand' || ended === 'reset') return 'Kurz bewegen — oder gleich setzen.'
+  if (ended === 'sit') return 'Tisch hochfahren und kurz bewegen — oder gleich stehen.'
+  if (ended === 'stand' || ended === 'reset') return 'Tisch runter und kurz bewegen — oder gleich setzen.'
   return 'Du musst nichts beweisen. Wähl den Weg, der heute geht.'
 }
 
 export function pickLead(pendingNext: ActivePhase | null): string {
-  if (pendingNext === 'sit') return 'Kurz bewegen, bevor du dich setzt.'
-  return 'Kurz bewegen, bevor du hochgehst.'
+  if (pendingNext === 'sit') return 'Tisch runterfahren und kurz bewegen.'
+  return 'Tisch hochfahren und kurz bewegen.'
+}
+
+/** Short orientation while a moment runs. */
+export function momentOrderHint(pendingNext: ActivePhase | null): string {
+  if (pendingNext === 'sit') return 'Knopf runter und kurz bewegen — in einem.'
+  if (pendingNext === 'stand') return 'Knopf hoch und kurz bewegen — in einem.'
+  return 'Kurz. Erledigt, wenn du fertig bist.'
 }
 
 export function skipMomentLabel(pendingNext: ActivePhase | null): string {
