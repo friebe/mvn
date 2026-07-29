@@ -32,6 +32,8 @@ Then open `http://localhost:4173` → **Install app** (or browser menu “Instal
 
 `npm run preview` after `build` is the most reliable path to install.
 
+If you previously installed **MVN**, uninstall that PWA first — Windows keeps the old shortcut name and icon until you reinstall as **Stint**.
+
 ## Intervals
 
 | Mode | Sit | Stand | Reset |
@@ -109,7 +111,7 @@ Everything stays on the device. The app uses several keys:
 | `checkInShownAt` | Since when check-in is visible |
 | `checkInHandled` | Already answered or timed out |
 
-An active Yes on “Still standing?” counts as `desk_confirmed` (Analytics: Confirmed). Sit check-in does not.
+An active Yes on “Still at your desk?” or “Still standing?” counts as `desk_confirmed` (Analytics / Day close: Confirmed).
 
 ### Ritual / moments / copy
 

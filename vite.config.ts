@@ -20,11 +20,16 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: [
         'icons/icon.svg',
+        'icons/icon-maskable.svg',
+        'icons/stint-mark.svg',
+        'icons/icon-96.png',
         'icons/icon-192.png',
         'icons/icon-512.png',
+        'icons/icon-maskable-512.png',
         'icons/apple-touch-icon.png',
       ],
       manifest: {
+        id: '/mvn/',
         name: 'Stint',
         short_name: 'Stint',
         description: 'Sit · micro-move · sit again — desk copilot, not a focus timer.',
@@ -35,6 +40,12 @@ export default defineConfig({
         start_url: '/mvn/',
         scope: '/mvn/',
         icons: [
+          {
+            src: 'icons/icon-96.png',
+            sizes: '96x96',
+            type: 'image/png',
+            purpose: 'any',
+          },
           {
             src: 'icons/icon-192.png',
             sizes: '192x192',
@@ -48,7 +59,7 @@ export default defineConfig({
             purpose: 'any',
           },
           {
-            src: 'icons/icon-512.png',
+            src: 'icons/icon-maskable-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
@@ -57,6 +68,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        importScripts: ['sw-notify-click.js'],
         navigateFallback: `${base}index.html`,
         navigateFallbackDenylist: [
           new RegExp(`^${base.replace(/\/$/, '')}/analytics\\.html$`),

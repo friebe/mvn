@@ -1,4 +1,4 @@
-import { playBeep } from './audio'
+import { playBeep, playMomentDone } from './audio'
 import {
   flashShell,
   setBaseTitle,
@@ -34,6 +34,7 @@ import {
 import { getMoment, pickMoment, pickMomentCards, rememberId } from './exercises'
 import { pickAmbient, pickMotivation, rememberMotivation, shouldShowRareAmbient, ambientMilestoneAfterShow } from './motivation'
 import { notifyPhase } from './notify'
+import { isAppAway, subscribePresence } from './presence'
 import { buildDayCloseLine, recordStat, summarizeToday, todayKey } from './stats'
 import { isLocalDebugHost } from './debug-host'
 
@@ -48,6 +49,17 @@ let state: AppState
 let tickId: number | null = null
 let listeners: TimerListener[] = []
 let motivationPickCount = 0
+/** Re-toast while desk action is waiting and the window is away. */
+let awayNudgeId: number | null = null
+let awayNudgeKind: AttentionKind | null = null
+let awayNudgeTitle = ''
+let awayNudgeBody = ''
+const AWAY_NUDGE_MS = 75_000
+const AWAY_ACTION_KINDS: ReadonlySet<AttentionKind> = new Set([
+  'threshold',
+  'foreshadow',
+  'ritual',
+])
 
 /** Localhost-only: freeze wall-clock deadlines for screen debugging. */
 let debugPaused = false
@@ -194,6 +206,7 @@ function shouldShowFreezePrompt(): boolean {
 }
 
 export function initTimer(initial: AppState): void {
+  bindPresenceOnce()
   // Legacy: desk-confirm phase removed — resume into stand.
   if ((initial.phase as string) === 'confirm') {
     state = { ...initial, phase: 'setup' }
@@ -214,6 +227,15 @@ export function initTimer(initial: AppState): void {
   }
   startTicking()
   emit()
+}
+
+let presenceBound = false
+function bindPresenceOnce(): void {
+  if (presenceBound) return
+  presenceBound = true
+  subscribePresence((away) => {
+    if (!away) clearAwayNudge()
+  })
 }
 
 function startTicking(): void {
@@ -292,43 +314,99 @@ function checkInPrompt(): string {
   return state.phase === 'stand' ? 'Still standing?' : 'Still at your desk?'
 }
 
-function shouldNotify(muted: boolean): boolean {
+function permissionGranted(): boolean {
+  return 'Notification' in window && Notification.permission === 'granted'
+}
+
+function shouldNotify(muted: boolean, _kind: AttentionKind, _away: boolean): boolean {
   if (state.notificationsEnabled) return true
-  return muted && 'Notification' in window && Notification.permission === 'granted'
+  return muted && permissionGranted()
+}
+
+function clearAwayNudge(): void {
+  if (awayNudgeId != null) {
+    window.clearInterval(awayNudgeId)
+    awayNudgeId = null
+  }
+  awayNudgeKind = null
+  awayNudgeTitle = ''
+  awayNudgeBody = ''
+}
+
+function stillNeedsAwayNudge(): boolean {
+  if (state.phase === 'threshold' || state.phase === 'pick' || state.phase === 'exercise') {
+    return true
+  }
+  return state.checkInShownAt != null && !state.checkInHandled
+}
+
+function armAwayNudge(kind: AttentionKind, title: string, body: string): void {
+  clearAwayNudge()
+  if (!AWAY_ACTION_KINDS.has(kind)) return
+  awayNudgeKind = kind
+  awayNudgeTitle = title
+  awayNudgeBody = body
+  awayNudgeId = window.setInterval(() => {
+    if (!isAppAway() || awayNudgeKind == null) return
+    if (!stillNeedsAwayNudge()) {
+      clearAwayNudge()
+      return
+    }
+    void notifyPhase(`Stint · ${awayNudgeTitle}`, awayNudgeBody, true, {
+      persistent: true,
+      playSound: true,
+    })
+    startTitleBlink(awayNudgeTitle)
+  }, AWAY_NUDGE_MS)
 }
 
 function signalAttention(kind: AttentionKind, title: string, body: string): void {
   const muted = !state.soundEnabled
+  const away = isAppAway()
+  const notify = shouldNotify(muted, kind, away)
   playBeep(state.soundEnabled)
-  void notifyPhase(`Stint · ${title}`, body, shouldNotify(muted), {
-    persistent: state.notificationPersistent,
-    playSound: state.soundEnabled,
+  void notifyPhase(`Stint · ${title}`, body, notify, {
+    // Stay on screen when you're in another window — Windows often only blinks the tray otherwise.
+    persistent: state.notificationPersistent || (away && notify && AWAY_ACTION_KINDS.has(kind)),
+    playSound: state.soundEnabled || (away && notify),
   })
   flashShell(kind, muted)
 
-  if (kind === 'threshold') {
-    setNeedsAction(true)
-    if (muted) startTitleBlink(title)
-    else {
-      stopTitleBlink()
-      setBaseTitle(`Stint · ${title}`)
-    }
+  if (kind === 'threshold') setNeedsAction(true)
+  else setNeedsAction(false)
+
+  if ((kind === 'threshold' && muted) || (away && notify && AWAY_ACTION_KINDS.has(kind))) {
+    startTitleBlink(title)
   } else {
-    setNeedsAction(false)
     stopTitleBlink()
     setBaseTitle(`Stint · ${title}`)
+  }
+
+  if (away && notify && AWAY_ACTION_KINDS.has(kind)) {
+    armAwayNudge(kind, title, body)
+  } else {
+    clearAwayNudge()
   }
 }
 
 function clearAttention(): void {
   setNeedsAction(false)
   stopTitleBlink()
+  clearAwayNudge()
+}
+
+function signalMomentDone(): void {
+  playMomentDone(state.soundEnabled)
+  flashShell('ritual', !state.soundEnabled)
+  setNeedsAction(false)
+  stopTitleBlink()
+  setBaseTitle('Stint · Moment done')
 }
 
 function onPhaseComplete(): void {
   if (state.phase === 'exercise') {
     clearAttention()
-    recordStat('ritual_done')
+    signalMomentDone()
 
     if (state.resumeAfterAfterplay) {
       finishAfterplay()
@@ -517,6 +595,7 @@ export function chooseRise(): void {
 export function chooseMoment(momentId: string): void {
   if (state.phase !== 'pick') return
   if (!state.momentChoiceIds?.includes(momentId)) return
+  recordStat('ritual_done')
   enterRitualWithMoment(momentId)
 }
 
@@ -564,9 +643,8 @@ export function rerollMoment(): void {
 
 export function confirmCheckIn(): void {
   if (state.checkInShownAt == null || state.checkInHandled) return
-  if (state.phase === 'stand') {
-    recordStat('desk_confirmed')
-  }
+  // Mid-phase Yes (sit or stand) = presence confirmed for the day.
+  recordStat('desk_confirmed')
   state = {
     ...state,
     checkInHandled: true,

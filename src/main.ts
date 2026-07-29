@@ -49,8 +49,10 @@ import {
   subscribe,
   refreshUi,
 } from './timer'
+import { initPresence } from './presence'
 
 registerPwa()
+initPresence()
 
 const app = document.querySelector<HTMLElement>('#app')!
 const initial = loadState()

@@ -1,0 +1,45 @@
+/* Shared Stint lockup — used on home, settings, analytics */
+
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.brand-mark {
+  flex-shrink: 0;
+  display: block;
+  width: clamp(1.85rem, 6vmin, 3rem);
+  height: clamp(1.85rem, 6vmin, 3rem);
+  color: var(--color-ink);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  padding-top: 0.1rem;
+}
+
+.brand {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 7.5vmin, 4.5rem);
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+  color: var(--color-ink);
+}
+
+.tag {
+  margin: 0;
+  max-width: 22rem;
+  font-size: clamp(0.85rem, 1.7vmin, 1.05rem);
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--color-ink-3);
+  letter-spacing: 0.01em;
+}

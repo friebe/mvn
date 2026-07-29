@@ -20,7 +20,7 @@ import { buildDayCloseComparison, buildDayStory, type StatsSummary } from './sta
 import { weekFocusLabel } from './week-focus'
 import { shortcutHintLabel, type ShortcutId } from './shortcuts'
 import { detailMode, isBarOnly } from './atmosphere-display'
-import { brandMarkSvg } from './brand-mark'
+import { brandLockupHtml } from './brand-mark'
 
 export interface UiHandlers {
   onStart: () => void
@@ -149,7 +149,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
       <div class="frame">
       <section class="install-banner" id="install-banner" hidden>
         <div class="install-copy">
-          <p class="install-title">Install as app</p>
+          <p class="install-title">Install Stint</p>
           <p class="install-text">Better for a second monitor, notifications, and a permanent spot on your desktop.</p>
         </div>
         <div class="install-actions">
@@ -160,11 +160,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
 
       <header class="top">
         <div class="top-brand">
-          <div class="brand-lockup">
-            ${brandMarkSvg(30)}
-            <p class="brand">Stint</p>
-          </div>
-          <p class="tag">Sit · micro-move · sit again</p>
+          ${brandLockupHtml('Desk rhythm — not a focus timer', 30)}
         </div>
         <nav class="top-actions" aria-label="App">
           <button
@@ -459,19 +455,18 @@ export function renderUi(
       lineEl.textContent = ''
       lineEl.hidden = true
     }
-    const open = Math.max(0, dayCloseSummary.rise - dayCloseSummary.rounds)
     qs(root, 'day-close-stats').innerHTML = `
       <div class="day-close-stat" data-tone="stand">
         <p class="day-close-stat-value">${dayCloseSummary.rounds}</p>
         <p class="day-close-stat-label">Confirmed</p>
       </div>
-      <div class="day-close-stat">
-        <p class="day-close-stat-value">${open}</p>
-        <p class="day-close-stat-label">No stand check</p>
+      <div class="day-close-stat" data-tone="sit">
+        <p class="day-close-stat-value">${dayCloseSummary.rise}</p>
+        <p class="day-close-stat-label">Desk up</p>
       </div>
       <div class="day-close-stat">
-        <p class="day-close-stat-value">${dayCloseSummary.ritual_skip}</p>
-        <p class="day-close-stat-label">No movement</p>
+        <p class="day-close-stat-value">${dayCloseSummary.ritual_done}</p>
+        <p class="day-close-stat-label">Moments</p>
       </div>
     `
   }
@@ -561,10 +556,7 @@ export function renderUi(
   } else if (checkInVisible) {
     qs(root, 'check-in-q').textContent =
       state.phase === 'stand' ? 'Still standing?' : 'Still at your desk?'
-    hint.textContent =
-      state.phase === 'stand'
-        ? 'Tap Yes — that counts as proof you\'re standing.'
-        : 'Quick check — no alarm. One tap is enough.'
+    hint.textContent = 'Tap Yes — that counts as confirmed for today.'
   } else if (isSetup) {
     const intervals = resolveIntervals(state.intervals)
     if (state.demo) {

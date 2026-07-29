@@ -50,11 +50,11 @@ export interface StatsSummary {
   ritual_skip: number
   /** Freeze gesamt (Schwelle + manuell) */
   freeze_total: number
-  /** Echte Wechsel = Steh-Check-in bestätigt */
+  /** Echte Wechsel = mid-phase check-in Yes (sit or stand) */
   rounds: number
 }
 
-/** Hochgefahren, aber ohne späteren Steh-Check-in-Tap. */
+/** Desk raised without a matching check-in Yes (rough gap signal). */
 export function unconfirmedRises(s: StatsSummary): number {
   return Math.max(0, s.rise - s.rounds)
 }
@@ -266,16 +266,16 @@ export function buildDayCloseComparison(at = new Date()): string | null {
 export function buildDayCloseLine(s: StatsSummary): string {
   const parts: string[] = []
   if (s.desk_confirmed > 0) {
-    parts.push(`${s.desk_confirmed}× standing confirmed`)
+    parts.push(`${s.desk_confirmed}× check-in confirmed`)
   } else if (s.rise > 0) {
-    parts.push(`${s.rise}× desk up without stand check`)
+    parts.push(`${s.rise}× desk up`)
   } else if (s.sit_done > 0) {
     parts.push(`${s.sit_done} sitting blocks finished`)
   } else {
     parts.push('Hardly any movement today')
   }
   if (s.ritual_done > 0) parts.push(`${s.ritual_done}× moment`)
-  if (s.ritual_skip > 0) parts.push(`${s.ritual_skip}× no movement`)
+  if (s.ritual_skip > 0) parts.push(`${s.ritual_skip}× skipped`)
   if (s.lazy_choice > 0) parts.push(`Lazy ${s.lazy_choice}×`)
   if (s.freeze_total > 0) parts.push(`${s.freeze_total}× freeze for calls`)
   return `${parts.join(', ')}. The desk kept up — that counts for showing up.`
@@ -286,18 +286,14 @@ export function buildDayStory(s: StatsSummary): string {
   if (s.day_start === 0 && s.rounds === 0 && s.sit_done === 0) {
     return 'No day started yet. The desk is waiting.'
   }
-  const open = unconfirmedRises(s)
   if (s.ritual_skip > 0 && s.ritual_skip >= s.ritual_done) {
     return 'Often continued straight on — without a short moment in between.'
   }
-  if (open > 0) {
-    return 'Often raised the desk — stand check sometimes skipped.'
-  }
   if (s.rounds > 0 && s.ritual_done > s.ritual_skip) {
-    return 'Standing confirmed and moments taken.'
+    return 'Check-ins confirmed and moments taken.'
   }
-  if (s.rounds > 0) return 'Standing confirmed — the rhythm held.'
-  if (s.rise > 0) return 'Desk raised — stand check often without a tap.'
+  if (s.rounds > 0) return 'Check-ins confirmed — you answered when the desk asked.'
+  if (s.rise > 0) return 'Desk raised — mid-phase check-in often without a tap.'
   if (s.freeze_total > 0) return 'Calls interrupted the flow — freeze protected you.'
   if (s.lazy_choice > 0) return 'Lazy Mode was in play.'
   return 'The day is running. No switches yet — ok.'

@@ -1,4 +1,4 @@
-import { appPath } from './paths'
+import { absoluteAssetUrl } from './paths'
 
 export async function ensureNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) return false
@@ -35,11 +35,13 @@ export async function notifyPhase(
   if (!('Notification' in window)) return
   if (Notification.permission !== 'granted') return
 
-  const icon = appPath('icons/icon-192.png')
+  // Absolute URLs + cache bust — Windows often ignores relative/cached PWA icons.
+  const icon = absoluteAssetUrl('icons/icon-192.png')
+  const badge = absoluteAssetUrl('icons/icon-96.png')
   const options: NotificationOptions = {
     body,
     icon,
-    badge: icon,
+    badge,
     silent: !opts.playSound,
     // Unique tag so Windows shows a fresh toast instead of silently replacing in the panel.
     tag: `stint-${Date.now()}`,

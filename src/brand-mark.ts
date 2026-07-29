@@ -13,3 +13,14 @@ export function brandMarkSvg(size = 28): string {
     <rect x="14" y="8" width="16" height="4" rx="1" fill="currentColor"/>
   </svg>`
 }
+
+/** Shared header lockup: mark + Stint + quiet subline. */
+export function brandLockupHtml(tag: string, markSize = 30): string {
+  return `<div class="brand-lockup">
+    ${brandMarkSvg(markSize)}
+    <div class="brand-text">
+      <p class="brand">Stint</p>
+      <p class="tag">${tag}</p>
+    </div>
+  </div>`
+}

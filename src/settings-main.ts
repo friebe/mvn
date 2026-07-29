@@ -23,14 +23,54 @@ import {
   shortcutsByContext,
 } from './shortcuts'
 import type { AtmosphereDisplay, EnergyMode } from './state'
-import { brandMarkSvg } from './brand-mark'
+import { brandLockupHtml } from './brand-mark'
 import {
   ATMOSPHERE_DISPLAY_LABELS,
   ATMOSPHERE_DISPLAY_NOTES,
   ATMOSPHERE_DISPLAY_ORDER,
 } from './atmosphere-display'
+import {
+  canInstallPwa,
+  installManualHint,
+  onInstallAvailability,
+  promptInstallPwa,
+  registerPwa,
+  shouldOfferInstall,
+} from './pwa'
+
+registerPwa()
 
 type IntervalPhase = 'sit' | 'stand'
+
+function installSectionHtml(): string {
+  if (!shouldOfferInstall()) return ''
+  const ready = canInstallPwa()
+  return `
+      <section class="settings-group settings-group-install" aria-label="Install">
+        <h2 class="settings-group-title">Install Stint</h2>
+        <p class="settings-hint">
+          Second monitor, desktop icon, and more reliable notifications — “Not now” on the home
+          banner only hides it for a while; you can always install from here.
+        </p>
+        <div class="setting-row">
+          <div class="setting-copy">
+            <p class="setting-label">Add as app</p>
+            <p class="setting-note">
+              ${
+                ready
+                  ? 'Opens the browser install dialog.'
+                  : installManualHint()
+              }
+            </p>
+          </div>
+          ${
+            ready
+              ? `<button type="button" class="setting-btn is-on" id="btn-settings-install">Install</button>`
+              : `<span class="setting-status" id="install-status">Manual</span>`
+          }
+        </div>
+      </section>`
+}
 
 function intervalSelect(
   mode: EnergyMode,
@@ -66,20 +106,20 @@ function render(): void {
           </svg>
         </a>
         <div class="settings-heading">
-          <div class="brand-lockup">
-            ${brandMarkSvg(26)}
-            <p class="settings-brand">Settings</p>
-          </div>
-          <p class="settings-tag">Stint · local on this device</p>
+          ${brandLockupHtml('Settings', 28)}
         </div>
       </header>
+
+      ${installSectionHtml()}
 
       <section class="settings-group" aria-label="Signals">
         <h2 class="settings-group-title">Signals</h2>
         <div class="setting-row">
           <div class="setting-copy">
             <p class="setting-label">Sound</p>
-            <p class="setting-note">Audio cues on phase changes.</p>
+            <p class="setting-note">
+              Cues on phase changes and when a micro-moment ends — useful if you stepped to the window.
+            </p>
           </div>
           <button type="button" class="setting-btn ${s.soundEnabled ? 'is-on' : ''}" id="btn-sound">
             ${s.soundEnabled ? 'On' : 'Off'}
@@ -88,7 +128,10 @@ function render(): void {
         <div class="setting-row">
           <div class="setting-copy">
             <p class="setting-label">Notifications</p>
-            <p class="setting-note">Browser toasts — best as an installed app.</p>
+            <p class="setting-note">
+              Browser toasts — best as an installed app. With this on, when another window is focused
+              Stint keeps toasts on screen and repeats desk / check-in cues every ~75s until you’re back.
+            </p>
           </div>
           <button type="button" class="setting-btn ${s.notificationsEnabled ? 'is-on' : ''}" id="btn-notif">
             ${s.notificationsEnabled ? 'On' : 'Off'}
@@ -235,6 +278,11 @@ function render(): void {
     </div>
   `
 
+  root.querySelector('#btn-settings-install')?.addEventListener('click', async () => {
+    await promptInstallPwa()
+    render()
+  })
+
   root.querySelector('#btn-sound')?.addEventListener('click', () => {
     togglePreference('soundEnabled')
     render()
@@ -288,3 +336,6 @@ function render(): void {
 }
 
 render()
+onInstallAvailability(() => {
+  if (document.querySelector('.settings')) render()
+})

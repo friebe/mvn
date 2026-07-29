@@ -3,7 +3,7 @@ import '@fontsource/source-sans-3/400.css'
 import '@fontsource/source-sans-3/600.css'
 import './analytics.css'
 
-import { brandMarkSvg } from './brand-mark'
+import { brandLockupHtml } from './brand-mark'
 import {
   activeDayCount,
   buildDayStory,
@@ -12,7 +12,6 @@ import {
   summarizeAll,
   summarizeLastDays,
   summarizeToday,
-  unconfirmedRises,
   type StatsSummary,
 } from './stats'
 import { appPath } from './paths'
@@ -48,7 +47,6 @@ function render(period: Period): void {
   const spark = lastDayBuckets(7)
   const maxRounds = Math.max(1, ...spark.map((d) => d.sit_done))
   const empty = isEmpty(s)
-  const open = unconfirmedRises(s)
   const activeDays =
     period === 'today' ? null : period === '7d' ? activeDayCount(7) : activeDayCount()
 
@@ -61,11 +59,7 @@ function render(period: Period): void {
           </svg>
         </a>
         <div class="analytics-heading">
-          <div class="brand-lockup">
-            ${brandMarkSvg(26)}
-            <p class="analytics-brand">Analytics</p>
-          </div>
-          <p class="analytics-tag">Stint · local on this device only</p>
+          ${brandLockupHtml('Analytics', 28)}
         </div>
         <nav class="analytics-nav" aria-label="Actions">
           <button type="button" class="icon-link" id="btn-refresh" aria-label="Refresh" title="Refresh">
@@ -122,15 +116,15 @@ function render(period: Period): void {
           <p class="stat-label">Confirmed</p>
         </div>
         <div class="stat" data-tone="gap">
-          <p class="stat-value">${open}</p>
-          <p class="stat-label">No stand check</p>
+          <p class="stat-value">${s.ritual_done}</p>
+          <p class="stat-label">Moments</p>
         </div>
         <div class="stat" data-tone="gap">
           <p class="stat-value">${s.ritual_skip}</p>
-          <p class="stat-label">No movement</p>
+          <p class="stat-label">Skipped</p>
         </div>
       </section>
-      <p class="section-note">Confirmed = Yes on “Still standing?” mid stand phase.</p>
+      <p class="section-note">Confirmed = Yes on a mid-phase check-in. Moments = tapped a card at desk switch.</p>
 
       ${
         s.freeze_total > 0
@@ -170,7 +164,8 @@ function render(period: Period): void {
         ${activeDays != null && activeDays > 0 ? `<div class="detail-row"><span>Active days</span><span>${activeDays}</span></div>` : ''}
         ${s.day_start > 0 ? `<div class="detail-row"><span>Days started</span><span>${s.day_start}</span></div>` : ''}
         ${s.day_close > 0 ? `<div class="detail-row"><span>Day close</span><span>${s.day_close}</span></div>` : ''}
-        ${s.ritual_done > 0 ? `<div class="detail-row"><span>Moments done</span><span>${s.ritual_done}</span></div>` : ''}
+        ${s.ritual_done > 0 ? `<div class="detail-row"><span>Moments</span><span>${s.ritual_done}</span></div>` : ''}
+        ${s.ritual_skip > 0 ? `<div class="detail-row"><span>Skipped</span><span>${s.ritual_skip}</span></div>` : ''}
         ${s.lazy_choice > 0 ? `<div class="detail-row"><span>Lazy chosen</span><span>${s.lazy_choice}</span></div>` : ''}
       </section>`
           : ''
