@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stint icon — size ladder</title>
+    <style>
+      /* Hallmark · component: icon · preview ladder (sizes, not UI states) */
+      :root {
+        --color-paper: oklch(96% 0.012 95);
+        --color-ink: oklch(22% 0.02 160);
+        --font-body: 'Source Sans 3', 'Segoe UI', sans-serif;
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--color-paper);
+        color: var(--color-ink);
+        font-family: var(--font-body);
+        overflow-x: clip;
+      }
+      main {
+        max-width: 40rem;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+      }
+      h1 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0 0 0.35rem;
+        font-style: normal;
+      }
+      p {
+        margin: 0 0 1.5rem;
+        color: oklch(42% 0.018 160);
+        line-height: 1.4;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 5rem 1fr;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-top: 1px solid oklch(89% 0.016 95);
+      }
+      .label {
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: oklch(58% 0.014 160);
+      }
+      .tile {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+      }
+      .tile img {
+        display: block;
+        image-rendering: auto;
+      }
+      .on-dark {
+        background: #141f1c;
+        padding: 0.5rem;
+        border-radius: 6px;
+      }
+      .on-dark img {
+        filter: invert(1);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Stint — icon ladder</h1>
+      <p>App tile + monochrome mark. Sit plane · stem · stand plane.</p>
+
+      <div class="row">
+        <span class="label">16</span>
+        <div class="tile">
+          <img src="./icon.svg" width="16" height="16" alt="" />
+          <img src="./stint-mark.svg" width="16" height="16" alt="" />
+        </div>
+      </div>
+      <div class="row">
+        <span class="label">32</span>
+        <div class="tile">
+          <img src="./icon.svg" width="32" height="32" alt="" />
+          <img src="./stint-mark.svg" width="32" height="32" alt="" />
+        </div>
+      </div>
+      <div class="row">
+        <span class="label">64</span>
+        <div class="tile">
+          <img src="./icon.svg" width="64" height="64" alt="" />
+          <img src="./stint-mark.svg" width="64" height="64" alt="" />
+        </div>
+      </div>
+      <div class="row">
+        <span class="label">128</span>
+        <div class="tile">
+          <img src="./icon.svg" width="128" height="128" alt="" />
+          <img src="./stint-mark.svg" width="128" height="128" alt="" />
+        </div>
+      </div>
+      <div class="row">
+        <span class="label">192</span>
+        <div class="tile">
+          <img src="./icon.svg" width="192" height="192" alt="" />
+        </div>
+      </div>
+      <div class="row">
+        <span class="label">Mark / dark</span>
+        <div class="tile">
+          <div class="on-dark">
+            <img src="./stint-mark.svg" width="48" height="48" alt="" />
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
