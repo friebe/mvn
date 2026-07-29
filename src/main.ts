@@ -21,9 +21,9 @@ import {
   renderUi,
   setInstallVisible,
   showDayCloseReward,
-  toggleAtmosphereDetail,
-  toggleAtmosphereWords,
 } from './ui'
+import { cycleAtmosphereDisplay } from './atmosphere-display'
+import { writePreferences } from './preferences'
 import { bindShortcuts } from './shortcuts'
 import { isLocalDebugHost } from './debug-host'
 import {
@@ -40,6 +40,7 @@ import {
   rerollMoment,
   resetDay,
   resume,
+  setAtmosphereDisplay,
   setDemo,
   setMode,
   skipStanding,
@@ -97,11 +98,9 @@ bindShortcuts(
 mountUi(app, {
   ...shortcutHandlers,
   onToggleClock: () => {
-    toggleAtmosphereDetail()
-    refreshUi()
-  },
-  onToggleAtmosphereWords: () => {
-    toggleAtmosphereWords()
+    const next = cycleAtmosphereDisplay(getState().atmosphereDisplay ?? 'soft')
+    writePreferences({ atmosphereDisplay: next })
+    setAtmosphereDisplay(next)
     refreshUi()
   },
   onInstall: async () => {
@@ -111,7 +110,7 @@ mountUi(app, {
     dismissInstallBanner()
   },
   onCloseDay: () => {
-    if (!confirm('Close the day — reset the timer?')) return
+    if (!confirm('Close the day — reset and start fresh?')) return
     const summary = summarizeToday()
     resetDay()
     showDayCloseReward(summary)

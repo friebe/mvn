@@ -19,6 +19,7 @@ import {
   THRESHOLD_MOMENT_MS,
   type ActivePhase,
   type AppState,
+  type AtmosphereDisplay,
   type EnergyMode,
 } from './state'
 import {
@@ -31,7 +32,7 @@ import {
   phaseLabel,
 } from './modes'
 import { getMoment, pickMoment, pickMomentCards, rememberId } from './exercises'
-import { pickAmbient, pickMotivation, rememberMotivation } from './motivation'
+import { pickAmbient, pickMotivation, rememberMotivation, shouldShowRareAmbient, ambientMilestoneAfterShow } from './motivation'
 import { notifyPhase } from './notify'
 import { buildDayCloseLine, recordStat, summarizeToday, todayKey } from './stats'
 import { isLocalDebugHost } from './debug-host'
@@ -299,7 +300,7 @@ function shouldNotify(muted: boolean): boolean {
 function signalAttention(kind: AttentionKind, title: string, body: string): void {
   const muted = !state.soundEnabled
   playBeep(state.soundEnabled)
-  void notifyPhase(`MVN · ${title}`, body, shouldNotify(muted), {
+  void notifyPhase(`Stint · ${title}`, body, shouldNotify(muted), {
     persistent: state.notificationPersistent,
     playSound: state.soundEnabled,
   })
@@ -310,12 +311,12 @@ function signalAttention(kind: AttentionKind, title: string, body: string): void
     if (muted) startTitleBlink(title)
     else {
       stopTitleBlink()
-      setBaseTitle(`MVN · ${title}`)
+      setBaseTitle(`Stint · ${title}`)
     }
   } else {
     setNeedsAction(false)
     stopTitleBlink()
-    setBaseTitle(`MVN · ${title}`)
+    setBaseTitle(`Stint · ${title}`)
   }
 }
 
@@ -360,7 +361,7 @@ function finishAfterplay(): void {
     currentMotivationId: null,
     momentChoiceIds: null,
   }
-  setBaseTitle(`MVN · ${phaseLabel(phase)}`)
+  setBaseTitle(`Stint · ${phaseLabel(phase)}`)
   emit()
 }
 
@@ -448,11 +449,18 @@ function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): vo
   let recentMot = state.recentMotivationIds
   let northKey = state.northShownKey
 
-  if (phase === 'sit' && northKey !== day) {
-    const ambient = pickAmbient(recentMot)
-    ambientId = ambient.id
-    recentMot = rememberMotivation(recentMot, ambient.id)
-    northKey = day
+  let ambientMilestone = state.ambientMilestone
+
+  if (phase === 'sit') {
+    const confirmed = summarizeToday().desk_confirmed
+    const now = new Date()
+    if (shouldShowRareAmbient(confirmed, ambientMilestone, northKey, now)) {
+      const ambient = pickAmbient(recentMot, now)
+      ambientId = ambient.id
+      recentMot = rememberMotivation(recentMot, ambient.id)
+      northKey = day
+      ambientMilestone = ambientMilestoneAfterShow(confirmed)
+    }
   }
 
   clearAttention()
@@ -469,6 +477,7 @@ function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): vo
     ambientMotivationId: ambientId,
     recentMotivationIds: recentMot,
     northShownKey: northKey,
+    ambientMilestone,
     resumeToThreshold: false,
     resumeAfterAfterplay: false,
     momentChoiceIds: null,
@@ -479,7 +488,7 @@ function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): vo
   }
 
   if (opts.soft) {
-    setBaseTitle(`MVN · ${phaseLabel(phase)}`)
+    setBaseTitle(`Stint · ${phaseLabel(phase)}`)
   } else {
     signalAttention('phase', phaseLabel(phase), formatDurationHint(ms, state.demo))
   }
@@ -564,7 +573,7 @@ export function confirmCheckIn(): void {
     checkInShownAt: null,
   }
   clearAttention()
-  setBaseTitle(`MVN · ${phaseLabel(state.phase)}`)
+  setBaseTitle(`Stint · ${phaseLabel(state.phase)}`)
   emit()
 }
 
@@ -592,6 +601,7 @@ export function startDay(mode: EnergyMode = state.mode): void {
     resumeToThreshold: false,
     resumeAfterAfterplay: false,
     northShownKey: null,
+    ambientMilestone: 0,
   }
   enterActivePhase('sit')
 }
@@ -626,8 +636,10 @@ export function resetDay(): string {
     checkInShownAt: null,
     checkInHandled: false,
     dayClosedKey: closeKey,
+    northShownKey: null,
+    ambientMilestone: 0,
   }
-  setBaseTitle('MVN')
+  setBaseTitle('Stint')
   emit()
   return story
 }
@@ -639,6 +651,12 @@ export function setMode(mode: EnergyMode): void {
     enterActivePhase(state.phase)
     return
   }
+  emit()
+}
+
+export function setAtmosphereDisplay(display: AtmosphereDisplay): void {
+  if (state.atmosphereDisplay === display) return
+  state = { ...state, atmosphereDisplay: display }
   emit()
 }
 
@@ -690,7 +708,7 @@ export function freeze(): void {
     momentChoiceIds: null,
   }
   clearAttention()
-  setBaseTitle('MVN · Freeze')
+  setBaseTitle('Stint · Freeze')
   emit()
 }
 
@@ -737,7 +755,7 @@ export function resume(): void {
       checkInHandled: true,
     }
   }
-  setBaseTitle(`MVN · ${phaseLabel(state.phase)}`)
+  setBaseTitle(`Stint · ${phaseLabel(state.phase)}`)
   emit()
 }
 

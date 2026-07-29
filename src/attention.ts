@@ -1,7 +1,7 @@
 /** Visual attention when sound is muted — second-monitor catch. */
 
 let titleBlinkId: number | null = null
-let baseTitle = 'MVN'
+let baseTitle = 'Stint'
 
 export type AttentionKind = 'foreshadow' | 'threshold' | 'ritual' | 'phase'
 
@@ -25,7 +25,7 @@ export function stopTitleBlink(): void {
 /** Persistent title blink until stop — for threshold while muted. */
 export function startTitleBlink(label: string): void {
   stopTitleBlink()
-  baseTitle = `MVN · ${label}`
+  baseTitle = `Stint · ${label}`
   let on = true
   document.title = `● ${baseTitle}`
   titleBlinkId = window.setInterval(() => {

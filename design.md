@@ -1,4 +1,4 @@
-# Design — MVN
+# Design — Stint
 
 Locked design system for this app. App-shell only (no landing macrostructure).
 
@@ -41,6 +41,6 @@ utilitarian · dry desk-worker · no wellness kitsch · no streaks · Tisch-Meta
 
 ## Slop gates
 - No purple, no cream+terracotta cliché, no broadsheet, no card clusters, no dark-mode default
-- Brand MVN hero-level in first viewport
+- Brand Stint hero-level in first viewport
 - Tokens only — no mid-render hex improvisation
 - Moment pick = text list, not cards

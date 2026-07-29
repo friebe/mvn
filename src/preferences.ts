@@ -11,6 +11,7 @@ export type PreferenceKey =
   | 'intervals'
   | 'shortcutHintsEnabled'
   | 'notificationPersistent'
+  | 'atmosphereDisplay'
 
 export function readPreferences(): AppState {
   return loadState()
@@ -69,6 +70,8 @@ export function closeDayInStorage(): { state: AppState; story: string } {
     checkInShownAt: null,
     checkInHandled: false,
     dayClosedKey: closeKey,
+    northShownKey: null,
+    ambientMilestone: 0,
   }
   saveState(next)
   return { state: next, story }

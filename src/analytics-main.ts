@@ -3,6 +3,7 @@ import '@fontsource/source-sans-3/400.css'
 import '@fontsource/source-sans-3/600.css'
 import './analytics.css'
 
+import { brandMarkSvg } from './brand-mark'
 import {
   activeDayCount,
   buildDayStory,
@@ -60,8 +61,11 @@ function render(period: Period): void {
           </svg>
         </a>
         <div class="analytics-heading">
-          <p class="analytics-brand">Analytics</p>
-          <p class="analytics-tag">MVN · local on this device only</p>
+          <div class="brand-lockup">
+            ${brandMarkSvg(26)}
+            <p class="analytics-brand">Analytics</p>
+          </div>
+          <p class="analytics-tag">Stint · local on this device only</p>
         </div>
         <nav class="analytics-nav" aria-label="Actions">
           <button type="button" class="icon-link" id="btn-refresh" aria-label="Refresh" title="Refresh">

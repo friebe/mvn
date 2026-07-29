@@ -1,6 +1,8 @@
 import type { UserIntervals } from './intervals'
 
 export type EnergyMode = 'high' | 'lazy'
+/** Atmosphere headline: soft words, timer, percent, or progress bar only */
+export type AtmosphereDisplay = 'soft' | 'clock' | 'percent' | 'bar'
 export type ActivePhase = 'sit' | 'stand' | 'reset'
 export type Phase =
   | ActivePhase
@@ -64,10 +66,14 @@ export interface AppState {
   intervals: UserIntervals | null
   /** Nordstern line already shown today */
   northShownKey: string | null
+  /** desk_confirmed count at last milestone ambient line */
+  ambientMilestone: number
   /** Show keyboard hints on action buttons */
   shortcutHintsEnabled: boolean
   /** Keep OS toast visible until dismissed (requireInteraction) */
   notificationPersistent: boolean
+  /** Main stage atmosphere display mode */
+  atmosphereDisplay: AtmosphereDisplay
 }
 
 export const STORAGE_KEY = 'mvn.v1'
@@ -85,6 +91,25 @@ export const DEMO_CHECKIN_TIMEOUT_MS = 8 * 1000
 /** Auto-advance to moment pick at threshold unless user opts out */
 export const THRESHOLD_MOMENT_MS = 15 * 1000
 export const DEMO_THRESHOLD_MOMENT_MS = 5 * 1000
+
+const LEGACY_WORDS_HIDDEN_KEY = 'mvn-atmosphere-words-hidden'
+
+function migrateAtmosphereDisplay(parsed: Partial<AppState>): AtmosphereDisplay {
+  if (
+    parsed.atmosphereDisplay === 'soft' ||
+    parsed.atmosphereDisplay === 'clock' ||
+    parsed.atmosphereDisplay === 'percent' ||
+    parsed.atmosphereDisplay === 'bar'
+  ) {
+    return parsed.atmosphereDisplay
+  }
+  try {
+    if (localStorage.getItem(LEGACY_WORDS_HIDDEN_KEY) === '1') return 'bar'
+  } catch {
+    // ignore
+  }
+  return 'soft'
+}
 
 export function defaultState(): AppState {
   return {
@@ -118,8 +143,10 @@ export function defaultState(): AppState {
     dayClosedKey: null,
     intervals: null,
     northShownKey: null,
+    ambientMilestone: 0,
     shortcutHintsEnabled: true,
     notificationPersistent: false,
+    atmosphereDisplay: 'soft',
   }
 }
 
@@ -128,7 +155,11 @@ export function loadState(): AppState {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return defaultState()
     const parsed = JSON.parse(raw) as Partial<AppState>
-    return { ...defaultState(), ...parsed }
+    return {
+      ...defaultState(),
+      ...parsed,
+      atmosphereDisplay: migrateAtmosphereDisplay(parsed),
+    }
   } catch {
     return defaultState()
   }

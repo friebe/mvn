@@ -22,7 +22,13 @@ import {
 import {
   shortcutsByContext,
 } from './shortcuts'
-import type { EnergyMode } from './state'
+import type { AtmosphereDisplay, EnergyMode } from './state'
+import { brandMarkSvg } from './brand-mark'
+import {
+  ATMOSPHERE_DISPLAY_LABELS,
+  ATMOSPHERE_DISPLAY_NOTES,
+  ATMOSPHERE_DISPLAY_ORDER,
+} from './atmosphere-display'
 
 type IntervalPhase = 'sit' | 'stand'
 
@@ -60,8 +66,11 @@ function render(): void {
           </svg>
         </a>
         <div class="settings-heading">
-          <p class="settings-brand">Settings</p>
-          <p class="settings-tag">MVN · local on this device</p>
+          <div class="brand-lockup">
+            ${brandMarkSvg(26)}
+            <p class="settings-brand">Settings</p>
+          </div>
+          <p class="settings-tag">Stint · local on this device</p>
         </div>
       </header>
 
@@ -103,15 +112,37 @@ function render(): void {
           </button>
         </div>
         <p class="settings-hint settings-hint-tight">
-          Windows: Settings → System → Notifications → MVN → enable “Banners”.
+          Windows: Settings → System → Notifications → Stint → enable “Banners”.
           Focus assist can suppress toasts.
+        </p>
+      </section>
+
+      <section class="settings-group" aria-label="Atmosphere display">
+        <h2 class="settings-group-title">Atmosphere display</h2>
+        <p class="settings-hint">
+          How the main screen shows time in a block — soft words, time left, or bar only.
+        </p>
+        <div class="display-tabs" role="radiogroup" aria-label="Atmosphere display">
+          ${ATMOSPHERE_DISPLAY_ORDER.map(
+            (mode) => `
+          <button
+            type="button"
+            role="radio"
+            class="display-tab${s.atmosphereDisplay === mode ? ' is-on' : ''}"
+            data-atmosphere="${mode}"
+            aria-checked="${s.atmosphereDisplay === mode}"
+          >${ATMOSPHERE_DISPLAY_LABELS[mode]}</button>`,
+          ).join('')}
+        </div>
+        <p class="settings-hint settings-hint-tight" id="atmosphere-display-note">
+          ${ATMOSPHERE_DISPLAY_NOTES[s.atmosphereDisplay ?? 'soft']}
         </p>
       </section>
 
       <section class="settings-group" aria-label="Intervals">
         <h2 class="settings-group-title">Intervals</h2>
         <p class="settings-hint">
-          Sitting and standing. Each switch gets a short moment — or you continue directly.
+          Long sit and stand blocks — not Pomodoro. At each desk switch, an optional ~15s micro-move.
         </p>
 
         <div class="interval-block">
@@ -151,7 +182,7 @@ function render(): void {
 
       <section class="settings-group" aria-label="Keyboard shortcuts">
         <h2 class="settings-group-title">Keyboard shortcuts</h2>
-        <p class="settings-hint">Only while MVN is focused — not a global OS shortcut.</p>
+        <p class="settings-hint">Only while Stint is focused — not a global OS shortcut.</p>
         <div class="setting-row">
           <div class="setting-copy">
             <p class="setting-label">Hints on buttons</p>
@@ -233,6 +264,14 @@ function render(): void {
   root.querySelector('#btn-shortcut-hints')?.addEventListener('click', () => {
     togglePreference('shortcutHintsEnabled')
     render()
+  })
+
+  root.querySelectorAll<HTMLButtonElement>('[data-atmosphere]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.atmosphere as AtmosphereDisplay
+      writePreferences({ atmosphereDisplay: mode })
+      render()
+    })
   })
 
   root.querySelectorAll<HTMLSelectElement>('.setting-select').forEach((select) => {

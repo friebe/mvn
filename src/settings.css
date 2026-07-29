@@ -71,6 +71,19 @@ body {
   padding-top: 0.2rem;
 }
 
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.brand-mark {
+  flex-shrink: 0;
+  display: block;
+  color: var(--color-ink);
+}
+
 .settings-brand {
   margin: 0;
   font-family: var(--font-display);
@@ -275,4 +288,42 @@ body {
   font-variant-numeric: tabular-nums;
   color: var(--color-ink-3);
   text-align: center;
+}
+
+.display-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.display-tab {
+  appearance: none;
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--color-paper-3);
+  border-radius: var(--radius);
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: clamp(0.95rem, 2vmin, 1.05rem);
+  font-weight: 600;
+  color: var(--color-ink-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.display-tab:hover {
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+}
+
+.display-tab.is-on {
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  border-color: var(--color-ink-3);
+}
+
+.display-tab:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
 }

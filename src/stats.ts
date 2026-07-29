@@ -223,6 +223,46 @@ export function lastDayBuckets(n: number): DayBucket[] {
   return out
 }
 
+/** Compare today with the same weekday 1–4 weeks ago. */
+export function buildDayCloseComparison(at = new Date()): string | null {
+  const today = summarizeToday()
+  if (today.rounds === 0 && today.rise === 0 && today.ritual_done === 0) return null
+
+  const store = loadStats()
+  const todayKeyStr = todayKey(at)
+
+  for (let weeks = 1; weeks <= 4; weeks++) {
+    const d = new Date(at)
+    d.setDate(d.getDate() - 7 * weeks)
+    const key = todayKey(d)
+    if (key >= todayKeyStr) continue
+
+    const bucket = store.days[key]
+    if (!bucket) continue
+
+    const prev = sumBucket(bucket)
+    if (prev.rounds === 0 && prev.rise === 0 && prev.ritual_done === 0) continue
+
+    const weekday = d.toLocaleDateString('en-US', { weekday: 'long' })
+
+    if (today.rounds > 0 || prev.rounds > 0) {
+      if (today.rounds > prev.rounds) {
+        return `Today ${today.rounds}× confirmed — last ${weekday}: ${prev.rounds}×.`
+      }
+      if (today.rounds < prev.rounds) {
+        return `Today ${today.rounds}× confirmed — last ${weekday} was ${prev.rounds}×. Still counts.`
+      }
+      return `Same rhythm as last ${weekday}: ${today.rounds}× confirmed.`
+    }
+
+    if (today.ritual_done > prev.ritual_done) {
+      return `More moments than last ${weekday} (${today.ritual_done} vs ${prev.ritual_done}).`
+    }
+  }
+
+  return null
+}
+
 export function buildDayCloseLine(s: StatsSummary): string {
   const parts: string[] = []
   if (s.desk_confirmed > 0) {

@@ -1,4 +1,16 @@
 import type { ActivePhase } from './state'
+import {
+  copyKey,
+  pickCopy,
+  PICK_LEAD_DOWN,
+  PICK_LEAD_UP,
+  RUNNING_HINTS_HIGH,
+  RUNNING_HINTS_LAZY,
+  THRESHOLD_LEAD_DOWN,
+  THRESHOLD_LEAD_SIT,
+  THRESHOLD_SUB_DOWN,
+  THRESHOLD_SUB_UP,
+} from './copy'
 
 export {
   DEMO_PRESETS,
@@ -47,7 +59,7 @@ export function phaseLabel(
     case 'closing':
       return 'Day end'
     case 'setup':
-      return 'Setup'
+      return 'Ready'
   }
 }
 
@@ -56,21 +68,30 @@ export function nextPhaseVerb(phase: ActivePhase): string {
   return 'Sit again'
 }
 
-export function thresholdLead(ended: ActivePhase | null): string {
-  if (ended === 'sit') return 'Desk wants up.'
-  if (ended === 'stand' || ended === 'reset') return 'Sit again?'
+export function thresholdLead(ended: ActivePhase | null, at = new Date()): string {
+  if (ended === 'sit') return pickCopy(THRESHOLD_LEAD_SIT, copyKey('threshold-lead-up', at))
+  if (ended === 'stand' || ended === 'reset') {
+    return pickCopy(THRESHOLD_LEAD_DOWN, copyKey('threshold-lead-down', at))
+  }
   return 'Desk is waiting.'
 }
 
-export function thresholdSub(ended: ActivePhase | null): string {
-  if (ended === 'sit') return 'Raise the desk and move briefly — or just stand.'
-  if (ended === 'stand' || ended === 'reset') return 'Lower the desk and move briefly — or just sit.'
+export function thresholdSub(ended: ActivePhase | null, at = new Date()): string {
+  if (ended === 'sit') return pickCopy(THRESHOLD_SUB_UP, copyKey('threshold-sub-up', at))
+  if (ended === 'stand' || ended === 'reset') {
+    return pickCopy(THRESHOLD_SUB_DOWN, copyKey('threshold-sub-down', at))
+  }
   return 'Nothing to prove. Pick what works today.'
 }
 
-export function pickLead(pendingNext: ActivePhase | null): string {
-  if (pendingNext === 'sit') return 'Lower the desk and move briefly.'
-  return 'Raise the desk and move briefly.'
+export function pickLead(pendingNext: ActivePhase | null, at = new Date()): string {
+  if (pendingNext === 'sit') return pickCopy(PICK_LEAD_DOWN, copyKey('pick-lead-down', at))
+  return pickCopy(PICK_LEAD_UP, copyKey('pick-lead-up', at))
+}
+
+export function runningPhaseHint(lazy: boolean, at = new Date()): string {
+  const variants = lazy ? RUNNING_HINTS_LAZY : RUNNING_HINTS_HIGH
+  return pickCopy(variants, copyKey(lazy ? 'hint-lazy' : 'hint-high', at))
 }
 
 /** Short orientation while a moment runs. */

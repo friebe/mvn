@@ -42,7 +42,7 @@ export async function notifyPhase(
     badge: icon,
     silent: !opts.playSound,
     // Unique tag so Windows shows a fresh toast instead of silently replacing in the panel.
-    tag: `mvn-${Date.now()}`,
+    tag: `stint-${Date.now()}`,
     requireInteraction: opts.persistent === true,
   }
 

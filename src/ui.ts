@@ -5,6 +5,7 @@ import {
   momentOrderHint,
   phaseLabel,
   pickLead,
+  runningPhaseHint,
   skipMomentLabel,
   thresholdLead,
   thresholdRiseLabel,
@@ -15,8 +16,11 @@ import { fillLevel, formatExactTime, formatRemainingPercent, softTimeLabel } fro
 import { intervalSummary, resolveIntervals } from './intervals'
 import { appPath } from './paths'
 import { isCheckInVisible } from './timer'
-import { buildDayStory, type StatsSummary } from './stats'
+import { buildDayCloseComparison, buildDayStory, type StatsSummary } from './stats'
+import { weekFocusLabel } from './week-focus'
 import { shortcutHintLabel, type ShortcutId } from './shortcuts'
+import { detailMode, isBarOnly } from './atmosphere-display'
+import { brandMarkSvg } from './brand-mark'
 
 export interface UiHandlers {
   onStart: () => void
@@ -31,7 +35,6 @@ export interface UiHandlers {
   onConfirmCheckIn: () => void
   onToggleLazy: () => void
   onToggleClock: () => void
-  onToggleAtmosphereWords: () => void
   onInstall: () => void
   onDismissInstall: () => void
   onChooseRise: () => void
@@ -40,22 +43,11 @@ export interface UiHandlers {
   onDismissDayClose: () => void
 }
 
-type AtmosphereDetail = 'soft' | 'clock' | 'percent'
-
-let atmosphereDetail: AtmosphereDetail = 'soft'
-const WORDS_KEY = 'mvn-atmosphere-words-hidden'
-let wordsHidden = false
-let dayCloseSummary: StatsSummary | null = null
 const RETURN_AWAY_MS = 20_000
 const RETURN_PULSE_MS = 8_000
 let hiddenAt: number | null = null
 let returnOrientationUntil = 0
-
-try {
-  wordsHidden = localStorage.getItem(WORDS_KEY) === '1'
-} catch {
-  wordsHidden = false
-}
+let dayCloseSummary: StatsSummary | null = null
 
 function setButtonLabel(btn: HTMLElement, text: string): void {
   const label = btn.querySelector<HTMLElement>('.btn-text')
@@ -147,42 +139,6 @@ export function isDayCloseRewardVisible(): boolean {
   return dayCloseSummary != null
 }
 
-export function getAtmosphereDetail(): AtmosphereDetail {
-  return atmosphereDetail
-}
-
-export function toggleAtmosphereDetail(): void {
-  if (wordsHidden) {
-    setAtmosphereWordsHidden(false)
-    return
-  }
-  atmosphereDetail =
-    atmosphereDetail === 'soft' ? 'clock' : atmosphereDetail === 'clock' ? 'percent' : 'soft'
-}
-
-/** @deprecated use toggleAtmosphereDetail */
-export function toggleExactClock(): void {
-  toggleAtmosphereDetail()
-}
-
-export function isAtmosphereWordsHidden(): boolean {
-  return wordsHidden
-}
-
-export function setAtmosphereWordsHidden(hidden: boolean): void {
-  wordsHidden = hidden
-  if (hidden) atmosphereDetail = 'soft'
-  try {
-    localStorage.setItem(WORDS_KEY, hidden ? '1' : '0')
-  } catch {
-    // session-only
-  }
-}
-
-export function toggleAtmosphereWords(): void {
-  setAtmosphereWordsHidden(!wordsHidden)
-}
-
 function qs<T extends HTMLElement>(root: HTMLElement, id: string): T {
   return root.querySelector(`#${id}`) as T
 }
@@ -204,8 +160,11 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
 
       <header class="top">
         <div class="top-brand">
-          <p class="brand">MVN</p>
-          <p class="tag">Minimal Viable Movement</p>
+          <div class="brand-lockup">
+            ${brandMarkSvg(30)}
+            <p class="brand">Stint</p>
+          </div>
+          <p class="tag">Sit · micro-move · sit again</p>
         </div>
         <nav class="top-actions" aria-label="App">
           <button
@@ -244,32 +203,29 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
       <div class="content-area">
         <div class="middle">
           <main class="stage">
-            <p class="phase-label" id="phase-label">Setup</p>
+            <p class="phase-label" id="phase-label">Ready</p>
             <div class="atmosphere" id="atmosphere">
               <button
                 type="button"
                 class="atmosphere-hit"
                 id="btn-atmosphere-label"
                 aria-live="polite"
-                aria-label="Phase — tap for time or percent"
+                aria-label="Phase — tap to cycle display"
               >
-                <span class="atmosphere-label" id="atmosphere-label">ready</span>
+                <span class="atmosphere-label" id="atmosphere-label">·</span>
               </button>
               <div class="desk-edge-row">
                 <button
                   type="button"
                   class="desk-edge"
                   id="btn-desk-edge"
-                  aria-label="Progress — tap to show text again"
+                  aria-label="Progress — tap to cycle display"
                 >
                   <span class="desk-edge-fill" id="desk-edge-fill"></span>
                 </button>
-                <button type="button" class="atmosphere-min" id="btn-atmosphere-min">
-                  progress only
-                </button>
               </div>
             </div>
-            <p class="hint" id="hint">Pick your start — the bar stays laughably low.</p>
+            <p class="hint" id="hint">Long sit blocks, tiny move at the desk switch — not a focus timer.</p>
             <p class="ambient" id="ambient" hidden></p>
             <p class="mute-hint" id="mute-hint" hidden></p>
           </main>
@@ -306,6 +262,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
           <section class="day-close-reward" id="day-close-reward" hidden>
             <p class="day-close-kicker">Day closed</p>
             <p class="day-close-story" id="day-close-story"></p>
+            <p class="day-close-line" id="day-close-line" hidden></p>
             <div class="day-close-stats" id="day-close-stats" aria-label="Day stats"></div>
             <a class="day-close-more" id="day-close-more" href="${appPath('analytics.html')}">All analytics</a>
           </section>
@@ -366,11 +323,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   qs(root, 'btn-lazy').addEventListener('click', handlers.onToggleLazy)
   qs(root, 'btn-close-day').addEventListener('click', handlers.onCloseDay)
   qs(root, 'btn-atmosphere-label').addEventListener('click', handlers.onToggleClock)
-  qs(root, 'btn-desk-edge').addEventListener('click', () => {
-    if (wordsHidden) handlers.onToggleAtmosphereWords()
-    else handlers.onToggleClock()
-  })
-  qs(root, 'btn-atmosphere-min').addEventListener('click', handlers.onToggleAtmosphereWords)
+  qs(root, 'btn-desk-edge').addEventListener('click', handlers.onToggleClock)
   qs(root, 'btn-install').addEventListener('click', handlers.onInstall)
   qs(root, 'btn-install-dismiss').addEventListener('click', handlers.onDismissInstall)
   qs(root, 'btn-rise').addEventListener('click', handlers.onChooseRise)
@@ -426,6 +379,9 @@ export function renderUi(
     isThreshold &&
     (state.endedPhase === 'sit' || state.endedPhase === 'stand' || state.endedPhase === 'reset')
   const thresholdTimerActive = momentChoiceAtThreshold && state.phaseEndsAt != null
+  const atmosphereDisplay = state.atmosphereDisplay ?? 'soft'
+  const barOnly = isBarOnly(atmosphereDisplay)
+  const atmosphereDetail = detailMode(atmosphereDisplay)
 
   shell.dataset.phase = state.phase
   shell.dataset.mode = state.mode
@@ -434,7 +390,7 @@ export function renderUi(
   shell.dataset.muted = state.soundEnabled ? 'false' : 'true'
   shell.dataset.started = isSetup ? 'false' : 'true'
   shell.dataset.atmosphereDetail = atmosphereDetail
-  shell.dataset.wordsHidden = wordsHidden ? 'true' : 'false'
+  shell.dataset.atmosphereDisplay = atmosphereDisplay
   shell.dataset.dayClose = dayCloseVisible ? 'true' : 'false'
   shell.dataset.returning = isReturnOrientationActive() ? 'true' : 'false'
   shell.dataset.thresholdTimer = thresholdTimerActive ? 'true' : 'false'
@@ -448,7 +404,6 @@ export function renderUi(
   const phaseEl = qs(root, 'phase-label')
   const atmo = qs(root, 'atmosphere')
   const atmoLabel = qs(root, 'atmosphere-label')
-  const atmoMin = qs(root, 'btn-atmosphere-min')
   const hint = qs(root, 'hint')
   const ambient = qs(root, 'ambient')
   const threshold = qs(root, 'threshold')
@@ -495,6 +450,15 @@ export function renderUi(
 
   if (dayCloseVisible && dayCloseSummary) {
     qs(root, 'day-close-story').textContent = buildDayStory(dayCloseSummary)
+    const comparison = buildDayCloseComparison()
+    const lineEl = qs<HTMLElement>(root, 'day-close-line')
+    if (comparison) {
+      lineEl.textContent = comparison
+      lineEl.hidden = false
+    } else {
+      lineEl.textContent = ''
+      lineEl.hidden = true
+    }
     const open = Math.max(0, dayCloseSummary.rise - dayCloseSummary.rounds)
     qs(root, 'day-close-stats').innerHTML = `
       <div class="day-close-stat" data-tone="stand">
@@ -552,14 +516,11 @@ export function renderUi(
     checkInVisible ||
     dayCloseVisible
   atmo.classList.toggle('is-timed', isRunning || isExercise)
-  atmo.classList.toggle('is-words-hidden', wordsHidden)
-  qs(root, 'btn-atmosphere-label').hidden = wordsHidden
-  atmoMin.hidden = false
-  atmoMin.textContent = wordsHidden ? 'Show text' : 'progress only'
-  atmoMin.setAttribute('aria-pressed', wordsHidden ? 'true' : 'false')
+  atmo.classList.toggle('is-bar-only', barOnly)
+  qs(root, 'btn-atmosphere-label').hidden = barOnly
 
   if (isSetup) {
-    atmoLabel.textContent = 'ready'
+    atmoLabel.textContent = '·'
   } else if (isFrozen) {
     atmoLabel.textContent = showFreezePrompt ? 'Call over?' : 'Freeze'
   } else if (
@@ -577,7 +538,7 @@ export function renderUi(
 
   const muteHint = qs(root, 'mute-hint')
   const compact = shell.dataset.compact === 'true'
-  if (!state.soundEnabled && !(compact && isRunning) && !wordsHidden && !dayCloseVisible) {
+  if (!state.soundEnabled && !(compact && isRunning) && !barOnly && !dayCloseVisible) {
     muteHint.hidden = false
     muteHint.textContent = state.notificationsEnabled
       ? 'Sound off — signals via color, tab title, and notifications.'
@@ -608,12 +569,15 @@ export function renderUi(
     const intervals = resolveIntervals(state.intervals)
     if (state.demo) {
       hint.textContent =
-        state.mode === 'lazy' ? 'Demo Lazy — short intervals for testing.' : 'Demo on — short intervals for testing.'
+        state.mode === 'lazy'
+          ? 'Demo Lazy — full loop in seconds, not a Pomodoro.'
+          : 'Demo — full loop in seconds, not a Pomodoro.'
     } else {
+      const rhythm = intervalSummary(intervals, state.mode)
       hint.textContent =
         state.mode === 'lazy'
-          ? `${intervalSummary(intervals, 'lazy')} · Survival mode.`
-          : intervalSummary(intervals, 'high')
+          ? `${rhythm} · Survival mode — move optional at each switch.`
+          : `${rhythm} · Not a focus timer — body maintenance between blocks.`
     }
   } else if (isThreshold) {
     hint.textContent = 'The desk is waiting. No pressure.'
@@ -621,10 +585,11 @@ export function renderUi(
     qs(root, 'threshold-sub').textContent = thresholdSub(state.endedPhase)
   } else if (isPick) {
     qs(root, 'pick-lead').textContent = pickLead(state.pendingNextPhase)
-    hint.textContent =
+    hint.textContent = `This week: ${weekFocusLabel()} · ${
       state.pendingNextPhase === 'sit'
-        ? 'Desk button down and a moment — or sit right away.'
-        : 'Desk button up and a moment — or stand right away.'
+        ? 'Desk down and a moment — or sit right away.'
+        : 'Desk up and a moment — or stand right away.'
+    }`
     const cards = qs(root, 'moment-cards')
     const ids = state.momentChoiceIds ?? []
     cards.innerHTML = ids
@@ -651,15 +616,13 @@ export function renderUi(
   } else {
     hint.textContent = state.demo
       ? 'Demo — atmosphere, moment, desk.'
-      : state.mode === 'lazy'
-        ? 'Lazy Mode — the bar stays low.'
-        : 'The desk keeps the rhythm. You choose the switches.'
+      : runningPhaseHint(state.mode === 'lazy')
   }
 
   if (
     isThreshold ||
     dayCloseVisible ||
-    (wordsHidden && (isRunning || isExercise || isFrozen) && !checkInVisible && !dayCloseVisible)
+    (barOnly && (isRunning || isExercise || isFrozen) && !checkInVisible && !dayCloseVisible)
   ) {
     hint.hidden = true
   } else {

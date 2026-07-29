@@ -1,6 +1,8 @@
-# MVN
+# Stint
 
-Elastic desk copilot for Minimal Viable Movement.
+Ein **Stint** ist ein fester, zusammenhängender Zeitblock für deine Arbeit — ganz ohne den gehetzten Ticker- oder Pausen-Rhythmus der Pomodoro-Technik. Du widmest dich einer Aufgabe für eine längere, sinnvolle Dauer, statt im Minutentakt auf die Uhr zu schauen.
+
+**Sit · micro-move · sit again.** While you work a stint at the desk, Stint only nudges posture: long sit/stand blocks, an optional ~15s micro-move when you switch the desk, then back to the next block. Body maintenance for adjustable desks — not a focus timer.
 
 Local PWA — no account, no cloud, LocalStorage only.
 
@@ -24,7 +26,7 @@ npm run preview
 
 Then open `http://localhost:4173` → **Install app** (or browser menu “Install app”).
 
-1. Open the installed MVN app (its own window)
+1. Open the installed Stint app (its own window)
 2. Allow **Notifications**
 3. Drag it to your second monitor
 
@@ -72,6 +74,7 @@ Everything stays on the device. The app uses several keys:
 | `notificationPersistent` | Toast stays until dismiss |
 | `shortcutHintsEnabled` | Keyboard hints on buttons |
 | `intervals` | Custom sit/stand durations (`null` = defaults) |
+| `atmosphereDisplay` | Main counter: `soft`, `clock`, `percent`, or `bar` (status bar only) |
 
 ### Session / progress
 

@@ -1,5 +1,6 @@
 import type { EnergyMode } from './state'
 import momentsJson from './moments.json'
+import { momentMatchesFocus, weekFocusParts } from './week-focus'
 
 export type MomentKind = 'body' | 'eyes' | 'breath' | 'desk' | 'play'
 
@@ -54,16 +55,28 @@ export function getMoment(id: string | null | undefined): Moment | undefined {
   return MOMENTS.find((m) => m.id === id)
 }
 
-function poolFor(mode: EnergyMode, kind?: MomentKind): Moment[] {
-  return MOMENTS.filter(
+function poolFor(mode: EnergyMode, kind?: MomentKind, at = new Date()): Moment[] {
+  const base = MOMENTS.filter(
     (m) => (m.mode === mode || m.mode === 'both') && (kind == null || m.kind === kind),
   )
+  const focus = weekFocusParts(at)
+  const focused = base.filter((m) => momentMatchesFocus(m.part, m.kind, focus))
+  return focused.length >= 2 ? focused : base
 }
 
-export function pickMoment(mode: EnergyMode, recentIds: string[], kind?: MomentKind): Moment {
-  const pool = poolFor(mode, kind)
+function preferFresh(pool: Moment[], recentIds: string[]): Moment[] {
   const fresh = pool.filter((m) => !recentIds.includes(m.id))
-  const candidates = fresh.length > 0 ? fresh : pool.length > 0 ? pool : MOMENTS
+  return fresh.length > 0 ? fresh : pool.length > 0 ? pool : MOMENTS
+}
+
+export function pickMoment(
+  mode: EnergyMode,
+  recentIds: string[],
+  kind?: MomentKind,
+  at = new Date(),
+): Moment {
+  const pool = poolFor(mode, kind, at)
+  const candidates = preferFresh(pool, recentIds)
   return candidates[Math.floor(Math.random() * candidates.length)]!
 }
 
@@ -73,22 +86,21 @@ function pickMomentAvoidingParts(
   recentIds: string[],
   kind: MomentKind,
   usedParts: Set<MomentPart>,
+  at = new Date(),
 ): Moment {
-  const pool = poolFor(mode, kind)
+  const pool = poolFor(mode, kind, at)
   const fresh = pool.filter((m) => !recentIds.includes(m.id) && !usedParts.has(m.part))
   const candidates =
     fresh.length > 0
       ? fresh
-      : pool.filter((m) => !recentIds.includes(m.id)).length > 0
-        ? pool.filter((m) => !recentIds.includes(m.id))
-        : pool.length > 0
-          ? pool
-          : MOMENTS
+      : preferFresh(pool.filter((m) => !usedParts.has(m.part)), recentIds).length > 0
+        ? preferFresh(pool.filter((m) => !usedParts.has(m.part)), recentIds)
+        : preferFresh(pool, recentIds)
   return candidates[Math.floor(Math.random() * candidates.length)]!
 }
 
 /** Three choices: prefer body / eyes / play-or-desk diversity. */
-export function pickMomentCards(mode: EnergyMode, recentIds: string[]): Moment[] {
+export function pickMomentCards(mode: EnergyMode, recentIds: string[], at = new Date()): Moment[] {
   const preferred: MomentKind[] = ['body', 'eyes', Math.random() > 0.5 ? 'play' : 'desk']
   const picked: Moment[] = []
   const used = new Set<string>()
@@ -97,8 +109,8 @@ export function pickMomentCards(mode: EnergyMode, recentIds: string[]): Moment[]
   for (const kind of preferred) {
     const m =
       kind === 'body'
-        ? pickMomentAvoidingParts(mode, [...recentIds, ...used], kind, usedParts)
-        : pickMoment(mode, [...recentIds, ...used], kind)
+        ? pickMomentAvoidingParts(mode, [...recentIds, ...used], kind, usedParts, at)
+        : pickMoment(mode, [...recentIds, ...used], kind, at)
     if (!used.has(m.id)) {
       picked.push(m)
       used.add(m.id)
@@ -107,7 +119,7 @@ export function pickMomentCards(mode: EnergyMode, recentIds: string[]): Moment[]
   }
 
   while (picked.length < 3) {
-    const m = pickMomentAvoidingParts(mode, [...recentIds, ...used], 'body', usedParts)
+    const m = pickMomentAvoidingParts(mode, [...recentIds, ...used], 'body', usedParts, at)
     if (used.has(m.id)) {
       const fallback =
         poolFor(mode).find((x) => !used.has(x.id)) ?? MOMENTS.find((x) => !used.has(x.id))

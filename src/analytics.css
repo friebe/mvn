@@ -51,6 +51,19 @@ body {
   padding-top: 0.2rem;
 }
 
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.brand-mark {
+  flex-shrink: 0;
+  display: block;
+  color: var(--color-ink);
+}
+
 .analytics-brand {
   margin: 0;
   font-family: var(--font-display);

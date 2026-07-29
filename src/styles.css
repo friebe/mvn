@@ -290,6 +290,21 @@ body {
   min-width: 0;
 }
 
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.brand-mark {
+  flex-shrink: 0;
+  display: block;
+  width: clamp(1.65rem, 5.5vmin, 2.75rem);
+  height: clamp(1.65rem, 5.5vmin, 2.75rem);
+  color: var(--color-ink);
+}
+
 .top-actions {
   flex-shrink: 0;
   display: flex;
@@ -337,7 +352,7 @@ body {
 }
 
 .tag {
-  margin: 0;
+  margin: 0.35rem 0 0;
   font-size: clamp(1rem, 2.2vmin, 1.35rem);
   color: var(--color-ink-2);
   letter-spacing: 0.02em;
@@ -375,8 +390,18 @@ body {
   font-size: clamp(1.35rem, 4vmin, 2rem);
 }
 
+.shell[data-compact='true'][data-started='true'] .brand-mark {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
 .shell[data-compact='true'] .brand {
   font-size: clamp(1.75rem, 5.5vmin, 2.75rem);
+}
+
+.shell[data-compact='true'] .brand-mark {
+  width: 1.55rem;
+  height: 1.55rem;
 }
 
 .shell[data-compact='true'] .tag {
@@ -583,32 +608,12 @@ body {
   opacity: 0.55;
 }
 
-.atmosphere-min {
-  appearance: none;
-  flex: 0 0 auto;
-  margin: 0;
-  padding: 0.2rem 0;
-  border: none;
-  background: transparent;
-  color: var(--color-ink-3);
-  font-family: var(--font-body);
-  font-size: clamp(0.8rem, 1.7vmin, 0.92rem);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.atmosphere-min:hover {
-  color: var(--color-ink);
-}
-
-.atmosphere.is-words-hidden {
+.atmosphere.is-bar-only {
   max-width: min(100%, 18rem);
   gap: 0.45rem;
 }
 
-.atmosphere.is-words-hidden .desk-edge {
+.atmosphere.is-bar-only .desk-edge {
   height: 4px;
 }
 
@@ -641,13 +646,9 @@ body {
   height: 3px;
 }
 
-.shell[data-compact='true'] .atmosphere-min {
-  font-size: 0.8rem;
-}
-
-.shell[data-compact='true'][data-words-hidden='true'] .hint,
-.shell[data-compact='true'][data-words-hidden='true'] .ambient,
-.shell[data-compact='true'][data-words-hidden='true'] .mute-hint {
+.shell[data-compact='true'][data-atmosphere-display='bar'] .hint,
+.shell[data-compact='true'][data-atmosphere-display='bar'] .ambient,
+.shell[data-compact='true'][data-atmosphere-display='bar'] .mute-hint {
   display: none !important;
 }
 
