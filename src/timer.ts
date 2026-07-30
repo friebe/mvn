@@ -353,8 +353,8 @@ function armAwayNudge(kind: AttentionKind, title: string, body: string): void {
       return
     }
     void notifyPhase(`Stint · ${awayNudgeTitle}`, awayNudgeBody, true, {
-      persistent: true,
-      playSound: true,
+      persistent: state.notificationPersistent,
+      playSound: state.soundEnabled,
     })
     startTitleBlink(awayNudgeTitle)
   }, AWAY_NUDGE_MS)
@@ -366,8 +366,7 @@ function signalAttention(kind: AttentionKind, title: string, body: string): void
   const notify = shouldNotify(muted, kind, away)
   playBeep(state.soundEnabled)
   void notifyPhase(`Stint · ${title}`, body, notify, {
-    // Stay on screen when you're in another window — Windows often only blinks the tray otherwise.
-    persistent: state.notificationPersistent || (away && notify && AWAY_ACTION_KINDS.has(kind)),
+    persistent: state.notificationPersistent,
     playSound: state.soundEnabled || (away && notify),
   })
   flashShell(kind, muted)

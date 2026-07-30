@@ -55,6 +55,10 @@ function setButtonLabel(btn: HTMLElement, text: string): void {
   else btn.textContent = text
 }
 
+function setHintLines(hint: HTMLElement, rhythm: string, tag: string): void {
+  hint.innerHTML = `<span class="hint-rhythm">${rhythm}</span><span class="hint-tag">${tag}</span>`
+}
+
 function actionButton(
   id: string,
   classes: string,
@@ -566,10 +570,11 @@ export function renderUi(
           : 'Demo — full loop in seconds, not a Pomodoro.'
     } else {
       const rhythm = intervalSummary(intervals, state.mode)
-      hint.textContent =
-        state.mode === 'lazy'
-          ? `${rhythm} · Survival mode — move optional at each switch.`
-          : `${rhythm} · Not a focus timer — body maintenance between blocks.`
+      if (state.mode === 'lazy') {
+        setHintLines(hint, rhythm, 'Survival mode — move optional at each switch.')
+      } else {
+        setHintLines(hint, rhythm, 'Body maintenance between blocks — not a focus timer.')
+      }
     }
   } else if (isThreshold) {
     hint.textContent = 'The desk is waiting. No pressure.'

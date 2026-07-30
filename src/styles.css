@@ -74,7 +74,7 @@ body {
   z-index: 1;
   box-sizing: border-box;
   width: 100%;
-  max-width: min(56rem, 100%);
+  max-width: var(--page-max-width);
   height: 100%;
   margin: 0 auto;
   display: flex;
@@ -629,6 +629,22 @@ body {
   max-width: 36rem;
   font-size: clamp(1.15rem, 2.6vmin, 1.55rem);
   line-height: 1.4;
+  color: var(--color-ink-2);
+  text-wrap: balance;
+}
+
+.hint-rhythm {
+  display: block;
+  font-weight: 600;
+  color: var(--color-ink);
+  line-height: 1.35;
+}
+
+.hint-tag {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.9em;
+  line-height: 1.45;
   color: var(--color-ink-2);
 }
 

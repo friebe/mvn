@@ -130,7 +130,7 @@ function render(): void {
             <p class="setting-label">Notifications</p>
             <p class="setting-note">
               Browser toasts — best as an installed app. With this on, when another window is focused
-              Stint keeps toasts on screen and repeats desk / check-in cues every ~75s until you’re back.
+              Stint repeats desk / check-in cues every ~75s (one toast at a time, auto-dismisses).
             </p>
           </div>
           <button type="button" class="setting-btn ${s.notificationsEnabled ? 'is-on' : ''}" id="btn-notif">

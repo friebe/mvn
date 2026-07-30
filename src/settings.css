@@ -28,7 +28,7 @@ body {
 }
 
 .settings {
-  max-width: 36rem;
+  max-width: var(--page-max-width);
   margin: 0 auto;
   padding: clamp(1.25rem, 3vmin, 2.5rem) clamp(1.25rem, 4vmin, 3rem)
     clamp(2rem, 5vmin, 3.5rem);

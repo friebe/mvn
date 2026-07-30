@@ -24,6 +24,27 @@ export interface NotifyOptions {
   playSound?: boolean
 }
 
+/** One tag — new toasts replace the previous instead of stacking. */
+const NOTIFY_TAG = 'stint'
+/** Auto-dismiss when not in “keep visible” mode (page + SW). */
+const AUTO_DISMISS_MS = 8_000
+
+async function dismissTagged(reg: ServiceWorkerRegistration): Promise<void> {
+  try {
+    const list = await reg.getNotifications({ tag: NOTIFY_TAG })
+    for (const n of list) n.close()
+  } catch {
+    // getNotifications unsupported or SW gone
+  }
+}
+
+function scheduleAutoDismiss(reg: ServiceWorkerRegistration | null, pageNote?: Notification): void {
+  window.setTimeout(() => {
+    if (reg) void dismissTagged(reg)
+    pageNote?.close()
+  }, AUTO_DISMISS_MS)
+}
+
 /** Prefer Service Worker notifications (works better for installed PWAs). */
 export async function notifyPhase(
   title: string,
@@ -35,6 +56,7 @@ export async function notifyPhase(
   if (!('Notification' in window)) return
   if (Notification.permission !== 'granted') return
 
+  const persistent = opts.persistent === true
   // Absolute URLs + cache bust — Windows often ignores relative/cached PWA icons.
   const icon = absoluteAssetUrl('icons/icon-192.png')
   const badge = absoluteAssetUrl('icons/icon-96.png')
@@ -43,15 +65,15 @@ export async function notifyPhase(
     icon,
     badge,
     silent: !opts.playSound,
-    // Unique tag so Windows shows a fresh toast instead of silently replacing in the panel.
-    tag: `stint-${Date.now()}`,
-    requireInteraction: opts.persistent === true,
+    tag: NOTIFY_TAG,
+    requireInteraction: persistent,
   }
 
   try {
     const reg = await getReadyRegistration()
     if (reg?.showNotification) {
       await reg.showNotification(title, options)
+      if (!persistent) scheduleAutoDismiss(reg)
       return
     }
   } catch {
@@ -64,6 +86,7 @@ export async function notifyPhase(
       window.focus()
       n.close()
     }
+    if (!persistent) scheduleAutoDismiss(null, n)
   } catch {
     // blocked / insecure context
   }
