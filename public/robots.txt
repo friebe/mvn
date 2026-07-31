@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /mvn/
+Disallow: /mvn/analytics.html
+Disallow: /mvn/settings.html
+
+Sitemap: https://friebe.github.io/mvn/sitemap.xml

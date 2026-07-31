@@ -2,7 +2,7 @@
 
 Ein **Stint** ist ein fester, zusammenhängender Zeitblock für deine Arbeit — ganz ohne den gehetzten Ticker- oder Pausen-Rhythmus der Pomodoro-Technik. Du widmest dich einer Aufgabe für eine längere, sinnvolle Dauer, statt im Minutentakt auf die Uhr zu schauen.
 
-**Sit · micro-move · sit again.** While you work a stint at the desk, Stint only nudges posture: long sit/stand blocks, an optional ~15s micro-move when you switch the desk, then back to the next block. Body maintenance for adjustable desks — not a focus timer.
+**Sit · micro-move · sit again.** Minimalist desk companion for adjustable sit/stand desks — calm design that feels simple to use. Long sit/stand blocks, an optional ~15s micro-move when you switch the desk, then back to the next block. Body maintenance — not a focus timer.
 
 Local PWA — no account, no cloud, LocalStorage only.
 

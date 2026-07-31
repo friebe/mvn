@@ -21,8 +21,8 @@ body {
   font-family: var(--font-body);
   color: var(--color-ink);
   background:
-    radial-gradient(ellipse 80% 50% at 10% -10%, oklch(92% 0.03 145 / 0.7), transparent),
-    radial-gradient(ellipse 60% 40% at 100% 0%, oklch(93% 0.025 85 / 0.5), transparent),
+    radial-gradient(ellipse 80% 50% at 10% -10%, var(--wash-a), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, var(--wash-b), transparent),
     var(--color-paper);
   -webkit-font-smoothing: antialiased;
 }
@@ -179,11 +179,11 @@ body {
 
 .setting-btn.danger {
   color: var(--color-freeze);
-  border-color: oklch(42% 0.05 250 / 0.35);
+  border-color: color-mix(in oklch, var(--color-freeze) 35%, transparent);
 }
 
 .setting-btn.danger:hover {
-  background: oklch(42% 0.05 250 / 0.08);
+  background: color-mix(in oklch, var(--color-freeze) 8%, transparent);
 }
 
 .setting-link {

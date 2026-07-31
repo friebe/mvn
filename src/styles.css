@@ -23,8 +23,8 @@ body {
   font-family: var(--font-body);
   color: var(--color-ink);
   background:
-    radial-gradient(ellipse 80% 50% at 10% -10%, oklch(92% 0.03 145 / 0.7), transparent),
-    radial-gradient(ellipse 60% 40% at 100% 0%, oklch(93% 0.025 85 / 0.5), transparent),
+    radial-gradient(ellipse 80% 50% at 10% -10%, var(--wash-a), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, var(--wash-b), transparent),
     var(--color-paper);
   -webkit-font-smoothing: antialiased;
 }
@@ -149,6 +149,18 @@ body {
 .quick-actions .btn,
 .quick-actions a {
   flex: 0 1 auto;
+}
+
+.btn-end-day {
+  color: var(--color-ink-3);
+  border-color: transparent;
+  font-weight: 500;
+}
+
+.btn-end-day:hover {
+  color: var(--color-ink);
+  border-color: var(--color-paper-3);
+  background: var(--color-paper-2);
 }
 
 .primary-actions .btn {
@@ -1008,15 +1020,15 @@ button[hidden] {
   padding: 0.28em 0.45em;
   border-radius: 5px;
   color: var(--color-ink-3);
-  background: oklch(40% 0.02 250 / 0.06);
-  border: 1px solid oklch(40% 0.02 250 / 0.1);
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
 }
 
 .btn-primary .btn-kbd,
 .btn-danger .btn-kbd {
-  color: oklch(98% 0 0 / 0.62);
-  background: oklch(0% 0 0 / 0.14);
-  border-color: oklch(100% 0 0 / 0.16);
+  color: var(--kbd-on-accent);
+  background: var(--kbd-on-accent-bg);
+  border-color: var(--kbd-on-accent-border);
 }
 
 .moment-choice {
@@ -1096,7 +1108,7 @@ button[hidden] {
 /* Localhost debug toolbar — only mounted on local hosts */
 .debug-bar {
   position: fixed;
-  z-index: 9999;
+  z-index: 10001;
   left: 0.75rem;
   bottom: 0.75rem;
   display: flex;
@@ -1107,7 +1119,7 @@ button[hidden] {
   border: 1px solid var(--color-paper-3);
   background: color-mix(in oklch, var(--color-paper) 92%, transparent);
   backdrop-filter: blur(8px);
-  box-shadow: 0 4px 18px oklch(20% 0.02 250 / 0.12);
+  box-shadow: 0 4px 18px var(--shadow-soft);
   font-family: var(--font-body);
   font-size: 0.75rem;
   color: var(--color-ink-2);
@@ -1146,6 +1158,11 @@ button[hidden] {
   background: var(--color-freeze);
   border-color: transparent;
   color: var(--color-paper);
+}
+
+.debug-bar[data-splash='true'] .debug-bar-btn[aria-pressed='true'] {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .debug-bar-hint {

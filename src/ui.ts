@@ -21,6 +21,7 @@ import { weekFocusLabel } from './week-focus'
 import { shortcutHintLabel, type ShortcutId } from './shortcuts'
 import { detailMode, isBarOnly } from './atmosphere-display'
 import { brandLockupHtml } from './brand-mark'
+import { resolveTheme } from './theme'
 
 export interface UiHandlers {
   onStart: () => void
@@ -35,6 +36,7 @@ export interface UiHandlers {
   onConfirmCheckIn: () => void
   onToggleLazy: () => void
   onToggleClock: () => void
+  onToggleTheme: () => void
   onInstall: () => void
   onDismissInstall: () => void
   onChooseRise: () => void
@@ -164,20 +166,21 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
 
       <header class="top">
         <div class="top-brand">
-          ${brandLockupHtml('Desk rhythm — not a focus timer', 30)}
+          ${brandLockupHtml()}
         </div>
         <nav class="top-actions" aria-label="App">
           <button
             type="button"
             class="icon-link"
-            id="btn-close-day"
-            aria-label="Day close"
-            title="Day close"
+            id="btn-theme"
+            aria-label="Switch to dark theme"
+            title="Theme"
           >
-            <svg class="icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+            <svg class="icon" id="icon-theme" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
               <path
+                id="icon-theme-path"
                 fill="currentColor"
-                d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm-1.1 14.5-4.2-4.2 1.4-1.4 2.8 2.8 5.8-5.8 1.4 1.4Z"
+                d="M12 3a9 9 0 1 0 9 9c0-.5-.04-.98-.1-1.45a7 7 0 1 1-7.45-7.45C12.98 3.04 12.5 3 12 3z"
               />
             </svg>
           </button>
@@ -300,6 +303,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             </div>
             <div class="row quick-actions" id="quick-actions">
               ${actionButton('btn-lazy', 'btn btn-ghost', 'Lazy Mode', 'toggleLazy')}
+              ${actionButton('btn-close-day', 'btn btn-ghost btn-end-day', 'End day', null, true)}
             </div>
           </nav>
         </div>
@@ -322,6 +326,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   qs(root, 'btn-check-in').addEventListener('click', handlers.onConfirmCheckIn)
   qs(root, 'btn-lazy').addEventListener('click', handlers.onToggleLazy)
   qs(root, 'btn-close-day').addEventListener('click', handlers.onCloseDay)
+  qs(root, 'btn-theme').addEventListener('click', handlers.onToggleTheme)
   qs(root, 'btn-atmosphere-label').addEventListener('click', handlers.onToggleClock)
   qs(root, 'btn-desk-edge').addEventListener('click', handlers.onToggleClock)
   qs(root, 'btn-install').addEventListener('click', handlers.onInstall)
@@ -394,12 +399,30 @@ export function renderUi(
   shell.dataset.dayClose = dayCloseVisible ? 'true' : 'false'
   shell.dataset.returning = isReturnOrientationActive() ? 'true' : 'false'
   shell.dataset.thresholdTimer = thresholdTimerActive ? 'true' : 'false'
+  const resolvedTheme = resolveTheme(state.theme ?? 'system')
+  shell.dataset.theme = resolvedTheme
   if (thresholdTimerActive && state.pendingNextPhase) {
     shell.dataset.pendingNext = state.pendingNextPhase
   } else {
     delete shell.dataset.pendingNext
   }
   updateCompactMode(root)
+
+  const btnTheme = qs<HTMLButtonElement>(root, 'btn-theme')
+  const themePath = root.querySelector('#icon-theme-path') as SVGPathElement | null
+  const darkOn = resolvedTheme === 'dark'
+  // One glyph: moon (→ dark) or sun (→ light)
+  themePath?.setAttribute(
+    'd',
+    darkOn
+      ? 'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0-5a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 17a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1zM3 11a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1zm16 0a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2h-1a1 1 0 0 1-1-1zM5.64 5.64a1 1 0 0 1 1.41 0l.71.71A1 1 0 1 1 6.35 7.76l-.71-.71a1 1 0 0 1 0-1.41zm11.31 11.31a1 1 0 0 1 1.41 0l.71.71a1 1 0 0 1-1.41 1.41l-.71-.71a1 1 0 0 1 0-1.41zM18.36 5.64a1 1 0 0 1 0 1.41l-.71.71a1 1 0 1 1-1.41-1.41l.71-.71a1 1 0 0 1 1.41 0zM6.35 16.24a1 1 0 0 1 0 1.41l-.71.71A1 1 0 0 1 4.22 17l.71-.71a1 1 0 0 1 1.42 0z'
+      : 'M12 3a9 9 0 1 0 9 9c0-.46-.04-.91-.1-1.35a7 7 0 1 1-7.55-7.55C12.91 3.04 13.36 3 12 3z',
+  )
+  btnTheme.setAttribute(
+    'aria-label',
+    darkOn ? 'Switch to light theme' : 'Switch to dark theme',
+  )
+  btnTheme.title = darkOn ? 'Light' : 'Dark'
 
   const phaseEl = qs(root, 'phase-label')
   const atmo = qs(root, 'atmosphere')
@@ -444,6 +467,8 @@ export function renderUi(
   dayCloseReward.hidden = !dayCloseVisible
 
   btnLazy.hidden = isThreshold || isExercise || isPick || dayCloseVisible
+  const btnCloseDay = qs<HTMLButtonElement>(root, 'btn-close-day')
+  btnCloseDay.hidden = isSetup || dayCloseVisible
   setButtonLabel(btnLazy, state.mode === 'lazy' ? 'Lazy on' : 'Lazy Mode')
   btnLazy.classList.toggle('is-on', state.mode === 'lazy')
   btnReroll.hidden = state.momentRerolled
@@ -573,7 +598,7 @@ export function renderUi(
       if (state.mode === 'lazy') {
         setHintLines(hint, rhythm, 'Survival mode — move optional at each switch.')
       } else {
-        setHintLines(hint, rhythm, 'Body maintenance between blocks — not a focus timer.')
+        setHintLines(hint, rhythm, 'Calm and simple — body maintenance, not a focus timer.')
       }
     }
   } else if (isThreshold) {

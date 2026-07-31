@@ -3,19 +3,107 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stint — Minimal desk rhythm for sit/stand desks</title>
+    <meta
+      name="description"
+      content="Stint is a minimalist desk companion for adjustable sit/stand desks. Calm, simple design that feels easy to use: long sit and stand blocks, a short micro-move at the desk switch. Not a Pomodoro or focus timer. Local PWA — no account, no cloud."
+    />
+    <meta
+      name="keywords"
+      content="minimalist desk app, sit stand desk, standing desk timer, desk rhythm, calm design, micro movement, posture, not pomodoro, PWA"
+    />
+    <meta name="author" content="Stint" />
+    <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#141f1c" />
-    <meta name="description" content="Stint — sit, micro-move at the desk switch, sit again. Elastic desk copilot, not a Pomodoro timer." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="application-name" content="Stint" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Stint" />
-    <meta name="application-name" content="Stint" />
-    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/icons/icon-192.png" type="image/png" sizes="192x192" />
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180" />
-    <title>Stint</title>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="canonical" href="https://friebe.github.io/mvn/" />
+    <script>
+      ;(function () {
+        try {
+          var raw = localStorage.getItem('mvn.v1')
+          var pref = 'system'
+          if (raw) {
+            var t = JSON.parse(raw).theme
+            if (t === 'light' || t === 'dark' || t === 'system') pref = t
+          }
+          var dark =
+            pref === 'dark' ||
+            (pref === 'system' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches)
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+        } catch (e) {
+          document.documentElement.dataset.theme = 'light'
+        }
+      })()
+    </script>
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Stint" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://friebe.github.io/mvn/" />
+    <meta property="og:title" content="Stint — Minimal desk rhythm for sit/stand desks" />
+    <meta
+      property="og:description"
+      content="Minimalist sit/stand desk companion — calm design, simple to use. Long blocks, short move at the switch. Not a focus timer."
+    />
+    <meta property="og:image" content="https://friebe.github.io/mvn/icons/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="Stint mark — sit plane, stem, stand plane" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Stint — Minimal desk rhythm for sit/stand desks" />
+    <meta
+      name="twitter:description"
+      content="Minimalist sit/stand desk companion — calm design, simple to use. Not a Pomodoro. Local PWA."
+    />
+    <meta name="twitter:image" content="https://friebe.github.io/mvn/icons/icon-512.png" />
+    <meta name="twitter:image:alt" content="Stint mark — sit plane, stem, stand plane" />
+
+    <link rel="icon" href="%BASE_URL%icons/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="%BASE_URL%icons/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="%BASE_URL%icons/apple-touch-icon.png" sizes="180x180" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Stint",
+        "url": "https://friebe.github.io/mvn/",
+        "description": "Minimalist desk companion for adjustable sit/stand desks. Calm, simple design — long sit and stand blocks with an optional micro-move at each desk switch. Not a Pomodoro or focus timer.",
+        "applicationCategory": "HealthApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires a modern browser with LocalStorage and optional Notifications.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "isAccessibleForFree": true,
+        "inLanguage": "en",
+        "image": "https://friebe.github.io/mvn/icons/icon-512.png"
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>
+    <noscript>
+      <main style="max-width: 36rem; margin: 2rem auto; padding: 0 1.25rem; font-family: system-ui, sans-serif">
+        <h1>Stint</h1>
+        <p>
+          A minimalist desk companion for sit/stand desks — calm design, simple to use. Long sit and
+          stand blocks, an optional ~15s micro-move when you switch the desk. Not a Pomodoro or focus
+          timer.
+        </p>
+        <p>Enable JavaScript to run the local Stint PWA (no account, no cloud).</p>
+        <p><a href="https://friebe.github.io/mvn/">https://friebe.github.io/mvn/</a></p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

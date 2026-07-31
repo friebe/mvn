@@ -15,6 +15,11 @@ import {
   type StatsSummary,
 } from './stats'
 import { appPath } from './paths'
+import { loadState } from './state'
+import { applyThemeFromState, bindSystemThemeListener } from './theme'
+
+applyThemeFromState(loadState())
+bindSystemThemeListener(() => loadState().theme)
 
 type Period = 'today' | '7d' | 'all'
 

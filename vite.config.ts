@@ -19,6 +19,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: [
+        'robots.txt',
+        'sitemap.xml',
         'icons/icon.svg',
         'icons/icon-maskable.svg',
         'icons/stint-mark.svg',
@@ -32,7 +34,11 @@ export default defineConfig({
         id: '/mvn/',
         name: 'Stint',
         short_name: 'Stint',
-        description: 'Sit · micro-move · sit again — desk copilot, not a focus timer.',
+        description:
+          'Minimalist sit/stand desk rhythm — calm design, simple to use. Not a focus timer.',
+        lang: 'en',
+        dir: 'ltr',
+        categories: ['health', 'productivity', 'lifestyle'],
         theme_color: '#141f1c',
         background_color: '#f3efe6',
         display: 'standalone',

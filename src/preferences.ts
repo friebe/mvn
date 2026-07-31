@@ -12,6 +12,7 @@ export type PreferenceKey =
   | 'shortcutHintsEnabled'
   | 'notificationPersistent'
   | 'atmosphereDisplay'
+  | 'theme'
 
 export function readPreferences(): AppState {
   return loadState()

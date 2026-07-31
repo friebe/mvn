@@ -26,6 +26,7 @@ import { cycleAtmosphereDisplay } from './atmosphere-display'
 import { writePreferences } from './preferences'
 import { bindShortcuts } from './shortcuts'
 import { isLocalDebugHost } from './debug-host'
+import { applyThemeFromState, bindSystemThemeListener, nextThemeToggle } from './theme'
 import {
   chooseLazyPath,
   chooseMoment,
@@ -43,6 +44,7 @@ import {
   setAtmosphereDisplay,
   setDemo,
   setMode,
+  setTheme,
   skipStanding,
   startDay,
   startFreezeAfterplay,
@@ -50,12 +52,16 @@ import {
   refreshUi,
 } from './timer'
 import { initPresence } from './presence'
+import { showLaunchSplash } from './splash'
 
 registerPwa()
 initPresence()
 
 const app = document.querySelector<HTMLElement>('#app')!
 const initial = loadState()
+applyThemeFromState(initial)
+bindSystemThemeListener(() => getState().theme)
+showLaunchSplash()
 
 const params = new URLSearchParams(window.location.search)
 if (params.get('demo') === '1' || params.get('demo') === 'true') {
@@ -103,6 +109,12 @@ mountUi(app, {
     const next = cycleAtmosphereDisplay(getState().atmosphereDisplay ?? 'soft')
     writePreferences({ atmosphereDisplay: next })
     setAtmosphereDisplay(next)
+    refreshUi()
+  },
+  onToggleTheme: () => {
+    const next = nextThemeToggle(getState().theme ?? 'system')
+    writePreferences({ theme: next })
+    setTheme(next)
     refreshUi()
   },
   onInstall: async () => {

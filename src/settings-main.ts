@@ -30,6 +30,14 @@ import {
   ATMOSPHERE_DISPLAY_ORDER,
 } from './atmosphere-display'
 import {
+  THEME_LABELS,
+  THEME_NOTES,
+  THEME_ORDER,
+  applyThemeFromState,
+  bindSystemThemeListener,
+  type ThemePreference,
+} from './theme'
+import {
   canInstallPwa,
   installManualHint,
   onInstallAvailability,
@@ -39,6 +47,8 @@ import {
 } from './pwa'
 
 registerPwa()
+applyThemeFromState(readPreferences())
+bindSystemThemeListener(() => readPreferences().theme)
 
 type IntervalPhase = 'sit' | 'stand'
 
@@ -157,6 +167,28 @@ function render(): void {
         <p class="settings-hint settings-hint-tight">
           Windows: Settings → System → Notifications → Stint → enable “Banners”.
           Focus assist can suppress toasts.
+        </p>
+      </section>
+
+      <section class="settings-group" aria-label="Appearance">
+        <h2 class="settings-group-title">Appearance</h2>
+        <p class="settings-hint">
+          Desk Daylight or Desk Evening — soft contrast for a long sit. System follows your OS.
+        </p>
+        <div class="display-tabs" role="radiogroup" aria-label="Theme">
+          ${THEME_ORDER.map(
+            (mode) => `
+          <button
+            type="button"
+            role="radio"
+            class="display-tab${(s.theme ?? 'system') === mode ? ' is-on' : ''}"
+            data-theme-pref="${mode}"
+            aria-checked="${(s.theme ?? 'system') === mode}"
+          >${THEME_LABELS[mode]}</button>`,
+          ).join('')}
+        </div>
+        <p class="settings-hint settings-hint-tight" id="theme-note">
+          ${THEME_NOTES[s.theme ?? 'system']}
         </p>
       </section>
 
@@ -312,6 +344,15 @@ function render(): void {
   root.querySelector('#btn-shortcut-hints')?.addEventListener('click', () => {
     togglePreference('shortcutHintsEnabled')
     render()
+  })
+
+  root.querySelectorAll<HTMLButtonElement>('[data-theme-pref]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.themePref as ThemePreference
+      writePreferences({ theme: mode })
+      applyThemeFromState(readPreferences())
+      render()
+    })
   })
 
   root.querySelectorAll<HTMLButtonElement>('[data-atmosphere]').forEach((btn) => {

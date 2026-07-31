@@ -37,6 +37,8 @@ import { notifyPhase } from './notify'
 import { isAppAway, subscribePresence } from './presence'
 import { buildDayCloseLine, recordStat, summarizeToday, todayKey } from './stats'
 import { isLocalDebugHost } from './debug-host'
+import type { ThemePreference } from './theme'
+import { applyTheme } from './theme'
 
 export type TimerListener = (
   state: AppState,
@@ -734,6 +736,13 @@ export function setMode(mode: EnergyMode): void {
 export function setAtmosphereDisplay(display: AtmosphereDisplay): void {
   if (state.atmosphereDisplay === display) return
   state = { ...state, atmosphereDisplay: display }
+  emit()
+}
+
+export function setTheme(theme: ThemePreference): void {
+  if (state.theme === theme) return
+  state = { ...state, theme }
+  applyTheme(theme)
   emit()
 }
 

@@ -1,4 +1,6 @@
 import type { UserIntervals } from './intervals'
+import type { ThemePreference } from './theme'
+import { normalizeTheme } from './theme'
 
 export type EnergyMode = 'high' | 'lazy'
 /** Atmosphere headline: soft words, timer, percent, or progress bar only */
@@ -74,6 +76,8 @@ export interface AppState {
   notificationPersistent: boolean
   /** Main stage atmosphere display mode */
   atmosphereDisplay: AtmosphereDisplay
+  /** Desk Daylight / Desk Evening / follow OS */
+  theme: ThemePreference
 }
 
 export const STORAGE_KEY = 'mvn.v1'
@@ -147,6 +151,7 @@ export function defaultState(): AppState {
     shortcutHintsEnabled: true,
     notificationPersistent: false,
     atmosphereDisplay: 'soft',
+    theme: 'system',
   }
 }
 
@@ -159,6 +164,7 @@ export function loadState(): AppState {
       ...defaultState(),
       ...parsed,
       atmosphereDisplay: migrateAtmosphereDisplay(parsed),
+      theme: normalizeTheme(parsed.theme),
     }
   } catch {
     return defaultState()
