@@ -2,7 +2,15 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'node:path'
 
-const base = '/mvn/'
+/** GitHub Pages default `/mvn/`; Netlify sets `BASE_PATH=/`. */
+function normalizeBase(raw: string | undefined): string {
+  const value = (raw ?? '/mvn/').trim() || '/'
+  if (value === '/') return '/'
+  return `/${value.replace(/^\/+|\/+$/g, '')}/`
+}
+
+const base = normalizeBase(process.env.BASE_PATH)
+const basePathNoSlash = base.replace(/\/$/, '') || ''
 
 export default defineConfig({
   base,
@@ -31,7 +39,7 @@ export default defineConfig({
         'icons/apple-touch-icon.png',
       ],
       manifest: {
-        id: '/mvn/',
+        id: base,
         name: 'Stint',
         short_name: 'Stint',
         description:
@@ -43,8 +51,8 @@ export default defineConfig({
         background_color: '#f3efe6',
         display: 'standalone',
         orientation: 'any',
-        start_url: '/mvn/',
-        scope: '/mvn/',
+        start_url: base,
+        scope: base,
         icons: [
           {
             src: 'icons/icon-96.png',
@@ -75,10 +83,10 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         importScripts: ['sw-notify-click.js'],
-        navigateFallback: `${base}index.html`,
+        navigateFallback: base === '/' ? '/index.html' : `${base}index.html`,
         navigateFallbackDenylist: [
-          new RegExp(`^${base.replace(/\/$/, '')}/analytics\\.html$`),
-          new RegExp(`^${base.replace(/\/$/, '')}/settings\\.html$`),
+          new RegExp(`^${basePathNoSlash}/analytics\\.html$`),
+          new RegExp(`^${basePathNoSlash}/settings\\.html$`),
         ],
       },
       devOptions: {

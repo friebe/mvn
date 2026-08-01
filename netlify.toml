@@ -1,0 +1,14 @@
+[build]
+  command = "BASE_PATH=/ npm run build"
+  publish = "dist"
+
+# MPA pretty URLs — not a SPA catch-all (analytics/settings stay real HTML files).
+[[redirects]]
+  from = "/settings"
+  to = "/settings.html"
+  status = 200
+
+[[redirects]]
+  from = "/analytics"
+  to = "/analytics.html"
+  status = 200

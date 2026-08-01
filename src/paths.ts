@@ -1,4 +1,4 @@
-/** Vite base path, e.g. `/mvn/` on GitHub Pages or `/` locally. */
+/** Vite base path from build (`BASE_PATH`), e.g. `/mvn/` or `/` on Netlify. */
 export const BASE = import.meta.env.BASE_URL
 
 /** Bump when shipping new icons so OS / SW caches refresh. */
