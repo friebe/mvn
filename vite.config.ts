@@ -35,7 +35,7 @@ export default defineConfig({
         name: 'Stint',
         short_name: 'Stint',
         description:
-          'Minimalist sit/stand desk rhythm — calm design, simple to use. Not a focus timer.',
+          'Sit · micro-move · stand. Calm, minimal desk rhythm for sit/stand desks. Not a focus timer.',
         lang: 'en',
         dir: 'ltr',
         categories: ['health', 'productivity', 'lifestyle'],

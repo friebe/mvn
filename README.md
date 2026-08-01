@@ -2,7 +2,7 @@
 
 Ein **Stint** ist ein fester, zusammenhängender Zeitblock für deine Arbeit — ganz ohne den gehetzten Ticker- oder Pausen-Rhythmus der Pomodoro-Technik. Du widmest dich einer Aufgabe für eine längere, sinnvolle Dauer, statt im Minutentakt auf die Uhr zu schauen.
 
-**Sit · micro-move · sit again.** Minimalist desk companion for adjustable sit/stand desks — calm design that feels simple to use. Long sit/stand blocks, an optional ~15s micro-move when you switch the desk, then back to the next block. Body maintenance — not a focus timer.
+**Sit · micro-move · stand — not a focus timer.** Calm, minimal desk companion for adjustable sit/stand desks. Long sit/stand blocks, an optional ~15s micro-move when you switch the desk, then back to the next block. Body maintenance — not a Pomodoro.
 
 Local PWA — no account, no cloud, LocalStorage only.
 
@@ -76,7 +76,7 @@ Everything stays on the device. The app uses several keys:
 | `notificationPersistent` | Toast stays until dismiss |
 | `shortcutHintsEnabled` | Keyboard hints on buttons |
 | `intervals` | Custom sit/stand durations (`null` = defaults) |
-| `atmosphereDisplay` | Main counter: `soft`, `clock`, `percent`, or `bar` (status bar only) |
+| `atmosphereDisplay` | Main counter: `clock` (default), `soft`, `percent`, or `bar` (status bar only) |
 
 ### Session / progress
 

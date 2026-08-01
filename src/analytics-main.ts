@@ -3,7 +3,7 @@ import '@fontsource/source-sans-3/400.css'
 import '@fontsource/source-sans-3/600.css'
 import './analytics.css'
 
-import { brandLockupHtml } from './brand-mark'
+import { brandLockupHtml, BRAND_TAG } from './brand-mark'
 import {
   activeDayCount,
   buildDayStory,
@@ -64,7 +64,7 @@ function render(period: Period): void {
           </svg>
         </a>
         <div class="analytics-heading">
-          ${brandLockupHtml('Analytics', 28)}
+          ${brandLockupHtml(BRAND_TAG, 28)}
         </div>
         <nav class="analytics-nav" aria-label="Actions">
           <button type="button" class="icon-link" id="btn-refresh" aria-label="Refresh" title="Refresh">

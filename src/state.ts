@@ -112,7 +112,7 @@ function migrateAtmosphereDisplay(parsed: Partial<AppState>): AtmosphereDisplay 
   } catch {
     // ignore
   }
-  return 'soft'
+  return 'clock'
 }
 
 export function defaultState(): AppState {
@@ -150,7 +150,7 @@ export function defaultState(): AppState {
     ambientMilestone: 0,
     shortcutHintsEnabled: true,
     notificationPersistent: false,
-    atmosphereDisplay: 'soft',
+    atmosphereDisplay: 'clock',
     theme: 'system',
   }
 }

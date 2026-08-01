@@ -130,10 +130,31 @@ export function subscribe(fn: TimerListener): () => void {
   }
 }
 
-function emit(): void {
+/** Last emit fingerprint — skip listeners when nothing visible changed. */
+let lastEmit: {
+  state: AppState
+  fillBucket: number
+  showPrompt: boolean
+  approaching: boolean
+} | null = null
+
+function emit(force = false): void {
   const remaining = remainingMs()
   const showPrompt = shouldShowFreezePrompt()
   const approaching = isApproaching(remaining)
+  // Quantize to the tick interval so idle phases (setup/pick/frozen) collapse to one emit.
+  const fillBucket = Math.round(remaining / 250)
+  if (
+    !force &&
+    lastEmit &&
+    lastEmit.state === state &&
+    lastEmit.fillBucket === fillBucket &&
+    lastEmit.showPrompt === showPrompt &&
+    lastEmit.approaching === approaching
+  ) {
+    return
+  }
+  lastEmit = { state, fillBucket, showPrompt, approaching }
   for (const l of listeners) l(state, remaining, showPrompt, approaching)
 }
 
@@ -899,5 +920,5 @@ export function isCheckInVisible(): boolean {
 }
 
 export function refreshUi(): void {
-  emit()
+  emit(true)
 }

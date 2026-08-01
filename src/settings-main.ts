@@ -23,7 +23,7 @@ import {
   shortcutsByContext,
 } from './shortcuts'
 import type { AtmosphereDisplay, EnergyMode } from './state'
-import { brandLockupHtml } from './brand-mark'
+import { brandLockupHtml, BRAND_TAG } from './brand-mark'
 import {
   ATMOSPHERE_DISPLAY_LABELS,
   ATMOSPHERE_DISPLAY_NOTES,
@@ -116,7 +116,7 @@ function render(): void {
           </svg>
         </a>
         <div class="settings-heading">
-          ${brandLockupHtml('Settings', 28)}
+          ${brandLockupHtml(BRAND_TAG, 28)}
         </div>
       </header>
 
@@ -210,7 +210,7 @@ function render(): void {
           ).join('')}
         </div>
         <p class="settings-hint settings-hint-tight" id="atmosphere-display-note">
-          ${ATMOSPHERE_DISPLAY_NOTES[s.atmosphereDisplay ?? 'soft']}
+          ${ATMOSPHERE_DISPLAY_NOTES[s.atmosphereDisplay ?? 'clock']}
         </p>
       </section>
 

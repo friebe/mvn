@@ -69,6 +69,7 @@ if (params.get('demo') === '1' || params.get('demo') === 'true') {
 }
 
 let showFreezePromptLatest = false
+let lastPersistedState: ReturnType<typeof getState> | null = null
 
 const shortcutHandlers = {
   onStart: () => startDay(getState().mode),
@@ -106,7 +107,7 @@ bindShortcuts(
 mountUi(app, {
   ...shortcutHandlers,
   onToggleClock: () => {
-    const next = cycleAtmosphereDisplay(getState().atmosphereDisplay ?? 'soft')
+    const next = cycleAtmosphereDisplay(getState().atmosphereDisplay ?? 'clock')
     writePreferences({ atmosphereDisplay: next })
     setAtmosphereDisplay(next)
     refreshUi()
@@ -148,7 +149,11 @@ updateInstallBanner()
 subscribe((state, remaining, showFreezePrompt, approaching) => {
   showFreezePromptLatest = showFreezePrompt
   renderUi(app, state, remaining, showFreezePrompt, approaching)
-  saveState(state)
+  // Tick-derived remaining is computed from phaseEndsAt — only persist real state mutations.
+  if (state !== lastPersistedState) {
+    lastPersistedState = state
+    saveState(state)
+  }
 })
 
 initTimer(initial)

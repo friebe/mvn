@@ -1,6 +1,6 @@
 import type { AtmosphereDisplay } from './state'
 
-export const ATMOSPHERE_DISPLAY_ORDER: AtmosphereDisplay[] = ['soft', 'clock', 'percent', 'bar']
+export const ATMOSPHERE_DISPLAY_ORDER: AtmosphereDisplay[] = ['clock', 'soft', 'percent', 'bar']
 
 export const ATMOSPHERE_DISPLAY_LABELS: Record<AtmosphereDisplay, string> = {
   soft: 'Soft text',
