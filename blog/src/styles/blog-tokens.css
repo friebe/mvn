@@ -1,0 +1,55 @@
+/* Hallmark · blog palette override · genre: modern-minimal
+ * theme: Ink Press (near B/W paper + deep forest accent)
+ * axes: light/paper · grotesk-adjacent (Fraunces display kept) · chromatic-other (dark green)
+ * scope: blog only — does not rewrite app Desk Daylight/Evening
+ * pre-emit critique: P5 H5 E5 S5 R5 V5
+ */
+
+:root,
+html[data-theme='light'] {
+  color-scheme: light;
+  --color-paper: oklch(99% 0.002 100);
+  --color-paper-2: oklch(96.5% 0.003 100);
+  --color-paper-3: oklch(93% 0.004 100);
+  --color-ink: oklch(14% 0.004 160);
+  --color-ink-2: oklch(38% 0.006 160);
+  --color-ink-3: oklch(52% 0.005 160);
+  /* Deep forest — quieter than app accent, enough chroma on grey paper */
+  --color-accent: oklch(28% 0.055 160);
+  --color-accent-2: oklch(34% 0.06 160);
+  --color-stand: oklch(32% 0.06 150);
+  --color-sit: oklch(42% 0.05 55);
+  --color-freeze: oklch(40% 0.02 250);
+  --color-focus: oklch(28% 0.055 160);
+  --color-danger: oklch(45% 0.12 25);
+  --wash-a: oklch(90% 0.008 160 / 0.35);
+  --wash-b: oklch(94% 0.004 100 / 0.25);
+  --kbd-bg: oklch(20% 0.01 160 / 0.05);
+  --kbd-border: oklch(20% 0.01 160 / 0.1);
+  --shadow-soft: oklch(0% 0 0 / 0.1);
+  --theme-meta: #0e1210;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --color-paper: oklch(11% 0.004 160);
+  --color-paper-2: oklch(15% 0.005 160);
+  --color-paper-3: oklch(20% 0.006 160);
+  --color-ink: oklch(95% 0.003 100);
+  --color-ink-2: oklch(72% 0.005 100);
+  --color-ink-3: oklch(55% 0.004 100);
+  /* Darker green than Desk Evening (was ~72%) — ink-press accent */
+  --color-accent: oklch(55% 0.055 160);
+  --color-accent-2: oklch(62% 0.05 155);
+  --color-stand: oklch(58% 0.06 150);
+  --color-sit: oklch(68% 0.055 60);
+  --color-freeze: oklch(48% 0.015 205);
+  --color-focus: oklch(58% 0.055 160);
+  --color-danger: oklch(65% 0.1 25);
+  --wash-a: oklch(18% 0.012 160 / 0.3);
+  --wash-b: oklch(14% 0.006 100 / 0.2);
+  --kbd-bg: oklch(95% 0.01 95 / 0.06);
+  --kbd-border: oklch(95% 0.01 95 / 0.1);
+  --shadow-soft: oklch(0% 0 0 / 0.45);
+  --theme-meta: #080b09;
+}

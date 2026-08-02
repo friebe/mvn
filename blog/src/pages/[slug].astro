@@ -1,0 +1,46 @@
+---
+import { getCollection, render } from 'astro:content'
+import Base from '../layouts/Base.astro'
+import { appHref } from '../lib/urls'
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft)
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }))
+}
+
+const { post } = Astro.props
+const { Content } = await render(post)
+---
+
+<Base
+  title={post.data.title}
+  description={post.data.description}
+  canonicalPath={`/blog/${post.id}/`}
+  phaseLabel="Reading"
+  pubDate={post.data.pubDate}
+>
+  <article>
+    <h1 class="post-title">{post.data.title}</h1>
+    <p class="meta">
+      <time datetime={post.data.pubDate.toISOString()}>
+        {
+          post.data.pubDate.toLocaleDateString('de-DE', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        }
+      </time>
+    </p>
+    <div class="prose">
+      <Content />
+    </div>
+    <aside class="cta">
+      <p class="cta-copy">Ruhigen Sit/Stand-Rhythmus — lokal, ohne Account.</p>
+      <a class="btn btn-primary" href={appHref}>Open Stint</a>
+    </aside>
+  </article>
+</Base>

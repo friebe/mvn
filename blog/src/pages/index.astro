@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content'
+import Base from '../layouts/Base.astro'
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+)
+---
+
+<Base
+  title="Blog"
+  description="Stehschreibtisch & Sit/Stand: ruhiger Rhythmus, Erinnerungen, Sound und Settings — Artikel von Stint."
+  canonicalPath="/blog/"
+  phaseLabel="Blog"
+>
+  <p class="lede">
+    Körperpflege am Schreibtisch — nicht noch ein Fokus-Timer. Sit · micro-move · stand.
+  </p>
+
+  {
+    posts.length === 0 ? (
+      <p class="lede">Noch keine Beiträge.</p>
+    ) : (
+      <ul class="post-list">
+        {posts.map((post) => (
+          <li>
+            <a class="post-card" href={`/blog/${post.id}/`}>
+              <h2 class="post-card-title">{post.data.title}</h2>
+              <p class="meta">
+                <time datetime={post.data.pubDate.toISOString()}>
+                  {post.data.pubDate.toLocaleDateString('de-DE', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </time>
+              </p>
+              <p class="post-card-desc">{post.data.description}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Base>

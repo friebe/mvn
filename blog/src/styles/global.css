@@ -1,0 +1,508 @@
+/* Hallmark · redesign: blog shell · genre: modern-minimal · theme: Ink Press
+ * inherit: app tokens + blog-tokens override (B/W paper, deep forest accent)
+ * pre-emit critique: P5 H5 E5 S5 R5 V5
+ */
+
+@import '../../../src/tokens.css';
+@import './blog-tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: clip;
+  font-size: clamp(17px, 2.1vmin, 22px);
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, var(--wash-a), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, var(--wash-b), transparent),
+    var(--color-paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reading shell — hairline wash only; green lives on accents, not the field. */
+.shell {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  --atmosphere-fill: 0.28;
+  --atmosphere-hue: var(--color-accent);
+}
+
+.shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 36% 70% at 0% 40%,
+      color-mix(in oklch, var(--atmosphere-hue) 14%, transparent),
+      transparent 75%
+    ),
+    radial-gradient(
+      ellipse 30% 45% at 100% 12%,
+      color-mix(in oklch, var(--color-ink) 4%, transparent),
+      transparent 70%
+    );
+  opacity: calc(0.18 + var(--atmosphere-fill) * 0.35);
+  transform: scale(calc(0.94 + var(--atmosphere-fill) * 0.08));
+  transform-origin: 50% 40%;
+}
+
+.frame {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--page-max-width);
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.25rem, 3vmin, 2.5rem) clamp(1.25rem, 4vmin, 3rem)
+    clamp(5.5rem, 12vmin, 7rem);
+}
+
+/* Narrow-inspired top bar — quiet pill; padding balances compact mark vs. nav chips */
+.top-bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: clamp(2rem, 5vmin, 3.25rem);
+  padding: 0.5rem 0.5rem 0.5rem 0.95rem;
+  background: color-mix(in oklch, var(--color-paper-2) 88%, transparent);
+  border: 1px solid color-mix(in oklch, var(--color-ink) 8%, transparent);
+  border-radius: calc(var(--radius) + 4px);
+  backdrop-filter: blur(8px);
+}
+
+/* Hallmark · component: brand-lockup · genre: modern-minimal · theme: Desk Daylight
+ * states: default · hover · focus · active · disabled · loading · error · success
+ * contrast: pass (ink on paper)
+ * pre-emit critique: P5 H5 E5 S5 R5 V4
+ */
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-lockup.is-compact {
+  gap: 0.45rem;
+  align-items: center;
+  padding-block: 0.2rem;
+}
+
+.brand-lockup.is-compact .brand-mark {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.brand-lockup.is-compact .brand-text {
+  gap: 0;
+  padding-top: 0;
+}
+
+.brand-lockup.is-compact .brand {
+  font-size: 1.05rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.brand-lockup-link:hover .brand,
+.brand-lockup-link:focus-visible .brand {
+  color: var(--color-accent);
+}
+
+.brand-lockup-link:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: var(--radius);
+}
+
+.brand-lockup-link:active .brand {
+  opacity: 0.85;
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
+
+.top-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius);
+  color: var(--color-ink-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.15s var(--ease),
+    color 0.15s var(--ease);
+}
+
+.top-nav-link:hover {
+  color: var(--color-ink);
+  background: color-mix(in oklch, var(--color-paper-3) 80%, transparent);
+}
+
+.top-nav-link:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.top-nav-link.is-current {
+  color: var(--color-accent);
+  background: color-mix(in oklch, var(--color-accent) 12%, transparent);
+}
+
+.top-nav-icon {
+  display: block;
+  opacity: 0.85;
+}
+
+@media (max-width: 420px) {
+  .top-nav-link span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .top-nav-link {
+    padding: 0.45rem;
+  }
+}
+
+/* Floating dock — Narrow DNA, Desk Daylight materials */
+.dock {
+  position: fixed;
+  z-index: 40;
+  left: 50%;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.35rem;
+  background: color-mix(in oklch, var(--color-paper) 82%, transparent);
+  border: 1px solid color-mix(in oklch, var(--color-ink) 10%, transparent);
+  border-radius: 999px;
+  box-shadow: 0 10px 28px var(--shadow-soft);
+  backdrop-filter: blur(12px);
+}
+
+.dock-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.55rem;
+  height: 2.55rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-ink-2);
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+  transition:
+    background 0.15s var(--ease),
+    color 0.15s var(--ease);
+}
+
+.dock-btn:hover {
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+}
+
+.dock-btn:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.dock-btn:active {
+  transform: translateY(1px);
+}
+
+.dock-btn.is-current {
+  color: var(--color-accent);
+  background: color-mix(in oklch, var(--color-accent) 14%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-btn:active {
+    transform: none;
+  }
+}
+
+.content {
+  flex: 1 1 auto;
+  max-width: 36rem;
+}
+
+.brand-mark {
+  flex-shrink: 0;
+  display: block;
+  width: clamp(1.65rem, 5vmin, 2.35rem);
+  height: clamp(1.65rem, 5vmin, 2.35rem);
+  color: var(--color-ink);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  padding-top: 0.05rem;
+}
+
+.brand {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 4vmin, 1.85rem);
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+  color: var(--color-ink);
+}
+
+.tag {
+  margin: 0;
+  max-width: 18rem;
+  font-size: clamp(0.72rem, 1.4vmin, 0.88rem);
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--color-ink-3);
+  letter-spacing: 0.01em;
+}
+
+.phase-label {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-body);
+  font-size: clamp(0.95rem, 2.2vmin, 1.15rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-accent);
+}
+
+.lede {
+  margin: 0 0 2rem;
+  color: var(--color-ink-2);
+  font-size: clamp(1rem, 2.2vmin, 1.15rem);
+  line-height: 1.45;
+}
+
+.meta {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  color: var(--color-ink-3);
+}
+
+h1.post-title,
+.page-title {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4.5vw, 2.35rem);
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+
+.post-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.post-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius);
+  transition: opacity 0.15s var(--ease);
+}
+
+.post-card:hover .post-card-title,
+.post-card:focus-visible .post-card-title {
+  color: var(--color-accent);
+}
+
+.post-card:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 6px;
+}
+
+.post-card-title {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 3vmin, 1.45rem);
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+
+.post-card .meta {
+  margin-bottom: 0.4rem;
+}
+
+.post-card-desc {
+  margin: 0;
+  color: var(--color-ink-2);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.prose {
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.prose :where(p, ul, ol) {
+  margin: 0 0 1.1rem;
+}
+
+.prose :where(ul, ol) {
+  padding-left: 1.2rem;
+}
+
+.prose :where(li) {
+  margin-bottom: 0.35rem;
+}
+
+.prose :where(h2) {
+  margin: 2rem 0 0.55rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+
+.prose :where(a) {
+  color: var(--color-accent);
+  text-underline-offset: 0.15em;
+}
+
+.prose :where(a:hover) {
+  color: var(--color-sit);
+}
+
+.prose :where(strong) {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.cta {
+  margin-top: 2.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.cta-copy {
+  margin: 0;
+  color: var(--color-ink-2);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.65rem;
+  padding: 0.55rem 1.15rem;
+  border: none;
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.15s var(--ease),
+    color 0.15s var(--ease),
+    transform 0.1s var(--ease);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-paper);
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-2);
+  color: var(--color-paper);
+}
+
+html[data-theme='dark'] .btn-primary {
+  color: var(--color-paper);
+}
+
+.site-footer {
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding-top: 2.5rem;
+  font-size: 0.9rem;
+  color: var(--color-ink-3);
+}
+
+.site-footer a {
+  color: var(--color-ink-2);
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  color: var(--color-ink);
+}

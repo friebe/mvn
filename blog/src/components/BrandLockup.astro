@@ -1,0 +1,49 @@
+---
+/** Stint mark — sit · stem · stand. Compact for nav; full lockup for mastheads. */
+interface Props {
+  size?: number
+  tag?: string
+  href?: string
+  titleAs?: 'p' | 'h1'
+  /** Nav-scale: small mark + wordmark, no subline */
+  compact?: boolean
+}
+
+const {
+  size,
+  tag = 'Sit · micro-move · stand — not a focus timer',
+  href = '/',
+  titleAs = 'p',
+  compact = false,
+} = Astro.props
+
+const markSize = size ?? (compact ? 18 : 28)
+---
+
+<a
+  class:list={['brand-lockup', 'brand-lockup-link', compact && 'is-compact']}
+  href={href}
+>
+  <svg
+    class="brand-mark"
+    viewBox="0 0 32 32"
+    width={markSize}
+    height={markSize}
+    aria-hidden="true"
+    focusable="false"
+  >
+    <rect x="2" y="20" width="16" height="4" rx="1" fill="currentColor"></rect>
+    <rect x="14" y="10" width="4" height="12" rx="0.5" fill="currentColor"></rect>
+    <rect x="14" y="8" width="16" height="4" rx="1" fill="currentColor"></rect>
+  </svg>
+  <div class="brand-text">
+    {
+      titleAs === 'h1' ? (
+        <h1 class="brand">Stint</h1>
+      ) : (
+        <p class="brand">Stint</p>
+      )
+    }
+    {!compact && <p class="tag">{tag}</p>}
+  </div>
+</a>

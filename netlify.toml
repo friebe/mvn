@@ -17,3 +17,9 @@
   from = "/analytics"
   to = "/analytics.html"
   status = 200
+
+# Astro blog (trailingSlash: always) — built into dist/blog by npm run build.
+[[redirects]]
+  from = "/blog"
+  to = "/blog/"
+  status = 301

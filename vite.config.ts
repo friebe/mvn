@@ -87,6 +87,7 @@ export default defineConfig({
         navigateFallbackDenylist: [
           new RegExp(`^${basePathNoSlash}/analytics\\.html$`),
           new RegExp(`^${basePathNoSlash}/settings\\.html$`),
+          /^\/blog(\/|$)/,
         ],
       },
       devOptions: {

@@ -12,7 +12,20 @@ Local PWA — no account, no cloud, LocalStorage only.
 
 ```bash
 npm install
+npm install --prefix blog
 npm run dev
+```
+
+Blog (Astro, `https://getstint.de/blog/`):
+
+```bash
+npm run dev:blog
+```
+
+Production build (app + blog → `dist/`):
+
+```bash
+npm run build
 ```
 
 ## Install as an app (recommended for second monitor + notifications)
