@@ -62,6 +62,7 @@ Everything stays on the device. The app uses several keys:
 | `stint-atmosphere-words-hidden` | Atmosphere text hidden (`1` / `0`) |
 | `stint-pwa-installed` | Install banner marked installed |
 | `stint-install-banner-dismissed` | Install banner dismissed manually |
+| `stint.settings-seen` | Settings cue dismissed (`1`) |
 
 `stint.v1` is written as a whole (settings + live session). Not every field needs its own key — this is pragmatic so a reload can resume the session.
 

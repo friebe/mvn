@@ -45,8 +45,10 @@ import {
   registerPwa,
   shouldOfferInstall,
 } from './pwa'
+import { markSettingsSeen } from './settings-cue'
 
 registerPwa()
+markSettingsSeen()
 applyThemeFromState(readPreferences())
 bindSystemThemeListener(() => readPreferences().theme)
 
