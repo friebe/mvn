@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:blog": "npm run dev --prefix blog",
+    "postinstall": "npm install --prefix blog",
     "build": "tsc && vite build && npm run build --prefix blog",
     "build:blog": "npm run build --prefix blog",
     "preview": "vite preview"

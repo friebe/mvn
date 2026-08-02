@@ -12,7 +12,6 @@ Local PWA — no account, no cloud, LocalStorage only.
 
 ```bash
 npm install
-npm install --prefix blog
 npm run dev
 ```
 

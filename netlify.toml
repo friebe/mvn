@@ -1,11 +1,13 @@
 [build]
+  # Root npm install → postinstall installs blog/; then app + Astro blog → dist/
   command = "npm run build"
   publish = "dist"
 
 [build.environment]
   # Ensure root asset URLs even if the UI build command omits BASE_PATH.
   BASE_PATH = "/"
-  NODE_VERSION = "20"
+  # Astro 7 requires Node >= 22.12
+  NODE_VERSION = "22"
 
 # MPA pretty URLs — not a SPA catch-all (analytics/settings stay real HTML files).
 [[redirects]]
