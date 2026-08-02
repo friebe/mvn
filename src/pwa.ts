@@ -1,12 +1,13 @@
 import { registerSW } from 'virtual:pwa-register'
+import { PWA_DISMISSED_KEY, PWA_INSTALLED_KEY } from './storage-keys'
 
 export type InstallPromptEvent = Event & {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-const INSTALLED_KEY = 'mvn-pwa-installed'
-const DISMISSED_KEY = 'mvn-install-banner-dismissed'
+const INSTALLED_KEY = PWA_INSTALLED_KEY
+const DISMISSED_KEY = PWA_DISMISSED_KEY
 /** Soft “Not now” — banner may return after this (Settings always offers install). */
 const DISMISS_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000
 

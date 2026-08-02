@@ -1,5 +1,7 @@
 /** Local usage analytics — LocalStorage only, no network. */
 
+import { STATS_KEY } from './storage-keys'
+
 export type StatEvent =
   | 'day_start'
   | 'day_close'
@@ -85,8 +87,6 @@ export function activeDayCount(n?: number): number {
   return keys.filter((k) => k >= start && k <= end).length
 }
 
-const STORAGE_KEY = 'mvn.stats.v1'
-
 function emptyDay(date: string): DayBucket {
   return {
     date,
@@ -114,7 +114,7 @@ export function todayKey(d = new Date()): string {
 
 export function loadStats(): StatsStore {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(STATS_KEY)
     if (!raw) return { version: 1, days: {} }
     const parsed = JSON.parse(raw) as StatsStore
     if (parsed?.version !== 1 || typeof parsed.days !== 'object') {
@@ -127,7 +127,7 @@ export function loadStats(): StatsStore {
 }
 
 function saveStats(store: StatsStore): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store))
+  localStorage.setItem(STATS_KEY, JSON.stringify(store))
 }
 
 export function recordStat(event: StatEvent, at = new Date()): void {
@@ -300,5 +300,5 @@ export function buildDayStory(s: StatsSummary): string {
 }
 
 export function clearStats(): void {
-  localStorage.removeItem(STORAGE_KEY)
+  localStorage.removeItem(STATS_KEY)
 }

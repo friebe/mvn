@@ -49,7 +49,7 @@ Micro-moments live in [`src/moments.json`](src/moments.json) (for developers, no
 
 ## Analytics
 
-`analytics.html` in the app folder (Analytics icon in the header): local stats for desk switches, moments, Lazy, Freeze — LocalStorage only, no cloud. On GitHub Pages: `/mvn/analytics.html`.
+`analytics.html` in the app folder (Analytics icon in the header): local stats for desk switches, moments, Lazy, Freeze — LocalStorage only, no cloud. Live: `https://getstint.de/analytics.html`.
 
 ## LocalStorage
 
@@ -57,13 +57,13 @@ Everything stays on the device. The app uses several keys:
 
 | Key | Contents |
 |-----|----------|
-| `mvn.v1` | Full app state (JSON blob, fields below) |
-| `mvn.stats.v1` | Day buckets for analytics |
-| `mvn-atmosphere-words-hidden` | Atmosphere text hidden (`1` / `0`) |
-| `mvn-pwa-installed` | Install banner marked installed |
-| `mvn-install-banner-dismissed` | Install banner dismissed manually |
+| `stint.v1` | Full app state (JSON blob, fields below) |
+| `stint.stats.v1` | Day buckets for analytics |
+| `stint-atmosphere-words-hidden` | Atmosphere text hidden (`1` / `0`) |
+| `stint-pwa-installed` | Install banner marked installed |
+| `stint-install-banner-dismissed` | Install banner dismissed manually |
 
-`mvn.v1` is written as a whole (settings + live session). Not every field needs its own key — this is pragmatic so a reload can resume the session.
+`stint.v1` is written as a whole (settings + live session). Not every field needs its own key — this is pragmatic so a reload can resume the session.
 
 ### Settings
 

@@ -2,9 +2,9 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'node:path'
 
-/** GitHub Pages default `/mvn/`; Netlify sets `BASE_PATH=/`. */
+/** Netlify / getstint.de root. Override with BASE_PATH if needed. */
 function normalizeBase(raw: string | undefined): string {
-  const value = (raw ?? '/mvn/').trim() || '/'
+  const value = (raw ?? '/').trim() || '/'
   if (value === '/') return '/'
   return `/${value.replace(/^\/+|\/+$/g, '')}/`
 }

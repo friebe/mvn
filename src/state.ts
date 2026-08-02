@@ -1,6 +1,10 @@
 import type { UserIntervals } from './intervals'
 import type { ThemePreference } from './theme'
 import { normalizeTheme } from './theme'
+import {
+  ATMOSPHERE_WORDS_HIDDEN_KEY,
+  STATE_KEY,
+} from './storage-keys'
 
 export type EnergyMode = 'high' | 'lazy'
 /** Atmosphere headline: soft words, timer, percent, or progress bar only */
@@ -80,7 +84,7 @@ export interface AppState {
   theme: ThemePreference
 }
 
-export const STORAGE_KEY = 'mvn.v1'
+export const STORAGE_KEY = STATE_KEY
 export const FREEZE_PROMPT_MS = 30 * 60 * 1000
 export const FREEZE_EXTEND_MS = 15 * 60 * 1000
 /** Micro-moment duration (was 60s exercise) */
@@ -96,8 +100,6 @@ export const DEMO_CHECKIN_TIMEOUT_MS = 8 * 1000
 export const THRESHOLD_MOMENT_MS = 15 * 1000
 export const DEMO_THRESHOLD_MOMENT_MS = 5 * 1000
 
-const LEGACY_WORDS_HIDDEN_KEY = 'mvn-atmosphere-words-hidden'
-
 function migrateAtmosphereDisplay(parsed: Partial<AppState>): AtmosphereDisplay {
   if (
     parsed.atmosphereDisplay === 'soft' ||
@@ -108,7 +110,7 @@ function migrateAtmosphereDisplay(parsed: Partial<AppState>): AtmosphereDisplay 
     return parsed.atmosphereDisplay
   }
   try {
-    if (localStorage.getItem(LEGACY_WORDS_HIDDEN_KEY) === '1') return 'bar'
+    if (localStorage.getItem(ATMOSPHERE_WORDS_HIDDEN_KEY) === '1') return 'bar'
   } catch {
     // ignore
   }
@@ -157,7 +159,7 @@ export function defaultState(): AppState {
 
 export function loadState(): AppState {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(STATE_KEY)
     if (!raw) return defaultState()
     const parsed = JSON.parse(raw) as Partial<AppState>
     return {
@@ -172,5 +174,5 @@ export function loadState(): AppState {
 }
 
 export function saveState(state: AppState): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  localStorage.setItem(STATE_KEY, JSON.stringify(state))
 }
