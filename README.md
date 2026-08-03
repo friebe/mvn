@@ -8,6 +8,8 @@ Local PWA — no account, no cloud, LocalStorage only.
 
 **UI language: English.** Micro-moments (exercises) stay in **German** for clearer body cues.
 
+Audience & niche (local, not in git): see `AUDIENCE.md`.
+
 ## Develop
 
 ```bash

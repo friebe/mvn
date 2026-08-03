@@ -4,6 +4,8 @@ dev-dist
 .DS_Store
 *.local
 .agents/
+AUDIENCE.md
+blog/CONTENT-MAP.md
 blog/node_modules
 blog/.astro
 blog/dist
