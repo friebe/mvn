@@ -419,6 +419,55 @@ h1.post-title,
   color: var(--color-ink);
 }
 
+.prose :where(h3) {
+  margin: 1.35rem 0 0.4rem;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-style: normal;
+  color: var(--color-ink);
+}
+
+.prose :where(table) {
+  width: 100%;
+  margin: 0 0 1.35rem;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.prose :where(th, td) {
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid color-mix(in oklch, var(--color-ink) 12%, transparent);
+}
+
+.prose :where(th) {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.prose :where(td) {
+  color: var(--color-ink-2);
+}
+
+.faq {
+  margin-top: 2.5rem;
+}
+
+.faq-item {
+  margin-bottom: 1.25rem;
+}
+
+.faq-item h3 {
+  margin: 0 0 0.35rem;
+}
+
+.faq-item p {
+  margin: 0;
+  color: var(--color-ink-2);
+}
+
 .prose :where(a) {
   color: var(--color-accent);
   text-underline-offset: 0.15em;

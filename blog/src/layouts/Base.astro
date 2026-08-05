@@ -13,14 +13,18 @@ interface Props {
   phaseLabel?: string
   /** ISO date for Article schema (posts only) */
   pubDate?: Date
+  updatedDate?: Date
+  faq?: { question: string; answer: string }[]
 }
 
-const { title, description, canonicalPath = '/blog/', phaseLabel, pubDate } = Astro.props
+const { title, description, canonicalPath = '/blog/', phaseLabel, pubDate, updatedDate, faq } =
+  Astro.props
 const canonical = new URL(canonicalPath.replace(/^\//, ''), Astro.site).href
 const pageTitle = title === 'Blog' ? 'Stint · Blog' : `${title} · Stint`
 const path = canonicalPath
 const onBlogIndex = path === '/blog/' || path === '/blog'
 const ogType = pubDate ? 'article' : 'website'
+const modified = (updatedDate ?? pubDate)?.toISOString()
 const articleJsonLd = pubDate
   ? JSON.stringify({
       '@context': 'https://schema.org',
@@ -28,8 +32,16 @@ const articleJsonLd = pubDate
       headline: title,
       description,
       datePublished: pubDate.toISOString(),
+      ...(modified ? { dateModified: modified } : {}),
       inLanguage: 'de-DE',
-      author: { '@type': 'Organization', name: 'Stint', url: 'https://getstint.de/' },
+      isAccessibleForFree: true,
+      author: {
+        '@type': 'Organization',
+        name: 'Stint',
+        url: 'https://getstint.de/',
+        description:
+          'Calm sit/stand desk companion — body maintenance, not a focus timer.',
+      },
       publisher: {
         '@type': 'Organization',
         name: 'Stint',
@@ -41,8 +53,27 @@ const articleJsonLd = pubDate
       },
       mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
       image: 'https://getstint.de/icons/icon-512.png',
+      about: [
+        { '@type': 'Thing', name: 'Sit-stand desk' },
+        { '@type': 'Thing', name: 'Workplace ergonomics' },
+      ],
     })
   : null
+const faqJsonLd =
+  faq && faq.length > 0
+    ? JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faq.map((item) => ({
+          '@type': 'Question',
+          name: item.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: item.answer,
+          },
+        })),
+      })
+    : null
 ---
 
 <!doctype html>
@@ -73,6 +104,7 @@ const articleJsonLd = pubDate
     <meta name="twitter:description" content={description} />
     <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
     {articleJsonLd && <script type="application/ld+json" set:html={articleJsonLd} />}
+    {faqJsonLd && <script type="application/ld+json" set:html={faqJsonLd} />}
     <script is:inline>
       ;(function () {
         try {

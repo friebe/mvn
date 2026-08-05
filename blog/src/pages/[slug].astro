@@ -13,6 +13,7 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props
 const { Content } = await render(post)
+const faq = post.data.faq
 ---
 
 <Base
@@ -21,6 +22,8 @@ const { Content } = await render(post)
   canonicalPath={`/blog/${post.id}/`}
   phaseLabel="Reading"
   pubDate={post.data.pubDate}
+  updatedDate={post.data.updatedDate}
+  faq={faq}
 >
   <article>
     <h1 class="post-title">{post.data.title}</h1>
@@ -37,6 +40,19 @@ const { Content } = await render(post)
     </p>
     <div class="prose">
       <Content />
+      {
+        faq && faq.length > 0 && (
+          <section class="faq" aria-labelledby="faq-heading">
+            <h2 id="faq-heading">Häufige Fragen</h2>
+            {faq.map((item) => (
+              <div class="faq-item">
+                <h3>{item.question}</h3>
+                <p>{item.answer}</p>
+              </div>
+            ))}
+          </section>
+        )
+      }
     </div>
     <aside class="cta">
       <p class="cta-copy">Ruhigen Sit/Stand-Rhythmus — lokal, ohne Account.</p>

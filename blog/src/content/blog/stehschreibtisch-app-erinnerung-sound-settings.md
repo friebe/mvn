@@ -1,80 +1,96 @@
 ---
 title: 'Stehschreibtisch-App: Sit/Stand-Erinnerung, Sound & Benachrichtigungen'
-description: 'Stint als Stehschreibtisch-App: ruhige Sit/Stand-Erinnerungen, Sound und Browser-Benachrichtigungen einstellen. Intervalle, Theme, Demo — ohne Fitness-Druck.'
+description: 'Stint als Stehschreibtisch-App: Sit/Stand-Erinnerung, Sound und Notifications einstellen. Intervalle, Demo, Install — lokal, ohne Fitness-Druck. How-to.'
 pubDate: 2026-08-02
+updatedDate: 2026-08-05
+faq:
+  - question: 'Was macht eine Sit/Stand-Erinnerung anders als ein Fokus-Timer?'
+    answer: 'Sie erinnert an den Haltungswechsel (sitzen/stehen), nicht an Arbeits-Sprints. Idealerweise weich und optional — ohne Streaks oder Sirenen.'
+  - question: 'Muss ich Sound und Notifications einschalten?'
+    answer: 'Nein. Beides ist optional und getrennt. Default kann still sein; du schaltest nur ein, was dich wirklich unterstützt.'
+  - question: 'Warum als App installieren?'
+    answer: 'Als installierte PWA läuft Stint zuverlässiger auf dem Zweitmonitor, und Browser-Benachrichtigungen greifen oft besser als im normalen Tab.'
+  - question: 'Was ist High Mode vs. Lazy Mode?'
+    answer: 'Zwei Intervall-Presets: High eher längerer Sit und etwas mehr Stand-Anteil (Default z. B. 30/5 Min); Lazy kürzer (z. B. 20/3), wenn der Tag schon voll ist. Beides feinjustierbar.'
+  - question: 'Wo liegen meine Daten?'
+    answer: 'In LocalStorage auf deinem Gerät. Kein Account, kein Cloud-Sync, keine Tracking-Pixel hinter den Settings.'
+  - question: 'Wie oft sollte ich die Intervalle setzen?'
+    answer: 'Es gibt keine Universallösung. Praxis-Ranges und Alltagstakte: Artikel „Sit/Stand-Wechsel: wie oft umstellen?“.'
 ---
 
-Eine gute **Sit/Stand-Erinnerung** schreit dich nicht an. Sie meldet sich leise, wenn es Zeit ist, **die Haltung zu wechseln** — und lässt dich sonst in Ruhe arbeiten.
+**Kurzantwort:** [Stint](/) ist eine lokale **Stehschreibtisch-App** (PWA): lange **Sit**- und **Stand**-Blöcke, optional ~15 s **Micro-move** beim Tischwechsel, dazu **optionale** Sound- und Browser-Erinnerungen. Kein Account, keine Cloud, kein Fitness-Druck — **Sit · micro-move · stand — not a focus timer.**
 
-Genau dafür ist [Stint](/): eine lokale **Stehschreibtisch-App** (PWA) für höhenverstellbare Schreibtische. Kein Account, keine Cloud, kein Streak-Drama. **Sit · micro-move · stand — not a focus timer.**
-
-Wenn du eher die Idee hinter dem Rhythmus willst (warum das kein Pomodoro ist), lies zuerst [Stehschreibtisch-Rhythmus ohne Pomodoro](/blog/sit-stand-ohne-pomodoro/). Hier geht’s ums Praktische: Settings für Sound, Benachrichtigungen und Intervalle.
+Philosophie (warum kein Pomodoro): [Stehschreibtisch-Rhythmus ohne Pomodoro](/blog/sit-stand-ohne-pomodoro/).  
+Intervalle wählen: [Sit/Stand-Wechsel: wie oft umstellen?](/blog/sit-stand-wechsel-wie-oft/).  
+Hier: Settings — was du einschaltest und warum weniger oft mehr ist.
 
 ## Was die App im Alltag macht
 
-Der Ablauf ist bewusst einfach:
+1. **Sit** — längere Sitzphase (z. B. 20–30 Minuten, einstellbar).  
+2. **Micro-move** — optional kurze Körper-Cues auf Deutsch, wenn der Tisch wechselt.  
+3. **Stand** — Stehblock, dann wieder zurück.
 
-1. **Sit** — du sitzt eine längere Phase (z. B. 20–30 Minuten, einstellbar).
-2. **Micro-move** — wenn der Tisch wechselt, optional ~15 Sekunden Mikro-Bewegung (kurze Körper-Cues, auf Deutsch).
-3. **Stand** — du stehst den nächsten Block, dann wieder zurück.
+Dazu: weiche Signale (Ton, Toast), **Freeze**, wenn du gerade nicht wechseln kannst, und Analytics **nur lokal**.
 
-Dazu gibt es weiche Signale (Ton, Browser-Benachrichtigung), einen **Freeze**, wenn du gerade nicht wechseln kannst, und lokale Analytics — nur auf dem Gerät.
-
-Stint misst keine Kalorien und bewertet dich nicht. Es hält nur den Rhythmus sichtbar, den du selbst gewählt hast.
+Stint misst keine Kalorien und bewertet dich nicht. Es hält den Rhythmus sichtbar, den *du* gewählt hast — typisch als ruhiges Fenster auf dem **Zweitmonitor**.
 
 ## High Mode und Lazy Mode
 
-Unter **Settings → Intervals** stellst du zwei Energie-Modi ein:
+Unter **Settings → Intervals**:
 
 | Modus | Default Sit | Default Stand | Idee |
 | --- | --- | --- | --- |
-| **High Mode** | 30 Min | 5 Min | Mehr Stehanteil, klarer Wechsel |
+| **High Mode** | 30 Min | 5 Min | Klarer Wechsel, etwas mehr Stehanteil |
 | **Lazy Mode** | 20 Min | 3 Min | Kürzer, wenn der Tag schon voll ist |
 
-Beide Modi lassen sich feiner justieren (Sit/Stand in Minuten-Schritten). Das ist kein „Workout-Plan“, sondern **dein** Schreibtisch-Takt — an gute und müde Tage anpassbar.
+Sit/Stand lassen sich in Minuten-Schritten feiner justieren. Das ist kein Workout-Plan, sondern dein Schreibtisch-Takt.
 
-**Demo** in den Settings verkürzt die Intervalle stark, damit du den ganzen Loop einmal durchspielen kannst, ohne eine halbe Stunde zu warten.
+**Demo** verkürzt die Intervalle stark, damit du den Loop einmal durchspielst, ohne eine halbe Stunde zu warten — sinnvoll beim ersten Setup.
 
 ## Sound: leise Cues, kein Alarm
 
 Unter **Signals → Sound**:
 
-- **Aus** (Default) — komplett still, nur die UI zählt.
-- **An** — kurze, weiche Töne bei Phasenwechseln und wenn ein Micro-Moment endet. Nützlich, wenn du kurz am Fenster stehst und den Bildschirm nicht anstarrst.
+| Zustand | Wirkung |
+| --- | --- |
+| **Aus** (Default) | Still — nur die UI zählt |
+| **An** | Kurze, weiche Töne bei Phasenwechsel und wenn ein Micro-Moment endet |
 
-Kein Sirenen-Sound, kein Countdown-Piepen jede Minute. Sound ist optional und absichtlich unaufdringlich.
+Nützlich, wenn du kurz am Fenster stehst. Kein Sirenen-Sound, kein Minutentakt-Piepen. Sound absichtlich unaufdringlich und optional.
 
 ## Benachrichtigungen: Erinnerung statt Druck
 
-**Notifications** holen dich zurück, wenn Stint auf dem Zweitmonitor läuft oder das Fenster im Hintergrund liegt:
+**Notifications**, wenn Stint auf dem Zweitmonitor oder im Hintergrund läuft:
 
-1. In den Settings **Notifications** einschalten.
-2. Der Browser fragt nach Erlaubnis — einmal bestätigen.
-3. Für zuverlässigere Toasts: Stint als **App installieren** (Settings → Install, oder Browser-Menü „App installieren“).
+1. In Settings **Notifications** einschalten.  
+2. Browser-Erlaubnis einmal bestätigen.  
+3. Für zuverlässigere Toasts: **App installieren** (Settings → Install oder Browser-Menü).
 
-Optional: **Keep toast visible** — die Benachrichtigung bleibt länger stehen, damit du sie nicht verpasst. (Wie lange Windows den Toast zeigt, steuert das System, nicht die App.)
+Optional: **Keep toast visible** — länger sichtbar; die genaue Dauer steuert oft das OS (z. B. Windows), nicht die App.
 
-Tipp: Notifications und Sound sind getrennt. Du kannst stille Banner nutzen — oder nur den leisen Ton, ohne System-Toast.
+**Tipp:** Sound und Notifications sind getrennt. Stille Banner *oder* nur Ton *oder* beides — je nachdem, was dich nicht nervt.
 
 ## Weitere Settings
 
-- **Appearance** — Desk Daylight, Desk Evening oder System. Weicher Kontrast für lange Sitzphasen, kein Neon-Dashboard.
-- **Atmosphere display** — wie die Atmosphäre auf dem Hauptschirm wirkt (u. a. Uhr), ohne die Seite mit Stats zuzukleistern.
-- **Keyboard shortcuts** — optionale Tastatur-Hinweise an den Buttons, wenn du lieber tippst als klickst.
-- **Install Stint** — eigene Fenster-App, oft besser für Zweitmonitor und Benachrichtigungen.
+- **Appearance** — Desk Daylight, Desk Evening oder System; weicher Kontrast, kein Neon-Dashboard.  
+- **Atmosphere display** — u. a. Uhr; wenig visuelle Last auf dem Side-Screen.  
+- **Keyboard shortcuts** — optionale Tastatur-Hints an den Buttons.  
+- **Install Stint** — eigenes Fenster, oft besser für Monitor 2 und Toasts.
 
-Alles landet in **LocalStorage** auf deinem Gerät. Kein Login, kein Sync in die Cloud, keine Tracking-Pixel hinter den Settings.
+**Trust:** Alles in **LocalStorage** auf dem Gerät. Kein Login, kein Sync in die Cloud, keine Tracking-Pixel hinter den Settings. UI der App ist Englisch; Micro-Moment-Texte bewusst Deutsch (klarere Körper-Cues).
 
 ## Was Stint bewusst nicht ist
 
-Kein Fitness-Tracker, kein Streak-Dashboard, kein Pomodoro mit 25-Minuten-Druck. Stattdessen: lange Sit/Stand-Blöcke, optionale Signale, kurze Micro-Moves beim Tischwechsel. Wenn dich genau das beschreibt, reicht [getstint.de](/) — Settings öffnest du im Header, sobald die App läuft.
+Kein Fitness-Tracker, kein Streak-Dashboard, kein Pomodoro mit 25-Minuten-Druck. Stattdessen: lange Sit/Stand-Blöcke, optionale Signale, kurze Micro-Moves beim Wechsel.
+
+Wenn dich das beschreibt: [getstint.de](/) — Settings im Header, sobald die App läuft.
 
 ## Kurz-Checkliste zum Start
 
-1. [Stint öffnen](/) (am besten installieren, wenn du einen zweiten Monitor hast).
-2. **Demo** einmal durchlaufen — Loop verstehen.
-3. Intervalle auf High oder Lazy setzen.
-4. Sound und/oder Notifications nur so weit einschalten, wie’s dich unterstützt — nicht „alles auf Maximum“.
+1. [Stint öffnen](/) — am besten installieren, wenn du einen zweiten Monitor hast.  
+2. **Demo** einmal durchlaufen.  
+3. High oder Lazy setzen (danach feinjustieren).  
+4. Sound und/oder Notifications nur so weit wie nötig.  
 5. Arbeiten. Wechseln. Weiter.
 
-Chill ist hier kein Marketingwort. Es ist die Produktentscheidung: **Erinnerungen, die dich begleiten — nicht anschreien.**
+**Kern:** Erinnerungen, die dich begleiten — nicht anschreien. Chill ist hier Produktentscheidung, kein Slogan.
