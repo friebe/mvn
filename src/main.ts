@@ -46,11 +46,13 @@ import {
   setMode,
   setTheme,
   skipStanding,
+  snoozePosture,
   startDay,
   startFreezeAfterplay,
   subscribe,
   refreshUi,
 } from './timer'
+import { CHECK_IN_YES_MESSAGE, SNOOZE_POSTURE_MESSAGE } from './notify'
 import { initPresence } from './presence'
 import { showLaunchSplash } from './splash'
 
@@ -82,6 +84,7 @@ const shortcutHandlers = {
   onRerollMoment: () => rerollMoment(),
   onChooseMoment: (id: string) => chooseMoment(id),
   onConfirmCheckIn: () => confirmCheckIn(),
+  onSnoozePosture: () => snoozePosture(),
   onToggleLazy: () => {
     const next = getState().mode === 'lazy' ? 'high' : 'lazy'
     setMode(next)
@@ -157,6 +160,40 @@ subscribe((state, remaining, showFreezePrompt, approaching) => {
 })
 
 initTimer(initial)
+
+function applyCheckInFromToast(): void {
+  confirmCheckIn()
+}
+
+function applySnoozeFromToast(): void {
+  snoozePosture()
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (event: MessageEvent) => {
+    if (event.data?.type === CHECK_IN_YES_MESSAGE) {
+      applyCheckInFromToast()
+    }
+    if (event.data?.type === SNOOZE_POSTURE_MESSAGE) {
+      applySnoozeFromToast()
+    }
+  })
+}
+
+if (params.get('checkIn') === '1') {
+  applyCheckInFromToast()
+  // Drop the one-shot flag so refresh does not re-confirm.
+  params.delete('checkIn')
+  const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}${window.location.hash}`
+  window.history.replaceState(null, '', next)
+}
+
+if (params.get('snooze') === '1') {
+  applySnoozeFromToast()
+  params.delete('snooze')
+  const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}${window.location.hash}`
+  window.history.replaceState(null, '', next)
+}
 
 if (isLocalDebugHost()) {
   void import('./debug').then(({ mountDebugToolbar }) => mountDebugToolbar())

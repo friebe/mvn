@@ -15,7 +15,7 @@ import {
 import { fillLevel, formatExactTime, formatRemainingPercent, softTimeLabel } from './atmosphere'
 import { intervalSummary, resolveIntervals } from './intervals'
 import { appPath } from './paths'
-import { isCheckInVisible } from './timer'
+import { canSnoozePostureNow, isCheckInVisible } from './timer'
 import { buildDayCloseComparison, buildDayStory, type StatsSummary } from './stats'
 import { weekFocusLabel } from './week-focus'
 import { shortcutHintLabel, type ShortcutId } from './shortcuts'
@@ -35,6 +35,7 @@ export interface UiHandlers {
   onRerollMoment: () => void
   onChooseMoment: (id: string) => void
   onConfirmCheckIn: () => void
+  onSnoozePosture: () => void
   onToggleLazy: () => void
   onToggleClock: () => void
   onToggleTheme: () => void
@@ -356,6 +357,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
               ${actionButton('btn-rise', 'btn btn-primary', 'Move briefly', 'rise')}
               ${actionButton('btn-threshold-skip', 'btn btn-ghost', 'Just sit', 'skipStanding')}
               <div class="row threshold-secondary">
+                ${actionButton('btn-snooze', 'btn btn-ghost', '+5 min', null)}
                 ${actionButton('btn-lazy-path', 'btn btn-ghost', 'Lazy continue', 'lazyPath')}
               </div>
             </div>
@@ -403,6 +405,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   qs(root, 'btn-install').addEventListener('click', handlers.onInstall)
   qs(root, 'btn-install-dismiss').addEventListener('click', handlers.onDismissInstall)
   qs(root, 'btn-rise').addEventListener('click', handlers.onChooseRise)
+  qs(root, 'btn-snooze').addEventListener('click', handlers.onSnoozePosture)
   qs(root, 'btn-lazy-path').addEventListener('click', handlers.onChooseLazyPath)
   qs(root, 'btn-day-close-done').addEventListener('click', handlers.onDismissDayClose)
 
@@ -515,6 +518,7 @@ export function renderUi(
   const btnResume = qs<HTMLButtonElement>(root, 'btn-resume')
   const btnRise = qs<HTMLButtonElement>(root, 'btn-rise')
   const thresholdSkip = qs<HTMLButtonElement>(root, 'btn-threshold-skip')
+  const btnSnooze = qs<HTMLButtonElement>(root, 'btn-snooze')
   const btnReroll = qs<HTMLButtonElement>(root, 'btn-reroll')
   const thresholdActions = qs(root, 'threshold-actions')
   const pickActions = qs(root, 'pick-actions')
@@ -589,6 +593,7 @@ export function renderUi(
   setButtonLabel(skipStandEx, skipLabel)
 
   setHidden(thresholdSkip, !momentChoiceAtThreshold || dayCloseVisible)
+  setHidden(btnSnooze, !isThreshold || dayCloseVisible || !canSnoozePostureNow())
   if (momentChoiceAtThreshold) {
     setButtonLabel(thresholdSkip, thresholdSkipLabel(state.pendingNextPhase))
     setButtonLabel(btnRise, thresholdRiseLabel(state.endedPhase))

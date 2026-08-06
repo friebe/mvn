@@ -33,7 +33,7 @@ import {
 } from './modes'
 import { getMoment, pickMoment, pickMomentCards, rememberId } from './exercises'
 import { pickAmbient, pickMotivation, rememberMotivation, shouldShowRareAmbient, ambientMilestoneAfterShow } from './motivation'
-import { notifyPhase } from './notify'
+import { CHECK_IN_YES_ACTION, notifyPhase, SNOOZE_POSTURE_ACTION } from './notify'
 import { isAppAway, subscribePresence } from './presence'
 import { buildDayCloseLine, recordStat, summarizeToday, todayKey } from './stats'
 import { isLocalDebugHost } from './debug-host'
@@ -56,12 +56,24 @@ let awayNudgeId: number | null = null
 let awayNudgeKind: AttentionKind | null = null
 let awayNudgeTitle = ''
 let awayNudgeBody = ''
+/** Away re-toasts include a Yes action for mid-phase check-in. */
+let awayNudgeCheckIn = false
+/** Away re-toasts include +5 min on threshold. */
+let awayNudgeSnooze = false
 const AWAY_NUDGE_MS = 75_000
 const AWAY_ACTION_KINDS: ReadonlySet<AttentionKind> = new Set([
   'threshold',
   'foreshadow',
   'ritual',
 ])
+
+/** Soft +5 min (same posture) from threshold — max per desk cue chain. */
+let postureSnoozeCount = 0
+/** Current sit/stand block is a +5 extension (skip sit_done/stand_done on end). */
+let phaseIsSnoozeExtension = false
+const MAX_POSTURE_SNOOZES = 2
+const SNOOZE_MS = 5 * 60_000
+const DEMO_SNOOZE_MS = 12_000
 
 /** Localhost-only: freeze wall-clock deadlines for screen debugging. */
 let debugPaused = false
@@ -219,6 +231,7 @@ function autoThresholdToMoment(): void {
   if (state.phase !== 'threshold' || !thresholdMomentChoice()) return
   recordStat('rise')
   clearThresholdMomentTimer()
+  resetPostureSnooze()
   enterPick()
 }
 
@@ -315,7 +328,7 @@ function maybeShowCheckIn(): void {
     ...state,
     checkInShownAt: Date.now(),
   }
-  signalAttention('foreshadow', 'Check-in', checkInPrompt())
+  signalAttention('foreshadow', 'Check-in', checkInPrompt(), { checkInConfirm: true })
 }
 
 function maybeTimeoutCheckIn(): void {
@@ -354,6 +367,8 @@ function clearAwayNudge(): void {
   awayNudgeKind = null
   awayNudgeTitle = ''
   awayNudgeBody = ''
+  awayNudgeCheckIn = false
+  awayNudgeSnooze = false
 }
 
 function stillNeedsAwayNudge(): boolean {
@@ -363,34 +378,84 @@ function stillNeedsAwayNudge(): boolean {
   return state.checkInShownAt != null && !state.checkInHandled
 }
 
-function armAwayNudge(kind: AttentionKind, title: string, body: string): void {
+function canSnoozePosture(): boolean {
+  if (state.phase !== 'threshold') return false
+  if (postureSnoozeCount >= MAX_POSTURE_SNOOZES) return false
+  const ended = state.endedPhase
+  return ended === 'sit' || ended === 'stand'
+}
+
+function snoozeDurationMs(): number {
+  return state.demo ? DEMO_SNOOZE_MS : SNOOZE_MS
+}
+
+function checkInNotifyExtras(): {
+  actions: { action: string; title: string }[]
+  data: { type: 'check-in' }
+} {
+  return {
+    actions: [{ action: CHECK_IN_YES_ACTION, title: 'Yes' }],
+    data: { type: 'check-in' },
+  }
+}
+
+function snoozeNotifyExtras(): {
+  actions: { action: string; title: string }[]
+  data: { type: 'threshold-snooze' }
+} {
+  return {
+    actions: [{ action: SNOOZE_POSTURE_ACTION, title: '+5 min' }],
+    data: { type: 'threshold-snooze' },
+  }
+}
+
+function armAwayNudge(
+  kind: AttentionKind,
+  title: string,
+  body: string,
+  opts: { checkInConfirm?: boolean; snoozePosture?: boolean } = {},
+): void {
   clearAwayNudge()
   if (!AWAY_ACTION_KINDS.has(kind)) return
   awayNudgeKind = kind
   awayNudgeTitle = title
   awayNudgeBody = body
+  awayNudgeCheckIn = opts.checkInConfirm === true
+  awayNudgeSnooze = opts.snoozePosture === true
   awayNudgeId = window.setInterval(() => {
     if (!isAppAway() || awayNudgeKind == null) return
     if (!stillNeedsAwayNudge()) {
       clearAwayNudge()
       return
     }
+    const snooze = awayNudgeSnooze && canSnoozePosture()
     void notifyPhase(`Stint · ${awayNudgeTitle}`, awayNudgeBody, true, {
       persistent: state.notificationPersistent,
       playSound: state.soundEnabled,
+      ...(awayNudgeCheckIn ? checkInNotifyExtras() : {}),
+      ...(snooze ? snoozeNotifyExtras() : {}),
     })
     startTitleBlink(awayNudgeTitle)
   }, AWAY_NUDGE_MS)
 }
 
-function signalAttention(kind: AttentionKind, title: string, body: string): void {
+function signalAttention(
+  kind: AttentionKind,
+  title: string,
+  body: string,
+  opts: { checkInConfirm?: boolean; snoozePosture?: boolean } = {},
+): void {
   const muted = !state.soundEnabled
   const away = isAppAway()
   const notify = shouldNotify(muted, kind, away)
+  const checkInConfirm = opts.checkInConfirm === true
+  const snoozePosture = opts.snoozePosture === true && canSnoozePosture()
   playBeep(state.soundEnabled)
   void notifyPhase(`Stint · ${title}`, body, notify, {
     persistent: state.notificationPersistent,
     playSound: state.soundEnabled || (away && notify),
+    ...(checkInConfirm ? checkInNotifyExtras() : {}),
+    ...(snoozePosture ? snoozeNotifyExtras() : {}),
   })
   flashShell(kind, muted)
 
@@ -405,7 +470,7 @@ function signalAttention(kind: AttentionKind, title: string, body: string): void
   }
 
   if (away && notify && AWAY_ACTION_KINDS.has(kind)) {
-    armAwayNudge(kind, title, body)
+    armAwayNudge(kind, title, body, { checkInConfirm, snoozePosture })
   } else {
     clearAwayNudge()
   }
@@ -467,9 +532,13 @@ function finishAfterplay(): void {
 
 function enterThreshold(ended: ActivePhase): void {
   const next = nextActivePhase(ended)
-  if (ended === 'sit') recordStat('sit_done')
-  else if (ended === 'stand') recordStat('stand_done')
-  else recordStat('reset_done')
+  if (!phaseIsSnoozeExtension) {
+    if (ended === 'sit') recordStat('sit_done')
+    else if (ended === 'stand') recordStat('stand_done')
+    else recordStat('reset_done')
+    postureSnoozeCount = 0
+  }
+  phaseIsSnoozeExtension = false
 
   const momentChoice = thresholdMomentChoice(ended)
   const duration = momentChoice ? thresholdMomentMs() : null
@@ -495,8 +564,52 @@ function enterThreshold(ended: ActivePhase): void {
     'threshold',
     'Desk',
     ended === 'sit' ? 'Desk wants up.' : 'Sit again?',
+    { snoozePosture: true },
   )
   emit()
+}
+
+function resetPostureSnooze(): void {
+  postureSnoozeCount = 0
+  phaseIsSnoozeExtension = false
+}
+
+/** Threshold toast / in-app: stay in current posture +5 min (deep work). */
+export function snoozePosture(): void {
+  if (!canSnoozePosture()) return
+  const phase = state.endedPhase
+  if (phase !== 'sit' && phase !== 'stand') return
+
+  postureSnoozeCount += 1
+  clearThresholdMomentTimer()
+  clearAttention()
+
+  const ms = snoozeDurationMs()
+  phaseIsSnoozeExtension = true
+  state = {
+    ...state,
+    phase,
+    phaseEndsAt: Date.now() + ms,
+    phaseDurationMs: ms,
+    foreshadowFired: false,
+    pendingNextPhase: null,
+    endedPhase: null,
+    currentExerciseId: null,
+    currentMotivationId: null,
+    ambientMotivationId: null,
+    resumeToThreshold: false,
+    resumeAfterAfterplay: false,
+    momentChoiceIds: null,
+    checkInAt: null,
+    checkInShownAt: null,
+    checkInHandled: true,
+  }
+  setBaseTitle(`Stint · ${phaseLabel(phase)} · +5`)
+  emit()
+}
+
+export function canSnoozePostureNow(): boolean {
+  return canSnoozePosture()
 }
 
 function enterPick(): void {
@@ -599,6 +712,7 @@ function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): vo
 function advanceThresholdNext(): void {
   clearThresholdMomentTimer()
   clearAttention()
+  resetPostureSnooze()
   enterActivePhase(state.pendingNextPhase ?? 'sit', { soft: true })
 }
 
@@ -611,6 +725,7 @@ export function chooseRise(): void {
   }
   recordStat('rise')
   clearThresholdMomentTimer()
+  resetPostureSnooze()
   enterPick()
 }
 
@@ -683,6 +798,7 @@ export function chooseLazyPath(): void {
   recordStat('lazy_choice')
   clearThresholdMomentTimer()
   clearAttention()
+  resetPostureSnooze()
   const next = state.pendingNextPhase ?? 'sit'
   state = { ...state, mode: 'lazy' }
   enterActivePhase(next, { soft: true })
@@ -690,6 +806,7 @@ export function chooseLazyPath(): void {
 
 export function startDay(mode: EnergyMode = state.mode): void {
   recordStat('day_start')
+  resetPostureSnooze()
   state = {
     ...state,
     mode,
@@ -713,6 +830,7 @@ export function resetDay(): string {
     recordStat('day_close')
   }
   clearAttention()
+  resetPostureSnooze()
   state = {
     ...state,
     phase: 'setup',
