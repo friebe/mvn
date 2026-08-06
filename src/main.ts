@@ -55,8 +55,10 @@ import {
 import { CHECK_IN_YES_MESSAGE, SNOOZE_POSTURE_MESSAGE } from './notify'
 import { initPresence } from './presence'
 import { showLaunchSplash } from './splash'
+import { trackPwaLaunch } from './analytics-umami'
 
 registerPwa()
+trackPwaLaunch()
 initPresence()
 
 const app = document.querySelector<HTMLElement>('#app')!

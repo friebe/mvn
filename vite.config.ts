@@ -51,7 +51,8 @@ export default defineConfig({
         background_color: '#f3efe6',
         display: 'standalone',
         orientation: 'any',
-        start_url: base,
+        // UTM so Umami can tell Homescreen/Desktop launches from browser tabs.
+        start_url: `${base}?utm_source=pwa&utm_medium=standalone`,
         scope: base,
         icons: [
           {
