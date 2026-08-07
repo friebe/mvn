@@ -19,6 +19,25 @@ export async function ensureNotificationPermission(): Promise<boolean> {
   return result === 'granted'
 }
 
+/** Browser already blocked the prompt — sites cannot reopen it. */
+export function notificationPermissionDenied(): boolean {
+  return 'Notification' in window && Notification.permission === 'denied'
+}
+
+/** Short how-to after the OS/browser blocked the prompt. */
+export function notificationUnblockHint(): string {
+  const ua = navigator.userAgent
+  if (/Safari/i.test(ua) && !/Chrome|Chromium|Edg/i.test(ua)) {
+    return 'Safari blocked the prompt. Safari → Settings for This Website → Notifications → Allow, then tap Check again.'
+  }
+  if (/Firefox/i.test(ua)) {
+    return 'Firefox blocked the prompt. Address bar left icon → Permissions → Notifications → Allow, then tap Check again.'
+  }
+  // Chrome / Edge / Arc / Brave
+  return 'Browser blocked the prompt (sites can’t show it again). Address bar 🔒 → Site settings → Notifications → Allow. Reload if needed, then tap Check again.'
+}
+
+
 async function getReadyRegistration(): Promise<ServiceWorkerRegistration | null> {
   if (!('serviceWorker' in navigator)) return null
   try {

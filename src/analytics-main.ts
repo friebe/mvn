@@ -171,7 +171,7 @@ function render(period: Period): void {
         ${s.day_close > 0 ? `<div class="detail-row"><span>Day close</span><span>${s.day_close}</span></div>` : ''}
         ${s.ritual_done > 0 ? `<div class="detail-row"><span>Moments</span><span>${s.ritual_done}</span></div>` : ''}
         ${s.ritual_skip > 0 ? `<div class="detail-row"><span>Skipped</span><span>${s.ritual_skip}</span></div>` : ''}
-        ${s.lazy_choice > 0 ? `<div class="detail-row"><span>Lazy chosen</span><span>${s.lazy_choice}</span></div>` : ''}
+        ${s.lazy_choice > 0 ? `<div class="detail-row"><span>Lazy (legacy)</span><span>${s.lazy_choice}</span></div>` : ''}
       </section>`
           : ''
       }

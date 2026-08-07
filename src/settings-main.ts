@@ -22,7 +22,7 @@ import {
 import {
   shortcutsByContext,
 } from './shortcuts'
-import type { AtmosphereDisplay, EnergyMode } from './state'
+import type { AtmosphereDisplay } from './state'
 import { brandLockupHtml, BRAND_TAG } from './brand-mark'
 import {
   ATMOSPHERE_DISPLAY_LABELS,
@@ -85,19 +85,18 @@ function installSectionHtml(): string {
 }
 
 function intervalSelect(
-  mode: EnergyMode,
   phase: IntervalPhase,
   options: number[],
   intervals: UserIntervals,
 ): string {
-  const current = minutesFromMs(intervals[mode][phase])
+  const current = minutesFromMs(intervals[phase])
   const opts = options
     .map(
       (m) =>
         `<option value="${m}"${m === current ? ' selected' : ''}>${m} min</option>`,
     )
     .join('')
-  return `<select class="setting-select" data-mode="${mode}" data-phase="${phase}" aria-label="${phase}">${opts}</select>`
+  return `<select class="setting-select" data-phase="${phase}" aria-label="${phase}">${opts}</select>`
 }
 
 function render(): void {
@@ -224,39 +223,18 @@ function render(): void {
         <p class="settings-hint">
           Long sit and stand blocks — not Pomodoro. At each desk switch, an optional ~15s micro-move.
         </p>
-
-        <div class="interval-block">
-          <h3 class="interval-mode">High Mode</h3>
-          <p class="interval-summary">${intervalSummary(intervals, 'high')}</p>
-          <div class="setting-row">
-            <div class="setting-copy">
-              <p class="setting-label">Sitting</p>
-            </div>
-            ${intervalSelect('high', 'sit', SIT_OPTIONS.high, intervals)}
+        <p class="interval-summary">${intervalSummary(intervals)}</p>
+        <div class="setting-row">
+          <div class="setting-copy">
+            <p class="setting-label">Sitting</p>
           </div>
-          <div class="setting-row">
-            <div class="setting-copy">
-              <p class="setting-label">Standing</p>
-            </div>
-            ${intervalSelect('high', 'stand', STAND_OPTIONS.high, intervals)}
-          </div>
+          ${intervalSelect('sit', SIT_OPTIONS, intervals)}
         </div>
-
-        <div class="interval-block">
-          <h3 class="interval-mode">Lazy Mode</h3>
-          <p class="interval-summary">${intervalSummary(intervals, 'lazy')}</p>
-          <div class="setting-row">
-            <div class="setting-copy">
-              <p class="setting-label">Sitting</p>
-            </div>
-            ${intervalSelect('lazy', 'sit', SIT_OPTIONS.lazy, intervals)}
+        <div class="setting-row">
+          <div class="setting-copy">
+            <p class="setting-label">Standing</p>
           </div>
-          <div class="setting-row">
-            <div class="setting-copy">
-              <p class="setting-label">Standing</p>
-            </div>
-            ${intervalSelect('lazy', 'stand', STAND_OPTIONS.lazy, intervals)}
-          </div>
+          ${intervalSelect('stand', STAND_OPTIONS, intervals)}
         </div>
       </section>
 
@@ -307,6 +285,15 @@ function render(): void {
           <button type="button" class="setting-btn ${s.demo ? 'is-on' : ''}" id="btn-demo">
             ${s.demo ? 'On' : 'Off'}
           </button>
+        </div>
+        <div class="setting-row">
+          <div class="setting-copy">
+            <p class="setting-label">Loop tour</p>
+            <p class="setting-note">
+              Sit → desk cue → moment → stand in about half a minute — for first visits or a quick refresh.
+            </p>
+          </div>
+          <a class="setting-link" id="link-walkthrough" href="${appPath('')}?tour=1">Replay</a>
         </div>
         <p class="settings-hint">
           Micro-moments (exercises) stay in German for now — clearer body cues.
@@ -370,11 +357,9 @@ function render(): void {
 
   root.querySelectorAll<HTMLSelectElement>('.setting-select').forEach((select) => {
     select.addEventListener('change', () => {
-      const mode = select.dataset.mode as EnergyMode
       const phase = select.dataset.phase as IntervalPhase
       const minutes = Number(select.value)
-      const next = getResolvedIntervals()
-      next[mode] = { ...next[mode], [phase]: msFromMinutes(minutes) }
+      const next = { ...getResolvedIntervals(), [phase]: msFromMinutes(minutes) }
       setIntervals(next)
       render()
     })

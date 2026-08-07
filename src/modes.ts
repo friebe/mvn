@@ -4,8 +4,7 @@ import {
   pickCopy,
   PICK_LEAD_DOWN,
   PICK_LEAD_UP,
-  RUNNING_HINTS_HIGH,
-  RUNNING_HINTS_LAZY,
+  RUNNING_HINTS,
   THRESHOLD_LEAD_DOWN,
   THRESHOLD_LEAD_SIT,
   THRESHOLD_SUB_DOWN,
@@ -89,9 +88,8 @@ export function pickLead(pendingNext: ActivePhase | null, at = new Date()): stri
   return pickCopy(PICK_LEAD_UP, copyKey('pick-lead-up', at))
 }
 
-export function runningPhaseHint(lazy: boolean, at = new Date()): string {
-  const variants = lazy ? RUNNING_HINTS_LAZY : RUNNING_HINTS_HIGH
-  return pickCopy(variants, copyKey(lazy ? 'hint-lazy' : 'hint-high', at))
+export function runningPhaseHint(at = new Date()): string {
+  return pickCopy(RUNNING_HINTS, copyKey('hint-run', at))
 }
 
 /** Short orientation while a moment runs. */

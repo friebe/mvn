@@ -295,7 +295,7 @@ export function buildDayStory(s: StatsSummary): string {
   if (s.rounds > 0) return 'Check-ins confirmed — you answered when the desk asked.'
   if (s.rise > 0) return 'Desk raised — mid-phase check-in often without a tap.'
   if (s.freeze_total > 0) return 'Calls interrupted the flow — freeze protected you.'
-  if (s.lazy_choice > 0) return 'Lazy Mode was in play.'
+  if (s.lazy_choice > 0) return 'Softer desk days were in the mix.'
   return 'The day is running. No switches yet — ok.'
 }
 

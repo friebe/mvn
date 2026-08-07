@@ -1,5 +1,3 @@
-import type { EnergyMode } from './state'
-
 export type MotivationKind = 'high' | 'lazy' | 'north'
 export type MotivationWhen = 'morning' | 'afternoon' | 'evening' | 'any'
 
@@ -78,7 +76,7 @@ export const MOTIVATIONS: Motivation[] = [
   {
     id: 'lazy-win',
     kind: 'lazy',
-    text: 'Lazy Mode is not failure. It is survival mode for real days.',
+    text: 'Soft days still count. The desk only needs one honest switch.',
   },
   {
     id: 'bare-minimum',
@@ -169,20 +167,27 @@ function poolForKind(kind: MotivationKind, at: Date): Motivation[] {
   return matched.length >= 2 ? matched : base
 }
 
+/** Ritual lines — former High + Lazy pools, no mode split. */
+function poolForCue(at: Date): Motivation[] {
+  const slot = timeOfDay(at)
+  const base = MOTIVATIONS.filter((m) => m.kind === 'high' || m.kind === 'lazy')
+  const matched = base.filter((m) => !m.when || m.when === slot || m.when === 'any')
+  return matched.length >= 2 ? matched : base
+}
+
 function pickFromPool(pool: Motivation[], recentIds: string[]): Motivation {
   const fresh = pool.filter((m) => !recentIds.includes(m.id))
   const candidates = fresh.length > 0 ? fresh : pool
   return candidates[Math.floor(Math.random() * candidates.length)]!
 }
 
-/** Mode pool only — Nordstern is reserved for rare ambient lines. */
+/** Cue pool only — Nordstern is reserved for rare ambient lines. */
 export function pickMotivation(
-  mode: EnergyMode,
   recentIds: string[],
   _pickCount: number,
   at = new Date(),
 ): Motivation {
-  return pickFromPool(poolForKind(mode, at), recentIds)
+  return pickFromPool(poolForCue(at), recentIds)
 }
 
 /** Rare ambient — Nordstern lines during sit/stand countdown. */

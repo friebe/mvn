@@ -20,7 +20,6 @@ import {
   type ActivePhase,
   type AppState,
   type AtmosphereDisplay,
-  type EnergyMode,
 } from './state'
 import {
   DEMO_EXERCISE_MS,
@@ -37,6 +36,7 @@ import { CHECK_IN_YES_ACTION, notifyPhase, SNOOZE_POSTURE_ACTION } from './notif
 import { isAppAway, subscribePresence } from './presence'
 import { buildDayCloseLine, recordStat, summarizeToday, todayKey } from './stats'
 import { isLocalDebugHost } from './debug-host'
+import { isWalkthroughActive, markWalkthroughSeen, skipWalkthrough } from './walkthrough'
 import type { ThemePreference } from './theme'
 import { applyTheme } from './theme'
 
@@ -613,7 +613,7 @@ export function canSnoozePostureNow(): boolean {
 }
 
 function enterPick(): void {
-  const cards = pickMomentCards(state.mode, state.recentExerciseIds)
+  const cards = pickMomentCards(state.recentExerciseIds)
   clearAttention()
   state = {
     ...state,
@@ -631,10 +631,10 @@ function enterPick(): void {
 }
 
 function enterRitualWithMoment(momentId: string): void {
-  const moment = getMoment(momentId) ?? pickMoment(state.mode, state.recentExerciseIds)
+  const moment = getMoment(momentId) ?? pickMoment(state.recentExerciseIds)
   const next = state.pendingNextPhase ?? 'sit'
   motivationPickCount += 1
-  const motivation = pickMotivation(state.mode, state.recentMotivationIds, motivationPickCount)
+  const motivation = pickMotivation(state.recentMotivationIds, motivationPickCount)
 
   clearAttention()
   state = {
@@ -656,7 +656,7 @@ function enterRitualWithMoment(momentId: string): void {
 }
 
 function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): void {
-  const ms = durationFor(state.mode, phase, state.demo, state.intervals)
+  const ms = durationFor(phase, state.demo, state.intervals)
   const day = todayKey()
   let ambientId: string | null = null
   let recentMot = state.recentMotivationIds
@@ -765,7 +765,7 @@ export function completeMoment(): void {
 
 export function rerollMoment(): void {
   if (state.phase !== 'exercise' || state.momentRerolled) return
-  const moment = pickMoment(state.mode, state.recentExerciseIds)
+  const moment = pickMoment(state.recentExerciseIds)
   state = {
     ...state,
     currentExerciseId: moment.id,
@@ -792,24 +792,13 @@ export function confirmCheckIn(): void {
   emit()
 }
 
-/** Threshold → Lazy + next phase without ritual */
-export function chooseLazyPath(): void {
-  if (state.phase !== 'threshold') return
-  recordStat('lazy_choice')
-  clearThresholdMomentTimer()
-  clearAttention()
-  resetPostureSnooze()
-  const next = state.pendingNextPhase ?? 'sit'
-  state = { ...state, mode: 'lazy' }
-  enterActivePhase(next, { soft: true })
-}
-
-export function startDay(mode: EnergyMode = state.mode): void {
+export function startDay(): void {
   recordStat('day_start')
   resetPostureSnooze()
+  if (isWalkthroughActive()) skipWalkthrough()
+  else markWalkthroughSeen()
   state = {
     ...state,
-    mode,
     startedAt: Date.now(),
     frozenAt: null,
     frozenRemainingMs: null,
@@ -862,16 +851,6 @@ export function resetDay(): string {
   return story
 }
 
-export function setMode(mode: EnergyMode): void {
-  if (state.mode === mode) return
-  state = { ...state, mode }
-  if (state.phase === 'sit' || state.phase === 'stand' || state.phase === 'reset') {
-    enterActivePhase(state.phase)
-    return
-  }
-  emit()
-}
-
 export function setAtmosphereDisplay(display: AtmosphereDisplay): void {
   if (state.atmosphereDisplay === display) return
   state = { ...state, atmosphereDisplay: display }
@@ -900,7 +879,11 @@ export function toggleDemo(): void {
 }
 
 export function toggleSound(): void {
-  state = { ...state, soundEnabled: !state.soundEnabled }
+  setSoundEnabled(!state.soundEnabled)
+}
+
+export function setSoundEnabled(enabled: boolean): void {
+  state = { ...state, soundEnabled: enabled }
   emit()
 }
 
@@ -992,7 +975,7 @@ export function startFreezeAfterplay(): void {
     return
   }
 
-  const moment = pickMoment(state.mode, state.recentExerciseIds)
+  const moment = pickMoment(state.recentExerciseIds)
   clearAttention()
   state = {
     ...state,

@@ -7,7 +7,6 @@ export type PreferenceKey =
   | 'soundEnabled'
   | 'notificationsEnabled'
   | 'demo'
-  | 'mode'
   | 'intervals'
   | 'shortcutHintsEnabled'
   | 'notificationPersistent'

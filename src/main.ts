@@ -28,7 +28,6 @@ import { bindShortcuts } from './shortcuts'
 import { isLocalDebugHost } from './debug-host'
 import { applyThemeFromState, bindSystemThemeListener, nextThemeToggle } from './theme'
 import {
-  chooseLazyPath,
   chooseMoment,
   chooseRise,
   completeMoment,
@@ -43,7 +42,8 @@ import {
   resume,
   setAtmosphereDisplay,
   setDemo,
-  setMode,
+  setNotificationsEnabled,
+  setSoundEnabled,
   setTheme,
   skipStanding,
   snoozePosture,
@@ -52,10 +52,19 @@ import {
   subscribe,
   refreshUi,
 } from './timer'
-import { CHECK_IN_YES_MESSAGE, SNOOZE_POSTURE_MESSAGE } from './notify'
+import { CHECK_IN_YES_MESSAGE, SNOOZE_POSTURE_MESSAGE, notifyPhase, notificationUnblockHint } from './notify'
+import { playBeep } from './audio'
 import { initPresence } from './presence'
 import { showLaunchSplash } from './splash'
 import { trackPwaLaunch } from './analytics-umami'
+import {
+  nextWalkthroughStep,
+  setWalkthroughCueFeedback,
+  skipWalkthrough,
+  startWalkthrough,
+  subscribeWalkthrough,
+  subscribeWalkthroughEnter,
+} from './walkthrough'
 
 registerPwa()
 trackPwaLaunch()
@@ -76,7 +85,7 @@ let showFreezePromptLatest = false
 let lastPersistedState: ReturnType<typeof getState> | null = null
 
 const shortcutHandlers = {
-  onStart: () => startDay(getState().mode),
+  onStart: () => startDay(),
   onFreeze: () => freeze(),
   onResume: () => resume(),
   onExtendFreeze: () => extendFreeze(),
@@ -87,15 +96,68 @@ const shortcutHandlers = {
   onChooseMoment: (id: string) => chooseMoment(id),
   onConfirmCheckIn: () => confirmCheckIn(),
   onSnoozePosture: () => snoozePosture(),
-  onToggleLazy: () => {
-    const next = getState().mode === 'lazy' ? 'high' : 'lazy'
-    setMode(next)
-  },
   onChooseRise: () => chooseRise(),
-  onChooseLazyPath: () => chooseLazyPath(),
   onDismissDayClose: () => {
     dismissDayCloseReward()
     refreshUi()
+  },
+  onStartWalkthrough: () => {
+    if (getState().phase === 'setup') startWalkthrough()
+  },
+  onNextWalkthrough: () => nextWalkthroughStep(),
+  onSkipWalkthrough: () => skipWalkthrough(),
+  onEnableWalkthroughSound: () => {
+    setSoundEnabled(true)
+    writePreferences({ soundEnabled: true })
+    setWalkthroughCueFeedback(null)
+    playBeep(true)
+    refreshUi()
+  },
+  onEnableWalkthroughNotifications: () => {
+    // requestPermission must start in the same turn as the click (user gesture).
+    if (!('Notification' in window)) {
+      setWalkthroughCueFeedback('Notifications aren’t available in this browser.')
+      refreshUi()
+      return
+    }
+
+    const apply = (ok: boolean) => {
+      setNotificationsEnabled(ok)
+      writePreferences({ notificationsEnabled: ok })
+      if (ok) {
+        setWalkthroughCueFeedback(null)
+        void notifyPhase('Stint · Desk', 'Desk wants up.', true, {
+          playSound: getState().soundEnabled,
+        })
+      } else if (Notification.permission === 'denied') {
+        setWalkthroughCueFeedback(notificationUnblockHint())
+      } else {
+        setWalkthroughCueFeedback('Notifications not enabled — you can continue without them.')
+      }
+      refreshUi()
+    }
+
+    // Already blocked: browsers will not show the allow popup again.
+    if (Notification.permission === 'denied') {
+      setWalkthroughCueFeedback(notificationUnblockHint())
+      refreshUi()
+      return
+    }
+
+    if (Notification.permission === 'granted') {
+      apply(true)
+      return
+    }
+
+    try {
+      const result = Notification.requestPermission()
+      void Promise.resolve(result).then((permission) => {
+        apply(permission === 'granted')
+      })
+    } catch {
+      setWalkthroughCueFeedback('Couldn’t open the notification prompt.')
+      refreshUi()
+    }
   },
 }
 
@@ -161,6 +223,25 @@ subscribe((state, remaining, showFreezePrompt, approaching) => {
   }
 })
 
+subscribeWalkthrough(() => {
+  refreshUi()
+})
+
+subscribeWalkthroughEnter((step) => {
+  if (step.id !== 'threshold' && step.id !== 'moment') return
+  const s = getState()
+  if (!s.soundEnabled && !s.notificationsEnabled) return
+  playBeep(s.soundEnabled)
+  if (s.notificationsEnabled) {
+    const title = step.id === 'threshold' ? 'Stint · Desk' : 'Stint · Moment'
+    const body =
+      step.id === 'threshold' ? 'Desk wants up.' : 'Three cards. One is enough.'
+    void notifyPhase(title, body, true, {
+      playSound: s.soundEnabled,
+    })
+  }
+})
+
 initTimer(initial)
 
 function applyCheckInFromToast(): void {
@@ -193,6 +274,13 @@ if (params.get('checkIn') === '1') {
 if (params.get('snooze') === '1') {
   applySnoozeFromToast()
   params.delete('snooze')
+  const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}${window.location.hash}`
+  window.history.replaceState(null, '', next)
+}
+
+if (params.get('tour') === '1') {
+  if (getState().phase === 'setup') startWalkthrough(true)
+  params.delete('tour')
   const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}${window.location.hash}`
   window.history.replaceState(null, '', next)
 }

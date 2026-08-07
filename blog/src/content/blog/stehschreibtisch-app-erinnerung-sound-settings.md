@@ -2,7 +2,7 @@
 title: 'Stehschreibtisch-App: Sit/Stand-Erinnerung, Sound & Benachrichtigungen'
 description: 'Stint als Stehschreibtisch-App: Sit/Stand-Erinnerung, Sound und Notifications einstellen. Intervalle, Demo, Install — lokal, ohne Fitness-Druck. How-to.'
 pubDate: 2026-08-02
-updatedDate: 2026-08-05
+updatedDate: 2026-08-07
 faq:
   - question: 'Was macht eine Sit/Stand-Erinnerung anders als ein Fokus-Timer?'
     answer: 'Sie erinnert an den Haltungswechsel (sitzen/stehen), nicht an Arbeits-Sprints. Idealerweise weich und optional — ohne Streaks oder Sirenen.'
@@ -10,8 +10,8 @@ faq:
     answer: 'Nein. Beides ist optional und getrennt. Default kann still sein; du schaltest nur ein, was dich wirklich unterstützt.'
   - question: 'Warum als App installieren?'
     answer: 'Als installierte PWA läuft Stint zuverlässiger auf dem Zweitmonitor, und Browser-Benachrichtigungen greifen oft besser als im normalen Tab.'
-  - question: 'Was ist High Mode vs. Lazy Mode?'
-    answer: 'Zwei Intervall-Presets: High eher längerer Sit und etwas mehr Stand-Anteil (Default z. B. 30/5 Min); Lazy kürzer (z. B. 20/3), wenn der Tag schon voll ist. Beides feinjustierbar.'
+  - question: 'Wie stelle ich Sit- und Stand-Zeiten ein?'
+    answer: 'Unter Settings → Intervals. Default z. B. 30 Min sitzen und 5 Min stehen — in Minuten-Schritten anpassbar. Kein zweites Preset mehr; ein Rhythmus reicht.'
   - question: 'Wo liegen meine Daten?'
     answer: 'In LocalStorage auf deinem Gerät. Kein Account, kein Cloud-Sync, keine Tracking-Pixel hinter den Settings.'
   - question: 'Wie oft sollte ich die Intervalle setzen?'
@@ -34,16 +34,9 @@ Dazu: weiche Signale (Ton, Toast), **Freeze**, wenn du gerade nicht wechseln kan
 
 Stint misst keine Kalorien und bewertet dich nicht. Es hält den Rhythmus sichtbar, den *du* gewählt hast — typisch als ruhiges Fenster auf dem **Zweitmonitor**.
 
-## High Mode und Lazy Mode
+## Intervalle
 
-Unter **Settings → Intervals**:
-
-| Modus | Default Sit | Default Stand | Idee |
-| --- | --- | --- | --- |
-| **High Mode** | 30 Min | 5 Min | Klarer Wechsel, etwas mehr Stehanteil |
-| **Lazy Mode** | 20 Min | 3 Min | Kürzer, wenn der Tag schon voll ist |
-
-Sit/Stand lassen sich in Minuten-Schritten feiner justieren. Das ist kein Workout-Plan, sondern dein Schreibtisch-Takt.
+Unter **Settings → Intervals**: Default oft **30 Min sitzen** und **5 Min stehen** (plus kurzer Reset). Sit/Stand lassen sich in Minuten-Schritten feiner justieren. Das ist kein Workout-Plan, sondern dein Schreibtisch-Takt.
 
 **Demo** verkürzt die Intervalle stark, damit du den Loop einmal durchspielst, ohne eine halbe Stunde zu warten — sinnvoll beim ersten Setup.
 
@@ -89,7 +82,7 @@ Wenn dich das beschreibt: [getstint.de](/) — Settings im Header, sobald die Ap
 
 1. [Stint öffnen](/) — am besten installieren, wenn du einen zweiten Monitor hast.  
 2. **Demo** einmal durchlaufen.  
-3. High oder Lazy setzen (danach feinjustieren).  
+3. Intervalle unter Settings setzen (danach feinjustieren).  
 4. Sound und/oder Notifications nur so weit wie nötig.  
 5. Arbeiten. Wechseln. Weiter.
 

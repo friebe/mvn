@@ -59,15 +59,10 @@ export const PICK_LEAD_DOWN = [
   'Sit down. One small thing.',
 ] as const
 
-export const RUNNING_HINTS_LAZY = [
-  'Lazy Mode — the bar stays low.',
-  'Survival mode. Small counts.',
-  'Low bar today — still a win.',
-] as const
-
-export const RUNNING_HINTS_HIGH = [
+export const RUNNING_HINTS = [
   'Long sit block — micro-move only when the desk switches.',
   'Body maintenance, not a focus timer.',
   'Sit · move · sit again. The desk keeps the rhythm.',
   'Maintenance, not performance.',
+  'Small counts. The desk keeps the beat.',
 ] as const

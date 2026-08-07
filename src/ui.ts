@@ -23,6 +23,17 @@ import { detailMode, isBarOnly } from './atmosphere-display'
 import { brandLockupHtml } from './brand-mark'
 import { resolveTheme } from './theme'
 import { hasSeenSettings, markSettingsSeen } from './settings-cue'
+import { notificationPermissionDenied } from './notify'
+import {
+  getWalkthroughAtmosphere,
+  getWalkthroughCueFeedback,
+  getWalkthroughMomentIds,
+  getWalkthroughProgress,
+  getWalkthroughStep,
+  isLastWalkthroughStep,
+  isWalkthroughActive,
+  shouldOfferWalkthrough,
+} from './walkthrough'
 
 export interface UiHandlers {
   onStart: () => void
@@ -36,15 +47,18 @@ export interface UiHandlers {
   onChooseMoment: (id: string) => void
   onConfirmCheckIn: () => void
   onSnoozePosture: () => void
-  onToggleLazy: () => void
   onToggleClock: () => void
   onToggleTheme: () => void
   onInstall: () => void
   onDismissInstall: () => void
   onChooseRise: () => void
-  onChooseLazyPath: () => void
   onCloseDay: () => void
   onDismissDayClose: () => void
+  onStartWalkthrough: () => void
+  onNextWalkthrough: () => void
+  onSkipWalkthrough: () => void
+  onEnableWalkthroughSound: () => void
+  onEnableWalkthroughNotifications: () => void
 }
 
 const RETURN_AWAY_MS = 20_000
@@ -98,16 +112,25 @@ function setHintText(hint: HTMLElement, text: string): void {
   setText(hint, text)
 }
 
-function setMomentCards(cards: HTMLElement, ids: string[]): boolean {
-  const key = ids.join(',')
+function setMomentCards(
+  cards: HTMLElement,
+  ids: string[],
+  opts: { showPrompt?: boolean } = {},
+): boolean {
+  const showPrompt = opts.showPrompt === true
+  const key = `${ids.join(',')}|${showPrompt ? 'p' : ''}`
   if (cards.dataset.momentIds === key) return false
   cards.dataset.momentIds = key
   cards.innerHTML = ids
     .map((id) => {
       const m = getMoment(id) ?? MOMENTS[0]!
+      const prompt = showPrompt
+        ? `<span class="moment-prompt">${m.prompt}</span>`
+        : ''
       return `<button type="button" class="moment-choice" data-moment-id="${m.id}">
           <span class="moment-kind">${kindLabel(m.kind)}</span>
           <span class="moment-title">${m.title}</span>
+          ${prompt}
         </button>`
     })
     .join('')
@@ -342,12 +365,38 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             <a class="day-close-more" id="day-close-more" href="${appPath('analytics.html')}">All analytics</a>
           </section>
 
+          <section class="walkthrough" id="walkthrough" hidden>
+            <p class="walkthrough-progress" id="walkthrough-progress" aria-live="polite"></p>
+            <p class="walkthrough-coach" id="walkthrough-coach" hidden></p>
+            <p class="walkthrough-kicker" id="walkthrough-kicker">Sit</p>
+            <p class="walkthrough-lead" id="walkthrough-lead"></p>
+            <p class="walkthrough-sub" id="walkthrough-sub"></p>
+            <div class="row walkthrough-cues" id="walkthrough-cues" hidden>
+              <button type="button" class="btn btn-ghost" id="btn-walkthrough-sound">
+                <span class="btn-text">Enable sound</span>
+              </button>
+              <button type="button" class="btn btn-ghost" id="btn-walkthrough-notif">
+                <span class="btn-text">Enable notifications</span>
+              </button>
+            </div>
+            <p class="walkthrough-cue-feedback" id="walkthrough-cue-feedback" hidden></p>
+          </section>
+
           <nav class="primary-actions" id="primary-actions" aria-label="Actions">
             <div class="row day-close-actions" id="day-close-actions" hidden>
               ${actionButton('btn-day-close-done', 'btn btn-primary', 'Continue', 'dayCloseDone')}
             </div>
             <div class="row setup-actions" id="setup-controls">
               ${actionButton('btn-start', 'btn btn-primary', 'Start', 'start')}
+              <button type="button" class="btn btn-ghost" id="btn-try-loop" hidden>
+                <span class="btn-text">Try the loop</span>
+              </button>
+            </div>
+            <div class="row walkthrough-actions" id="walkthrough-actions" hidden>
+              ${actionButton('btn-walkthrough-next', 'btn btn-primary', 'Next', null)}
+              <button type="button" class="btn btn-ghost" id="btn-walkthrough-skip">
+                <span class="btn-text">Skip</span>
+              </button>
             </div>
             <div class="row run-actions" id="run-controls" hidden>
               ${actionButton('btn-freeze', 'btn btn-danger', 'Freeze', 'freeze')}
@@ -356,10 +405,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             <div class="row threshold-actions" id="threshold-actions" hidden>
               ${actionButton('btn-rise', 'btn btn-primary', 'Move briefly', 'rise')}
               ${actionButton('btn-threshold-skip', 'btn btn-ghost', 'Just sit', 'skipStanding')}
-              <div class="row threshold-secondary">
-                ${actionButton('btn-snooze', 'btn btn-ghost', '+5 min', null)}
-                ${actionButton('btn-lazy-path', 'btn btn-ghost', 'Lazy continue', 'lazyPath')}
-              </div>
+              ${actionButton('btn-snooze', 'btn btn-ghost', '+5 min', null)}
             </div>
             <div class="row pick-actions" id="pick-actions" hidden>
               ${actionButton('btn-skip-standing', 'btn btn-primary', 'Standing is enough today', 'skipStanding')}
@@ -375,7 +421,6 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
               ${actionButton('btn-skip-standing-ex', 'btn btn-ghost', 'Standing is enough today', 'skipStanding')}
             </div>
             <div class="row quick-actions" id="quick-actions">
-              ${actionButton('btn-lazy', 'btn btn-ghost', 'Lazy Mode', 'toggleLazy')}
               ${actionButton('btn-close-day', 'btn btn-ghost btn-end-day', 'End day', null, true)}
             </div>
           </nav>
@@ -386,6 +431,11 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   `
 
   qs(root, 'btn-start').addEventListener('click', handlers.onStart)
+  qs(root, 'btn-try-loop').addEventListener('click', handlers.onStartWalkthrough)
+  qs(root, 'btn-walkthrough-next').addEventListener('click', handlers.onNextWalkthrough)
+  qs(root, 'btn-walkthrough-skip').addEventListener('click', handlers.onSkipWalkthrough)
+  qs(root, 'btn-walkthrough-sound').addEventListener('click', handlers.onEnableWalkthroughSound)
+  qs(root, 'btn-walkthrough-notif').addEventListener('click', handlers.onEnableWalkthroughNotifications)
   qs(root, 'btn-freeze').addEventListener('click', handlers.onFreeze)
   qs(root, 'btn-resume').addEventListener('click', handlers.onResume)
   qs(root, 'btn-call-done').addEventListener('click', handlers.onResume)
@@ -397,7 +447,6 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   qs(root, 'btn-done-moment').addEventListener('click', handlers.onCompleteMoment)
   qs(root, 'btn-reroll').addEventListener('click', handlers.onRerollMoment)
   qs(root, 'btn-check-in').addEventListener('click', handlers.onConfirmCheckIn)
-  qs(root, 'btn-lazy').addEventListener('click', handlers.onToggleLazy)
   qs(root, 'btn-close-day').addEventListener('click', handlers.onCloseDay)
   qs(root, 'btn-theme').addEventListener('click', handlers.onToggleTheme)
   qs(root, 'btn-atmosphere-label').addEventListener('click', handlers.onToggleClock)
@@ -406,7 +455,6 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   qs(root, 'btn-install-dismiss').addEventListener('click', handlers.onDismissInstall)
   qs(root, 'btn-rise').addEventListener('click', handlers.onChooseRise)
   qs(root, 'btn-snooze').addEventListener('click', handlers.onSnoozePosture)
-  qs(root, 'btn-lazy-path').addEventListener('click', handlers.onChooseLazyPath)
   qs(root, 'btn-day-close-done').addEventListener('click', handlers.onDismissDayClose)
 
   qs(root, 'link-settings').addEventListener('click', () => {
@@ -461,6 +509,17 @@ export function renderUi(
     state.phase === 'sit' || state.phase === 'stand' || state.phase === 'reset'
   const checkInVisible = isCheckInVisible()
   const dayCloseVisible = dayCloseSummary != null
+  const walkthroughVisible = isWalkthroughActive()
+  const walkStep = getWalkthroughStep()
+  const walkAtmo = getWalkthroughAtmosphere()
+  const walkLayout = walkStep?.layout ?? null
+  const walkThreshold = walkthroughVisible && walkLayout === 'threshold'
+  const walkPick = walkthroughVisible && walkLayout === 'pick'
+  const walkCues = walkthroughVisible && walkLayout === 'cues'
+  const walkCopy = walkthroughVisible && (walkLayout === 'copy' || walkLayout === 'cues')
+  const walkTimed = walkthroughVisible && walkAtmo?.timed === true
+  const walkShowAtmo = walkTimed
+  const walkApproaching = walkTimed && walkAtmo?.approaching === true
   const momentChoiceAtThreshold =
     isThreshold &&
     (state.endedPhase === 'sit' || state.endedPhase === 'stand' || state.endedPhase === 'reset')
@@ -469,15 +528,16 @@ export function renderUi(
   const barOnly = isBarOnly(atmosphereDisplay)
   const atmosphereDetail = detailMode(atmosphereDisplay)
 
-  setData(shell, 'phase', state.phase)
-  setData(shell, 'mode', state.mode)
+  setData(shell, 'phase', walkthroughVisible && walkStep ? walkStep.phase : state.phase)
   setData(shell, 'demo', state.demo ? 'true' : 'false')
-  setData(shell, 'approaching', approaching ? 'true' : 'false')
+  setData(shell, 'approaching', approaching || walkApproaching ? 'true' : 'false')
   setData(shell, 'muted', state.soundEnabled ? 'false' : 'true')
-  setData(shell, 'started', isSetup ? 'false' : 'true')
+  setData(shell, 'started', isSetup && !walkthroughVisible ? 'false' : 'true')
   setData(shell, 'atmosphereDetail', atmosphereDetail)
   setData(shell, 'atmosphereDisplay', atmosphereDisplay)
   setData(shell, 'dayClose', dayCloseVisible ? 'true' : 'false')
+  setData(shell, 'walkthrough', walkthroughVisible ? 'true' : 'false')
+  setData(shell, 'walkTimed', walkTimed ? 'true' : 'false')
   setData(shell, 'returning', isReturnOrientationActive() ? 'true' : 'false')
   setData(shell, 'thresholdTimer', thresholdTimerActive ? 'true' : 'false')
   const resolvedTheme = resolveTheme(state.theme ?? 'system')
@@ -526,33 +586,135 @@ export function renderUi(
   const exerciseActions = qs(root, 'exercise-actions')
   const dayCloseReward = qs(root, 'day-close-reward')
   const dayCloseActions = qs(root, 'day-close-actions')
-  const btnLazy = qs(root, 'btn-lazy')
+  const walkthrough = qs(root, 'walkthrough')
+  const walkthroughCoach = qs(root, 'walkthrough-coach')
+  const walkthroughActions = qs(root, 'walkthrough-actions')
+  const walkthroughCues = qs(root, 'walkthrough-cues')
+  const btnTryLoop = qs<HTMLButtonElement>(root, 'btn-try-loop')
+  const btnWalkNext = qs<HTMLButtonElement>(root, 'btn-walkthrough-next')
+  const btnWalkSound = qs<HTMLButtonElement>(root, 'btn-walkthrough-sound')
+  const btnWalkNotif = qs<HTMLButtonElement>(root, 'btn-walkthrough-notif')
 
-  setHidden(setupControls, !isSetup || dayCloseVisible)
+  setHidden(setupControls, !isSetup || dayCloseVisible || walkthroughVisible)
   setHidden(
     runControls,
-    isSetup || isThreshold || isExercise || isPick || checkInVisible || dayCloseVisible,
+    isSetup ||
+      isThreshold ||
+      isExercise ||
+      isPick ||
+      checkInVisible ||
+      dayCloseVisible ||
+      walkthroughVisible,
   )
-  setHidden(thresholdActions, !isThreshold || dayCloseVisible)
-  setHidden(pickActions, !isPick || dayCloseVisible)
-  setHidden(freezeActions, !(isFrozen && showFreezePrompt) || dayCloseVisible)
-  setHidden(exerciseActions, !isExercise || dayCloseVisible)
+  setHidden(
+    thresholdActions,
+    !isThreshold || dayCloseVisible || walkthroughVisible,
+  )
+  setHidden(pickActions, !isPick || dayCloseVisible || walkthroughVisible)
+  setHidden(freezeActions, !(isFrozen && showFreezePrompt) || dayCloseVisible || walkthroughVisible)
+  setHidden(exerciseActions, !isExercise || dayCloseVisible || walkthroughVisible)
   setHidden(dayCloseActions, !dayCloseVisible)
-  setHidden(btnFreeze, isFrozen || isThreshold || isExercise || isPick || dayCloseVisible)
-  setHidden(btnResume, !isFrozen || showFreezePrompt || dayCloseVisible)
-  setHidden(freezePrompt, !(isFrozen && showFreezePrompt) || dayCloseVisible)
-  setHidden(exercise, !isExercise || dayCloseVisible)
-  setHidden(threshold, !isThreshold || dayCloseVisible)
-  setHidden(pick, !isPick || dayCloseVisible)
-  setHidden(checkIn, !checkInVisible || dayCloseVisible)
+  setHidden(walkthroughActions, !walkthroughVisible)
+  setHidden(walkthroughCues, !walkCues)
+  setHidden(btnFreeze, isFrozen || isThreshold || isExercise || isPick || dayCloseVisible || walkthroughVisible)
+  setHidden(btnResume, !isFrozen || showFreezePrompt || dayCloseVisible || walkthroughVisible)
+  setHidden(freezePrompt, !(isFrozen && showFreezePrompt) || dayCloseVisible || walkthroughVisible)
+  setHidden(exercise, !isExercise || dayCloseVisible || walkthroughVisible)
+  setHidden(threshold, !(isThreshold || walkThreshold) || dayCloseVisible || (walkthroughVisible && !walkThreshold))
+  setHidden(pick, !(isPick || walkPick) || dayCloseVisible || (walkthroughVisible && !walkPick))
+  setHidden(checkIn, !checkInVisible || dayCloseVisible || walkthroughVisible)
   setHidden(dayCloseReward, !dayCloseVisible)
+  // Tour chrome always on during walkthrough — progress is the shared first line.
+  setHidden(walkthrough, !walkthroughVisible)
+  setHidden(
+    btnTryLoop,
+    !isSetup || dayCloseVisible || walkthroughVisible || !shouldOfferWalkthrough(),
+  )
 
-  setHidden(btnLazy, isThreshold || isExercise || isPick || dayCloseVisible)
   const btnCloseDay = qs<HTMLButtonElement>(root, 'btn-close-day')
-  setHidden(btnCloseDay, isSetup || dayCloseVisible)
-  setButtonLabel(btnLazy, state.mode === 'lazy' ? 'Lazy on' : 'Lazy Mode')
-  btnLazy.classList.toggle('is-on', state.mode === 'lazy')
+  setHidden(btnCloseDay, isSetup || dayCloseVisible || walkthroughVisible)
   setHidden(btnReroll, state.momentRerolled)
+
+  // Tour: hide real day actions — only Next / Skip navigate.
+  setHidden(btnSnooze, !isThreshold || dayCloseVisible || walkthroughVisible || !canSnoozePostureNow())
+  setHidden(thresholdSkip, !momentChoiceAtThreshold || dayCloseVisible || walkthroughVisible)
+
+  const progress = getWalkthroughProgress()
+  const walkKicker = qs(root, 'walkthrough-kicker')
+  const walkLead = qs(root, 'walkthrough-lead')
+  const walkSub = qs(root, 'walkthrough-sub')
+
+  if (walkthroughVisible && walkStep && progress) {
+    setText(qs(root, 'walkthrough-progress'), `${progress.index + 1} / ${progress.total}`)
+    setButtonLabel(btnWalkNext, isLastWalkthroughStep() ? 'Ready to start' : 'Next')
+
+    // Timed sit/stand: soft atmosphere words lead — keep a short caption, skip the big kicker.
+    if (walkTimed) {
+      setHidden(walkKicker, true)
+      setHidden(walkLead, false)
+      setHidden(walkSub, false)
+      setText(walkLead, walkStep.lead)
+      setText(walkSub, walkStep.sub)
+    } else {
+      const showCopy = walkCopy
+      setHidden(walkKicker, !showCopy)
+      setHidden(walkLead, !showCopy)
+      setHidden(walkSub, !showCopy)
+      if (showCopy) {
+        setText(walkKicker, walkStep.kicker)
+        setText(walkLead, walkStep.lead)
+        setText(walkSub, walkStep.sub)
+      }
+    }
+
+    // Coach tip only — progress already lives on the first line.
+    if (walkStep.coach) {
+      setHidden(walkthroughCoach, false)
+      setText(walkthroughCoach, walkStep.coach)
+    } else {
+      setHidden(walkthroughCoach, true)
+    }
+  } else {
+    setHidden(walkthroughCoach, true)
+  }
+
+  if (walkCues) {
+    setButtonLabel(btnWalkSound, state.soundEnabled ? 'Sound on' : 'Enable sound')
+    btnWalkSound.classList.toggle('is-on', state.soundEnabled)
+    const notifDenied = notificationPermissionDenied()
+    const notifLabel = state.notificationsEnabled
+      ? 'Notifications on'
+      : notifDenied
+        ? 'Check again'
+        : 'Enable notifications'
+    setButtonLabel(btnWalkNotif, notifLabel)
+    btnWalkNotif.classList.toggle('is-on', state.notificationsEnabled)
+    // Keep clickable so a second tap can re-fire a sample toast / re-check permission.
+    btnWalkSound.disabled = false
+    btnWalkNotif.disabled = false
+    const feedback = getWalkthroughCueFeedback()
+    const feedbackEl = qs(root, 'walkthrough-cue-feedback')
+    if (feedback) {
+      setHidden(feedbackEl, false)
+      setText(feedbackEl, feedback)
+    } else {
+      setHidden(feedbackEl, true)
+    }
+  } else {
+    setHidden(qs(root, 'walkthrough-cue-feedback'), true)
+  }
+
+  if (walkThreshold) {
+    setText(qs(root, 'threshold-lead'), thresholdLead('sit'))
+    setText(qs(root, 'threshold-sub'), thresholdSub('sit'))
+  }
+
+  let momentsChanged = false
+  if (walkPick) {
+    const ids = getWalkthroughMomentIds() ?? []
+    setText(qs(root, 'pick-lead'), pickLead('stand'))
+    momentsChanged = setMomentCards(qs(root, 'moment-cards'), ids, { showPrompt: true })
+  }
 
   if (dayCloseVisible && dayCloseSummary) {
     setText(qs(root, 'day-close-story'), buildDayStory(dayCloseSummary))
@@ -588,51 +750,80 @@ export function renderUi(
 
   const skipStand = qs(root, 'btn-skip-standing')
   const skipStandEx = qs(root, 'btn-skip-standing-ex')
-  const skipLabel = skipMomentLabel(state.pendingNextPhase)
-  setButtonLabel(skipStand, skipLabel)
-  setButtonLabel(skipStandEx, skipLabel)
-
-  setHidden(thresholdSkip, !momentChoiceAtThreshold || dayCloseVisible)
-  setHidden(btnSnooze, !isThreshold || dayCloseVisible || !canSnoozePostureNow())
-  if (momentChoiceAtThreshold) {
-    setButtonLabel(thresholdSkip, thresholdSkipLabel(state.pendingNextPhase))
-    setButtonLabel(btnRise, thresholdRiseLabel(state.endedPhase))
-    btnRise.classList.add('btn-primary')
-    btnRise.classList.remove('btn-ghost')
-    thresholdSkip.classList.remove('btn-primary')
-    thresholdSkip.classList.add('btn-ghost')
-  } else if (isThreshold) {
-    setButtonLabel(btnRise, thresholdRiseLabel(state.endedPhase))
-    btnRise.classList.add('btn-primary')
-    btnRise.classList.remove('btn-ghost')
+  if (!walkPick) {
+    const skipLabel = skipMomentLabel(state.pendingNextPhase)
+    setButtonLabel(skipStand, skipLabel)
+    setButtonLabel(skipStandEx, skipLabel)
   }
 
-  setText(phaseEl, dayCloseVisible ? 'Day close' : phaseLabel(state.phase))
-  setHidden(phaseEl, isThreshold || dayCloseVisible)
+  if (!walkThreshold) {
+    setHidden(thresholdSkip, !momentChoiceAtThreshold || dayCloseVisible || walkthroughVisible)
+    setHidden(btnSnooze, !isThreshold || dayCloseVisible || walkthroughVisible || !canSnoozePostureNow())
+    if (momentChoiceAtThreshold) {
+      setButtonLabel(thresholdSkip, thresholdSkipLabel(state.pendingNextPhase))
+      setButtonLabel(btnRise, thresholdRiseLabel(state.endedPhase))
+      btnRise.classList.add('btn-primary')
+      btnRise.classList.remove('btn-ghost')
+      thresholdSkip.classList.remove('btn-primary')
+      thresholdSkip.classList.add('btn-ghost')
+    } else if (isThreshold) {
+      setButtonLabel(btnRise, thresholdRiseLabel(state.endedPhase))
+      btnRise.classList.add('btn-primary')
+      btnRise.classList.remove('btn-ghost')
+    }
+  }
+
+  if (walkthroughVisible && walkStep) {
+    setText(phaseEl, walkStep.kicker)
+    setHidden(phaseEl, true)
+  } else {
+    setText(phaseEl, dayCloseVisible ? 'Day close' : phaseLabel(state.phase))
+    setHidden(phaseEl, isThreshold || dayCloseVisible)
+  }
 
   const level =
-    isRunning || isExercise || thresholdTimerActive
-      ? fillLevel(remainingMs, state.phaseDurationMs)
-      : isSetup
-        ? 0.85
-        : 0.4
+    walkAtmo != null
+      ? walkAtmo.fill
+      : isRunning || isExercise || thresholdTimerActive
+        ? fillLevel(remainingMs, state.phaseDurationMs)
+        : isSetup
+          ? 0.85
+          : 0.4
   const fillCss = String(level)
   if (shell.style.getPropertyValue('--atmosphere-fill') !== fillCss) {
     shell.style.setProperty('--atmosphere-fill', fillCss)
   }
   const edgeFill = qs(root, 'desk-edge-fill')
-  const edgeScale = `scaleX(${isRunning || isExercise ? level : 1})`
+  const edgeScale = `scaleX(${isRunning || isExercise || walkTimed || thresholdTimerActive ? level : 1})`
   if (edgeFill.style.transform !== edgeScale) {
     edgeFill.style.transform = edgeScale
   }
 
   // Wait screens: no edge bar under the headline — only shell atmosphere animation.
-  setHidden(atmo, isPick || isThreshold || checkInVisible || dayCloseVisible)
-  atmo.classList.toggle('is-timed', isRunning || isExercise)
+  // Tour sit/stand keep the real atmosphere chrome so the shrink is the experience.
+  setHidden(
+    atmo,
+    !walkShowAtmo &&
+      (isPick ||
+        isThreshold ||
+        checkInVisible ||
+        dayCloseVisible ||
+        walkThreshold ||
+        walkPick ||
+        walkCopy),
+  )
+  atmo.classList.toggle('is-timed', isRunning || isExercise || walkTimed || thresholdTimerActive)
   atmo.classList.toggle('is-bar-only', barOnly)
   setHidden(qs(root, 'btn-atmosphere-label'), barOnly)
 
-  if (isSetup) {
+  if (walkTimed && walkAtmo) {
+    setText(
+      atmoLabel,
+      softTimeLabel(walkAtmo.remainingMs, walkAtmo.durationMs, walkAtmo.approaching),
+    )
+  } else if (walkthroughVisible && walkStep) {
+    setText(atmoLabel, walkStep.atmosphere)
+  } else if (isSetup) {
     setText(atmoLabel, '·')
   } else if (isFrozen) {
     setText(atmoLabel, showFreezePrompt ? 'Call over?' : 'Freeze')
@@ -657,7 +848,8 @@ export function renderUi(
     !state.soundEnabled &&
     !(compact && isRunning) &&
     !barOnly &&
-    !dayCloseVisible
+    !dayCloseVisible &&
+    !walkthroughVisible
   ) {
     setHidden(muteHint, false)
     setText(
@@ -671,7 +863,13 @@ export function renderUi(
   }
 
   const ambientMot = MOTIVATIONS.find((m) => m.id === state.ambientMotivationId)
-  if (isRunning && ambientMot?.kind === 'north' && !compact && !dayCloseVisible) {
+  if (
+    isRunning &&
+    ambientMot?.kind === 'north' &&
+    !compact &&
+    !dayCloseVisible &&
+    !walkthroughVisible
+  ) {
     setHidden(ambient, false)
     setText(ambient, ambientMot.text)
   } else {
@@ -679,9 +877,8 @@ export function renderUi(
     setText(ambient, '')
   }
 
-  let momentsChanged = false
-  if (dayCloseVisible) {
-    // hint hidden — story + stats carry the message
+  if (dayCloseVisible || walkthroughVisible) {
+    // hint hidden — story / walkthrough copy carry the message
   } else if (checkInVisible) {
     setText(
       qs(root, 'check-in-q'),
@@ -691,19 +888,9 @@ export function renderUi(
   } else if (isSetup) {
     const intervals = resolveIntervals(state.intervals)
     if (state.demo) {
-      setHintText(
-        hint,
-        state.mode === 'lazy'
-          ? 'Demo Lazy — full loop in seconds, not a Pomodoro.'
-          : 'Demo — full loop in seconds, not a Pomodoro.',
-      )
+      setHintText(hint, 'Demo — full loop in seconds, not a Pomodoro.')
     } else {
-      const rhythm = intervalSummary(intervals, state.mode)
-      if (state.mode === 'lazy') {
-        setHintLines(hint, rhythm, 'Survival mode — move optional at each switch.')
-      } else {
-        setHintLines(hint, rhythm, 'Body maintenance — not a focus timer.')
-      }
+      setHintLines(hint, intervalSummary(intervals), 'Body maintenance — not a focus timer.')
     }
   } else if (isThreshold) {
     setHintText(hint, 'The desk is waiting. No pressure.')
@@ -741,14 +928,17 @@ export function renderUi(
   } else {
     setHintText(
       hint,
-      state.demo ? 'Demo — atmosphere, moment, desk.' : runningPhaseHint(state.mode === 'lazy'),
+      state.demo ? 'Demo — atmosphere, moment, desk.' : runningPhaseHint(),
     )
   }
 
   setHidden(
     hint,
     isThreshold ||
+      walkThreshold ||
+      walkPick ||
       dayCloseVisible ||
+      walkCopy ||
       (barOnly && (isRunning || isExercise || isFrozen) && !checkInVisible && !dayCloseVisible),
   )
 

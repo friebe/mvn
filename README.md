@@ -50,20 +50,17 @@ If you previously installed **MVN**, uninstall that PWA first — Windows keeps 
 
 ## Intervals
 
-| Mode | Sit | Stand | Reset |
-|------|-----|-------|-------|
-| High | 30 min | 5 min | 1 min |
-| Lazy | 20 min | 3 min | 1 min |
+Default: **30 min sit → micro-move → 5 min stand** (1 min reset). Adjust under Settings → Intervals.
 
 Demo mode: **Demo** button or `?demo=1`.
 
 ## Extending moments
 
-Micro-moments live in [`src/moments.json`](src/moments.json) (for developers, not end users). Fields: `id`, `mode` (`high` | `lazy` | `both`), `kind`, `part`, `posture` (`sit` | `stand` | `either`), `title`, `prompt`. Copy is German on purpose.
+Micro-moments live in [`src/moments.json`](src/moments.json) (for developers, not end users). Fields: `id`, `mode` (legacy tag), `kind`, `part`, `posture` (`sit` | `stand` | `either`), `title`, `prompt`. Copy is German on purpose.
 
 ## Analytics
 
-`analytics.html` in the app folder (Analytics icon in the header): local stats for desk switches, moments, Lazy, Freeze — LocalStorage only, no cloud. Live: `https://getstint.de/analytics.html`.
+`analytics.html` in the app folder (Analytics icon in the header): local stats for desk switches, moments, Freeze — LocalStorage only, no cloud. Live: `https://getstint.de/analytics.html`.
 
 ## LocalStorage
 
@@ -84,7 +81,7 @@ Everything stays on the device. The app uses several keys:
 
 | Field | Meaning |
 |------|---------|
-| `mode` | High or Lazy (interval set) |
+| `intervals` | Sit / stand / reset durations (ms) |
 | `demo` | Short intervals for testing |
 | `soundEnabled` | App sound on/off |
 | `notificationsEnabled` | Browser toasts |

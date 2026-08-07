@@ -5,13 +5,11 @@ export type ShortcutId =
   | 'freeze'
   | 'resume'
   | 'rise'
-  | 'lazyPath'
   | 'skipStanding'
   | 'afterplay'
   | 'extendFreeze'
   | 'doneMoment'
   | 'reroll'
-  | 'toggleLazy'
   | 'checkIn'
   | 'dayCloseDone'
   | 'pick1'
@@ -36,7 +34,6 @@ export const SHORTCUTS: ShortcutDef[] = [
     action: 'Just sit / Enough today',
     context: 'Threshold / Pick moment',
   },
-  { id: 'lazyPath', keys: ['l', 'L'], label: 'L', action: 'Lazy continue', context: 'Threshold' },
   { id: 'pick1', keys: ['1'], label: '1', action: 'Moment 1', context: 'Pick moment' },
   { id: 'pick2', keys: ['2'], label: '2', action: 'Moment 2', context: 'Pick moment' },
   { id: 'pick3', keys: ['3'], label: '3', action: 'Moment 3', context: 'Pick moment' },
@@ -47,7 +44,6 @@ export const SHORTCUTS: ShortcutDef[] = [
   { id: 'afterplay', keys: ['a', 'A'], label: 'A', action: 'Call cooldown', context: 'Freeze prompt' },
   { id: 'extendFreeze', keys: ['e', 'E'], label: 'E', action: '15 more min', context: 'Freeze prompt' },
   { id: 'checkIn', keys: ['Enter', ' '], label: '↵', action: 'Still standing / at desk', context: 'Check-in' },
-  { id: 'toggleLazy', keys: ['m', 'M'], label: 'M', action: 'Lazy Mode', context: 'Quick actions' },
   { id: 'dayCloseDone', keys: ['Enter', ' '], label: '↵', action: 'Continue', context: 'Day close' },
 ]
 
@@ -83,10 +79,10 @@ export function availableShortcuts(ctx: ShortcutContext): Set<ShortcutId> {
   if (phase === 'setup') {
     active.add('start')
   } else if (phase === 'threshold') {
-    const momentChoice = state.endedPhase === 'sit' || state.endedPhase === 'stand' || state.endedPhase === 'reset'
+    const momentChoice =
+      state.endedPhase === 'sit' || state.endedPhase === 'stand' || state.endedPhase === 'reset'
     if (momentChoice) active.add('skipStanding')
     active.add('rise')
-    active.add('lazyPath')
   } else if (phase === 'pick') {
     const count = state.momentChoiceIds?.length ?? 0
     if (count >= 1) active.add('pick1')
@@ -107,10 +103,6 @@ export function availableShortcuts(ctx: ShortcutContext): Set<ShortcutId> {
     active.add('skipStanding')
   } else if (phase === 'sit' || phase === 'stand' || phase === 'reset') {
     active.add('freeze')
-  }
-
-  if (phase !== 'threshold' && phase !== 'exercise' && phase !== 'pick') {
-    active.add('toggleLazy')
   }
 
   return active
@@ -145,9 +137,7 @@ export interface ShortcutHandlers {
   onRerollMoment: () => void
   onChooseMoment: (id: string) => void
   onConfirmCheckIn: () => void
-  onToggleLazy: () => void
   onChooseRise: () => void
-  onChooseLazyPath: () => void
   onDismissDayClose: () => void
 }
 
@@ -177,9 +167,6 @@ export function bindShortcuts(
       case 'rise':
         handlers.onChooseRise()
         break
-      case 'lazyPath':
-        handlers.onChooseLazyPath()
-        break
       case 'skipStanding':
         handlers.onSkipStanding()
         break
@@ -197,9 +184,6 @@ export function bindShortcuts(
         break
       case 'checkIn':
         handlers.onConfirmCheckIn()
-        break
-      case 'toggleLazy':
-        handlers.onToggleLazy()
         break
       case 'dayCloseDone':
         handlers.onDismissDayClose()

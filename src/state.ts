@@ -1,4 +1,4 @@
-import type { UserIntervals } from './intervals'
+import { migrateIntervals, type UserIntervals } from './intervals'
 import type { ThemePreference } from './theme'
 import { normalizeTheme } from './theme'
 import {
@@ -6,7 +6,6 @@ import {
   STATE_KEY,
 } from './storage-keys'
 
-export type EnergyMode = 'high' | 'lazy'
 /** Atmosphere headline: soft words, timer, percent, or progress bar only */
 export type AtmosphereDisplay = 'soft' | 'clock' | 'percent' | 'bar'
 export type ActivePhase = 'sit' | 'stand' | 'reset'
@@ -20,7 +19,6 @@ export type Phase =
   | 'setup'
 
 export interface AppState {
-  mode: EnergyMode
   /** Short intervals for testing the full loop quickly */
   demo: boolean
   phase: Phase
@@ -64,7 +62,7 @@ export interface AppState {
   checkInHandled: boolean
   /** Which active phase just ended (threshold context) */
   endedPhase: ActivePhase | null
-  /** Next phase after ritual / lazy skip */
+  /** Next phase after ritual / skip */
   pendingNextPhase: ActivePhase | null
   /** Day already closed today (ISO date key) */
   dayClosedKey: string | null
@@ -119,7 +117,6 @@ function migrateAtmosphereDisplay(parsed: Partial<AppState>): AtmosphereDisplay 
 
 export function defaultState(): AppState {
   return {
-    mode: 'high',
     demo: false,
     phase: 'setup',
     phaseDurationMs: null,
@@ -161,10 +158,15 @@ export function loadState(): AppState {
   try {
     const raw = localStorage.getItem(STATE_KEY)
     if (!raw) return defaultState()
-    const parsed = JSON.parse(raw) as Partial<AppState>
+    const parsed = JSON.parse(raw) as Partial<AppState> & {
+      mode?: string
+      intervals?: unknown
+    }
+    const { mode: legacyMode, intervals: rawIntervals, ...rest } = parsed
     return {
       ...defaultState(),
-      ...parsed,
+      ...rest,
+      intervals: migrateIntervals(rawIntervals, legacyMode),
       atmosphereDisplay: migrateAtmosphereDisplay(parsed),
       theme: normalizeTheme(parsed.theme),
     }
