@@ -29,6 +29,9 @@ export default defineConfig({
       includeAssets: [
         'robots.txt',
         'sitemap.xml',
+        'favicon.ico',
+        'favicon.svg',
+        'icons/favicon-32.png',
         'icons/icon.svg',
         'icons/icon-maskable.svg',
         'icons/stint-mark.svg',
