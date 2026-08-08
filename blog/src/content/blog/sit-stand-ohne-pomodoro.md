@@ -2,14 +2,14 @@
 title: 'Stehschreibtisch-Rhythmus ohne Pomodoro — Sit/Stand statt Fokus-Timer'
 description: 'Warum Sit/Stand am Stehschreibtisch kein Pomodoro ist: lange Blöcke, Mikro-Bewegung beim Wechsel, ruhiger Rhythmus statt Fokus-Timer. Körperpflege am Desk.'
 pubDate: 2026-08-02
-updatedDate: 2026-08-05
+updatedDate: 2026-08-08
 faq:
   - question: 'Ist ein Sit/Stand-Rhythmus dasselbe wie Pomodoro?'
     answer: 'Nein. Pomodoro taktet Fokusarbeit in kurzen Sprints. Sit/Stand taktet Haltung — lange Sitz- oder Stehblöcke und Wechsel am Tisch, unabhängig von 25-Minuten-Arbeitseinheiten.'
   - question: 'Warum keine kurzen 25-Minuten-Blöcke für Stehen?'
     answer: 'Weil Haltungswechsel und Tiefenarbeit unterschiedliche Jobs sind. Zu häufiges Hoch/Runter kann nerven und den Flow zerstören; zu seltenes Wechseln lässt dich Stunden in einer Haltung.'
   - question: 'Was ist micro-move beim Tischwechsel?'
-    answer: 'Eine optionale, sehr kurze Mikro-Bewegung (oft ~15 Sekunden), während der Tisch fährt — Stretch, Schultern, Blick in die Ferne. Kein Workout und kein Fitness-Programm.'
+    answer: 'Eine optionale, sehr kurze Mikro-Bewegung (oft ~15 Sekunden), während der Tisch fährt — Stretch, Schultern, Blick in die Ferne. Kein Workout. Details und Cues: Artikel „Mikro-Bewegung am Stehschreibtisch“.'
   - question: 'Brauche ich dafür eine App?'
     answer: 'Nicht zwingend. Ein klarer Rhythmus plus weiche Erinnerung reicht. Eine lokale Desk-App hilft, wenn du den Takt sichtbar halten willst, ohne Streaks oder Cloud.'
   - question: 'Wie oft sollte ich Sit und Stand wechseln?'
@@ -41,7 +41,7 @@ Sit/Stand beantwortet: *Wann wechsle ich die Körperposition?*
 **Sit · micro-move · stand** heißt in der Praxis:
 
 1. **Sit** — längere Phase sitzen (einstellbar).
-2. **Micro-move** — optional kurz bewegen, *wenn der Tisch wechselt*.
+2. **Micro-move** — optional kurz bewegen, *wenn der Tisch wechselt* ([was genau?](/blog/mikro-bewegung-stehschreibtisch/)).
 3. **Stand** — nächster Block stehen, dann wieder zurück.
 
 Das ist kein HIIT und kein Streak-Sport. Es ist ein ruhiger Loop neben der Arbeit.

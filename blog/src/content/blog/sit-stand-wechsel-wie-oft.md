@@ -2,6 +2,7 @@
 title: 'Sit/Stand-Wechsel: wie oft am Stehschreibtisch umstellen?'
 description: 'Wie oft Sit/Stand am Stehschreibtisch wechseln? Praxis-Ranges statt Dogma: Intervalle, Zeichen für zu viel/zu wenig, weiche Erinnerung — Körperpflege, kein Fokus-Timer.'
 pubDate: 2026-08-05
+updatedDate: 2026-08-08
 faq:
   - question: 'Wie oft Sit/Stand am Stehschreibtisch wechseln?'
     answer: 'Als Praxis-Range etwa alle 30–60 Minuten die Haltung wechseln und Stehen anfangs kurz halten. Passe an Komfort, Aufgabe und Tagesform an — nicht an eine starre App-Default.'
@@ -85,6 +86,7 @@ Praktisch:
 - Ton und System-Toast **optional** und getrennt schaltbar
 - „Nicht jetzt“ / Pause erlauben — Körperpflege, kein Streak
 
+Tiefe dazu (Signal-Arten, warum weniger besser ist): [Aufsteh-Erinnerung ohne Alarm-Stress](/blog/aufsteh-erinnerung-ohne-stress/).  
 Wie das in einer lokalen Stehschreibtisch-App aussehen kann: [Stehschreibtisch-App: Erinnerung, Sound & Benachrichtigungen](/blog/stehschreibtisch-app-erinnerung-sound-settings/).
 
 [Stint](/) ist dafür gebaut: lange Sit/Stand-Blöcke, optional Micro-Move beim Wechsel, chill auf dem Zweitmonitor — **not a focus timer**. Kein Muss für den Ratgeber oben.
@@ -94,7 +96,7 @@ Wie das in einer lokalen Stehschreibtisch-App aussehen kann: [Stehschreibtisch-A
 1. Wähle einen der drei Alltagstakte für 7 Tage.  
 2. Wechsle lieber **regelmäßig** als „irgendwann viel stehen“.  
 3. Stehphasen bei Beschwerden sofort verkürzen — kein Hero-Modus.  
-4. Optional: kurze Mikro-Bewegung **nur** wenn der Tisch fährt.  
-5. Erinnerung so leise einstellen, dass du sie nicht hasst.
+4. Optional: kurze Mikro-Bewegung **nur** wenn der Tisch fährt — [Cues](/blog/mikro-bewegung-stehschreibtisch/).  
+5. Erinnerung so leise einstellen, dass du sie nicht hasst — [ohne Alarm-Stress](/blog/aufsteh-erinnerung-ohne-stress/).
 
 **Kern:** Der beste Sit/Stand-Wechsel ist der, den du morgen noch machst — ruhig, wiederholbar, ohne dich anzuschreien.
