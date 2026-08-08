@@ -25,3 +25,14 @@
   from = "/blog"
   to = "/blog/"
   status = 301
+
+# Browsers often request favicon next to /blog/ even when <link> points to root.
+[[redirects]]
+  from = "/blog/favicon.ico"
+  to = "/favicon.ico"
+  status = 200
+
+[[redirects]]
+  from = "/blog/favicon.svg"
+  to = "/favicon.svg"
+  status = 200

@@ -295,6 +295,15 @@ function render(): void {
           </div>
           <a class="setting-link" id="link-walkthrough" href="${appPath('')}?tour=1">Replay</a>
         </div>
+        <div class="setting-row">
+          <div class="setting-copy">
+            <p class="setting-label">Blog</p>
+            <p class="setting-note">
+              Sit/stand rhythm, soft reminders, micro-moves — German how-tos, no hustle feed.
+            </p>
+          </div>
+          <a class="setting-link" id="link-blog" href="${appPath('blog/')}">Open</a>
+        </div>
         <p class="settings-hint">
           Micro-moments (exercises) stay in German for now — clearer body cues.
         </p>
