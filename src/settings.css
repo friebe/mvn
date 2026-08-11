@@ -317,35 +317,3 @@ body {
   outline-offset: 2px;
 }
 
-.settings-featured {
-  margin-top: 0.5rem;
-}
-
-.featured-on-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.85rem 1.25rem;
-}
-
-.featured-on-link {
-  display: inline-flex;
-  line-height: 0;
-  opacity: 0.9;
-  transition: opacity 0.15s ease;
-}
-
-.featured-on-link:hover {
-  opacity: 1;
-}
-
-.featured-on-link img {
-  display: block;
-  width: auto;
-  max-width: min(100%, 250px);
-  height: auto;
-  max-height: 3.25rem;
-}

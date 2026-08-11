@@ -46,7 +46,6 @@ import {
   shouldOfferInstall,
 } from './pwa'
 import { markSettingsSeen } from './settings-cue'
-import featuredBadges from './featured.json'
 
 registerPwa()
 markSettingsSeen()
@@ -54,45 +53,6 @@ applyThemeFromState(readPreferences())
 bindSystemThemeListener(() => readPreferences().theme)
 
 type IntervalPhase = 'sit' | 'stand'
-
-type FeaturedBadge = {
-  name: string
-  href: string
-  image: string
-  alt: string
-  width?: number
-}
-
-function featuredOnHtml(): string {
-  const badges = featuredBadges as FeaturedBadge[]
-  if (badges.length === 0) return ''
-  const items = badges
-    .map(
-      (b) => `
-        <li>
-          <a
-            class="featured-on-link"
-            href="${b.href}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img
-              src="${b.image}"
-              width="${b.width ?? 200}"
-              alt="${b.alt || b.name}"
-              loading="lazy"
-              decoding="async"
-            />
-          </a>
-        </li>`,
-    )
-    .join('')
-  return `
-      <section class="settings-group settings-featured" aria-label="Featured on">
-        <h2 class="settings-group-title">Featured on</h2>
-        <ul class="featured-on-list">${items}</ul>
-      </section>`
-}
 
 function installSectionHtml(): string {
   if (!shouldOfferInstall()) return ''
@@ -348,8 +308,6 @@ function render(): void {
           Micro-moments (exercises) stay in German for now — clearer body cues.
         </p>
       </section>
-
-      ${featuredOnHtml()}
     </div>
   `
 

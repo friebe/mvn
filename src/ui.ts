@@ -34,6 +34,7 @@ import {
   isWalkthroughActive,
   shouldOfferWalkthrough,
 } from './walkthrough'
+import { featuredOnHtml, shouldShowFeaturedOn } from './featured-on'
 
 export interface UiHandlers {
   onStart: () => void
@@ -424,6 +425,8 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
               ${actionButton('btn-close-day', 'btn btn-ghost btn-end-day', 'End day', null, true)}
             </div>
           </nav>
+
+          ${featuredOnHtml()}
         </div>
       </div>
       </div>
@@ -474,6 +477,12 @@ export function setInstallVisible(root: HTMLElement, visible: boolean): void {
   const banner = qs<HTMLElement>(root, 'install-banner')
   if (!banner) return
   setHidden(banner, !visible)
+}
+
+export function setFeaturedOnVisible(root: HTMLElement, visible: boolean): void {
+  const el = qs<HTMLElement>(root, 'featured-on')
+  if (!el) return
+  setHidden(el, !visible)
 }
 
 const COMPACT_HEIGHT_MQ = '(max-height: 900px)'
@@ -542,6 +551,10 @@ export function renderUi(
   setData(shell, 'thresholdTimer', thresholdTimerActive ? 'true' : 'false')
   const resolvedTheme = resolveTheme(state.theme ?? 'system')
   setData(shell, 'theme', resolvedTheme)
+  setFeaturedOnVisible(
+    root,
+    shouldShowFeaturedOn() && isSetup && !walkthroughVisible && !dayCloseVisible,
+  )
   setData(
     shell,
     'pendingNext',
