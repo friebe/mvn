@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Fazier",
+    "href": "https://fazier.com/launches/getstint.de",
+    "image": "https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=neutral",
+    "width": 250,
+    "alt": "Featured on Fazier"
+  },
+  {
+    "name": "TinyTools",
+    "href": "https://tinytools.tools/t/stint-calm-sitstand-desk-rhythm-03b3155f",
+    "image": "/icons/featured-tinytools.png",
+    "width": 52,
+    "alt": "Featured on TinyTools"
+  }
+]
