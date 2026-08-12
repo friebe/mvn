@@ -70,7 +70,7 @@ Nicht jedes Signal ist gleich invasiv. Grobe Landkarte:
 | **Browser-/OS-Toast** | mittel | Tab im Hintergrund | Dauer-Banner, die sich stapeln |
 | **Alarm / Sirene** | hoch | Fast nie am Desk | Fast immer — Reminder stirbt |
 
-**Zweitmonitor** verdient eine eigene Zeile: Ein ruhiges Fenster neben der Arbeit ist oft die freundlichste **Stehschreibtisch-Erinnerung**. Du siehst den Wechsel kommen — ohne dass etwas schreit.
+**Zweitmonitor** verdient eine eigene Zeile: Ein ruhiges Fenster neben der Arbeit ist oft die freundlichste **Stehschreibtisch-Erinnerung**. Du siehst den Wechsel kommen — ohne dass etwas schreit. Warum Handy-Pushes am Desk oft trotzdem versagen (Ort des Cues): [Handy-Reminder am Schreibtisch](/blog/handy-reminder-schreibtisch/).
 
 Was bei mir (und vielen Desk-Tagen) wirkt: die **Kombination** aus visuellem Cue und optionalem, leisen Signal. Nicht Sirene — eher ein leichter physiologischer Nudge im Hintergrund, plus etwas, das du **sehen** kannst. Der Mensch neigt dann eher dazu mitzumachen, ohne dass es sich wie ein Befehl anfühlt.
 
