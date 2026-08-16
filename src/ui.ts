@@ -17,7 +17,6 @@ import { intervalSummary, resolveIntervals } from './intervals'
 import { appPath } from './paths'
 import { canSnoozePostureNow, isCheckInVisible } from './timer'
 import { buildDayCloseComparison, buildDayStory, type StatsSummary } from './stats'
-import { weekFocusLabel } from './week-focus'
 import { shortcutHintLabel, type ShortcutId } from './shortcuts'
 import { detailMode, isBarOnly } from './atmosphere-display'
 import { brandLockupHtml } from './brand-mark'
@@ -913,11 +912,9 @@ export function renderUi(
     setText(qs(root, 'pick-lead'), pickLead(state.pendingNextPhase))
     setHintText(
       hint,
-      `This week: ${weekFocusLabel()} · ${
-        state.pendingNextPhase === 'sit'
-          ? 'Desk down and a moment — or sit right away.'
-          : 'Desk up and a moment — or stand right away.'
-      }`,
+      state.pendingNextPhase === 'sit'
+        ? 'Desk down and a moment — or sit right away.'
+        : 'Desk up and a moment — or stand right away.',
     )
     momentsChanged = setMomentCards(qs(root, 'moment-cards'), state.momentChoiceIds ?? [])
   } else if (isFrozen) {

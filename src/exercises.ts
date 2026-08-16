@@ -1,5 +1,4 @@
 import momentsJson from './moments.json'
-import { momentMatchesFocus, weekFocusParts } from './week-focus'
 
 export type MomentKind = 'body' | 'eyes' | 'breath' | 'desk' | 'play'
 
@@ -55,11 +54,9 @@ export function getMoment(id: string | null | undefined): Moment | undefined {
   return MOMENTS.find((m) => m.id === id)
 }
 
-function poolFor(kind?: MomentKind, at = new Date()): Moment[] {
-  const base = MOMENTS.filter((m) => kind == null || m.kind === kind)
-  const focus = weekFocusParts(at)
-  const focused = base.filter((m) => momentMatchesFocus(m.part, m.kind, focus))
-  return focused.length >= 2 ? focused : base
+function poolFor(kind?: MomentKind): Moment[] {
+  if (kind == null) return MOMENTS
+  return MOMENTS.filter((m) => m.kind === kind)
 }
 
 function preferFresh(pool: Moment[], recentIds: string[]): Moment[] {
@@ -67,8 +64,8 @@ function preferFresh(pool: Moment[], recentIds: string[]): Moment[] {
   return fresh.length > 0 ? fresh : pool.length > 0 ? pool : MOMENTS
 }
 
-export function pickMoment(recentIds: string[], kind?: MomentKind, at = new Date()): Moment {
-  const pool = poolFor(kind, at)
+export function pickMoment(recentIds: string[], kind?: MomentKind): Moment {
+  const pool = poolFor(kind)
   const candidates = preferFresh(pool, recentIds)
   return candidates[Math.floor(Math.random() * candidates.length)]!
 }
@@ -78,9 +75,8 @@ function pickMomentAvoidingParts(
   recentIds: string[],
   kind: MomentKind,
   usedParts: Set<MomentPart>,
-  at = new Date(),
 ): Moment {
-  const pool = poolFor(kind, at)
+  const pool = poolFor(kind)
   const fresh = pool.filter((m) => !recentIds.includes(m.id) && !usedParts.has(m.part))
   const candidates =
     fresh.length > 0
@@ -92,7 +88,7 @@ function pickMomentAvoidingParts(
 }
 
 /** Three choices: prefer body / eyes / play-or-desk diversity. */
-export function pickMomentCards(recentIds: string[], at = new Date()): Moment[] {
+export function pickMomentCards(recentIds: string[]): Moment[] {
   const preferred: MomentKind[] = ['body', 'eyes', Math.random() > 0.5 ? 'play' : 'desk']
   const picked: Moment[] = []
   const used = new Set<string>()
@@ -101,8 +97,8 @@ export function pickMomentCards(recentIds: string[], at = new Date()): Moment[] 
   for (const kind of preferred) {
     const m =
       kind === 'body'
-        ? pickMomentAvoidingParts([...recentIds, ...used], kind, usedParts, at)
-        : pickMoment([...recentIds, ...used], kind, at)
+        ? pickMomentAvoidingParts([...recentIds, ...used], kind, usedParts)
+        : pickMoment([...recentIds, ...used], kind)
     if (!used.has(m.id)) {
       picked.push(m)
       used.add(m.id)
@@ -111,7 +107,7 @@ export function pickMomentCards(recentIds: string[], at = new Date()): Moment[] 
   }
 
   while (picked.length < 3) {
-    const m = pickMomentAvoidingParts([...recentIds, ...used], 'body', usedParts, at)
+    const m = pickMomentAvoidingParts([...recentIds, ...used], 'body', usedParts)
     if (used.has(m.id)) {
       const fallback =
         poolFor().find((x) => !used.has(x.id)) ?? MOMENTS.find((x) => !used.has(x.id))
@@ -129,6 +125,7 @@ export function pickMomentCards(recentIds: string[], at = new Date()): Moment[] 
   return picked.slice(0, 3)
 }
 
-export function rememberId(recent: string[], id: string, max = 8): string[] {
+/** Avoid immediate repeats across a working day of desk switches. */
+export function rememberId(recent: string[], id: string, max = 16): string[] {
   return [id, ...recent.filter((x) => x !== id)].slice(0, max)
 }
