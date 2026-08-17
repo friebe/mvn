@@ -74,7 +74,7 @@ Zeichen, dass der Takt sitzt: Du wechselst, **ohne** dich gehetzt zu fühlen, un
 - Stehfunktion nur „fürs Foto“
 - Abends merkst du Nacken/Hüfte stärker als früher mit festem Tisch
 
-→ Kürzeren Sit-Block wählen (z. B. Richtung „leicht“), Wechsel an **Task-Grenzen** koppeln (Mail fertig → Tisch), weiche Erinnerung statt stiller Hoffnung.
+→ Kürzeren Sit-Block wählen (z. B. Richtung „leicht“), Wechsel an **Task-Grenzen** koppeln (Mail fertig → Tisch), weiche Erinnerung statt stiller Hoffnung. Wenn der Tisch im Home-Office Wochen auf einer Höhe bleibt, ist oft die Gewohnheit kaputt, nicht die Minuten: [Stehschreibtisch im Home-Office — warum der Rhythmus oft stirbt](/blog/stehschreibtisch-home-office-rhythmus/).
 
 ## Weiche Erinnerung statt Alarm-Stress
 
