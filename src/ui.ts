@@ -793,20 +793,27 @@ export function renderUi(
     setHidden(phaseEl, isThreshold || dayCloseVisible)
   }
 
+  const pausedFill = isFrozen
+    ? fillLevel(
+        state.frozenRemainingMs ?? remainingMs,
+        state.frozenDurationMs ?? state.phaseDurationMs,
+      )
+    : 0.4
+  const timedFill = isRunning || isExercise || thresholdTimerActive
   const level =
     walkAtmo != null
       ? walkAtmo.fill
-      : isRunning || isExercise || thresholdTimerActive
+      : timedFill
         ? fillLevel(remainingMs, state.phaseDurationMs)
         : isSetup
           ? 0.85
-          : 0.4
+          : pausedFill
   const fillCss = String(level)
   if (shell.style.getPropertyValue('--atmosphere-fill') !== fillCss) {
     shell.style.setProperty('--atmosphere-fill', fillCss)
   }
   const edgeFill = qs(root, 'desk-edge-fill')
-  const edgeScale = `scaleX(${isRunning || isExercise || walkTimed || thresholdTimerActive ? level : 1})`
+  const edgeScale = `scaleX(${timedFill || walkTimed || isFrozen ? level : 1})`
   if (edgeFill.style.transform !== edgeScale) {
     edgeFill.style.transform = edgeScale
   }
@@ -818,13 +825,12 @@ export function renderUi(
     !walkShowAtmo &&
       (isPick ||
         isThreshold ||
-        checkInVisible ||
         dayCloseVisible ||
         walkThreshold ||
         walkPick ||
         walkCopy),
   )
-  atmo.classList.toggle('is-timed', isRunning || isExercise || walkTimed || thresholdTimerActive)
+  atmo.classList.toggle('is-timed', timedFill || walkTimed || isFrozen)
   atmo.classList.toggle('is-bar-only', barOnly)
   setHidden(qs(root, 'btn-atmosphere-label'), barOnly)
 

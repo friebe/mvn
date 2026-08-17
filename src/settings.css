@@ -317,3 +317,11 @@ body {
   outline-offset: 2px;
 }
 
+.settings-version {
+  margin: 1.25rem 0 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-2);
+  opacity: 0.7;
+}
+

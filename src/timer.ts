@@ -336,14 +336,16 @@ function maybeTimeoutCheckIn(): void {
   if (state.phase !== 'sit' && state.phase !== 'stand') return
   if (Date.now() - state.checkInShownAt < checkInTimeoutMs()) return
 
-  const ended = state.phase
+  // Missed Yes — drop the prompt, keep the sit/stand block. Ending the phase here
+  // cut a 15 min stand down to ~8.5 min whenever the cue was ignored.
   state = {
     ...state,
     checkInHandled: true,
     checkInShownAt: null,
     checkInAt: null,
   }
-  enterThreshold(ended)
+  clearAttention()
+  setBaseTitle(`Stint · ${phaseLabel(state.phase)}`)
 }
 
 function checkInPrompt(): string {
@@ -511,14 +513,16 @@ function onPhaseComplete(): void {
 function finishAfterplay(): void {
   const rem = state.frozenRemainingMs ?? 0
   const phase = state.frozenPhase ?? 'sit'
+  const duration = state.frozenDurationMs ?? rem
   state = {
     ...state,
     phase,
     phaseEndsAt: Date.now() + Math.max(rem, 1000),
-    phaseDurationMs: state.phaseDurationMs ?? rem,
+    phaseDurationMs: duration > 0 ? duration : rem,
     foreshadowFired: false,
     frozenAt: null,
     frozenRemainingMs: null,
+    frozenDurationMs: null,
     freezeExtendUntil: null,
     frozenPhase: null,
     resumeAfterAfterplay: false,
@@ -802,6 +806,7 @@ export function startDay(): void {
     startedAt: Date.now(),
     frozenAt: null,
     frozenRemainingMs: null,
+    frozenDurationMs: null,
     freezeExtendUntil: null,
     frozenPhase: null,
     resumeToThreshold: false,
@@ -828,6 +833,7 @@ export function resetDay(): string {
     foreshadowFired: false,
     frozenAt: null,
     frozenRemainingMs: null,
+    frozenDurationMs: null,
     freezeExtendUntil: null,
     frozenPhase: null,
     resumeToThreshold: false,
@@ -908,6 +914,7 @@ export function freeze(): void {
     phase: 'frozen',
     phaseEndsAt: null,
     frozenRemainingMs: rem,
+    frozenDurationMs: state.phaseDurationMs ?? rem,
     frozenAt: Date.now(),
     freezeExtendUntil: null,
     frozenPhase,
@@ -929,6 +936,7 @@ export function resume(): void {
       ...state,
       frozenAt: null,
       frozenRemainingMs: null,
+      frozenDurationMs: null,
       freezeExtendUntil: null,
       resumeToThreshold: false,
     }
@@ -949,13 +957,15 @@ export function resume(): void {
       freezeExtendUntil: null,
     }
   } else {
+    const duration = state.frozenDurationMs ?? state.phaseDurationMs ?? rem
     state = {
       ...state,
       phase,
       phaseEndsAt: Date.now() + Math.max(rem, 1000),
-      phaseDurationMs: state.phaseDurationMs ?? rem,
+      phaseDurationMs: duration > 0 ? duration : rem,
       frozenAt: null,
       frozenRemainingMs: null,
+      frozenDurationMs: null,
       freezeExtendUntil: null,
       frozenPhase: null,
       checkInAt: null,

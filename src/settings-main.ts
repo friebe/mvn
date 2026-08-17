@@ -307,6 +307,7 @@ function render(): void {
         <p class="settings-hint">
           Micro-moments (exercises) stay in German for now — clearer body cues.
         </p>
+        <p class="settings-version">Stint ${__APP_VERSION__}</p>
       </section>
     </div>
   `

@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 /** Netlify / getstint.de root. Override with BASE_PATH if needed. */
@@ -11,9 +12,15 @@ function normalizeBase(raw: string | undefined): string {
 
 const base = normalizeBase(process.env.BASE_PATH)
 const basePathNoSlash = base.replace(/\/$/, '') || ''
+const appVersion = JSON.parse(
+  readFileSync(resolve(__dirname, 'package.json'), 'utf8'),
+).version as string
 
 export default defineConfig({
   base,
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion),
+  },
   build: {
     rollupOptions: {
       input: {

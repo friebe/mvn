@@ -30,6 +30,8 @@ export interface AppState {
   phaseEndsAt: number | null
   /** Remaining ms of interrupted phase while frozen */
   frozenRemainingMs: number | null
+  /** Full duration of the interrupted sit/stand block (restore after cooldown) */
+  frozenDurationMs: number | null
   /** When freeze started */
   frozenAt: number | null
   /** If set, suppress "Call vorbei?" until this timestamp */
@@ -123,6 +125,7 @@ export function defaultState(): AppState {
     foreshadowFired: false,
     phaseEndsAt: null,
     frozenRemainingMs: null,
+    frozenDurationMs: null,
     frozenAt: null,
     freezeExtendUntil: null,
     frozenPhase: null,

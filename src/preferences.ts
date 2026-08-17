@@ -55,6 +55,7 @@ export function closeDayInStorage(): { state: AppState; story: string } {
     foreshadowFired: false,
     frozenAt: null,
     frozenRemainingMs: null,
+    frozenDurationMs: null,
     freezeExtendUntil: null,
     frozenPhase: null,
     resumeToThreshold: false,
