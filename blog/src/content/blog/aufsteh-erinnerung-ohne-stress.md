@@ -1,7 +1,8 @@
 ---
-title: 'Aufsteh-Erinnerung am Schreibtisch — ohne Alarm-Stress'
-description: 'Aufsteh-Erinnerung am Stehschreibtisch ohne Alarm-Stress: weiche Cues, Zweitmonitor, optionaler Ton — Sit/Stand-Reminder, die du nicht hasst.'
+title: 'Aufsteh-Erinnerung am Stehschreibtisch ohne Stress'
+description: 'Aufsteh-Erinnerung am Stehschreibtisch ohne Stress: weiche Cues, Zweitmonitor, optionaler Ton — Sit/Stand-Reminder, die du nicht hasst.'
 pubDate: 2026-08-08
+updatedDate: 2026-08-18
 faq:
   - question: 'Was ist eine gute Aufsteh-Erinnerung am Schreibtisch?'
     answer: 'Eine, die dich an den Haltungswechsel erinnert, ohne den Flow zu zerreißen: sichtbar und leise oft besser als Sirene. Ideal optional — Ton und Banner getrennt, Pause erlaubt.'
@@ -70,7 +71,7 @@ Nicht jedes Signal ist gleich invasiv. Grobe Landkarte:
 | **Browser-/OS-Toast** | mittel | Tab im Hintergrund | Dauer-Banner, die sich stapeln |
 | **Alarm / Sirene** | hoch | Fast nie am Desk | Fast immer — Reminder stirbt |
 
-**Zweitmonitor** verdient eine eigene Zeile: Ein ruhiges Fenster neben der Arbeit ist oft die freundlichste **Stehschreibtisch-Erinnerung**. Du siehst den Wechsel kommen — ohne dass etwas schreit. Warum Handy-Pushes am Desk oft trotzdem versagen (Ort des Cues): [Handy-Reminder am Schreibtisch](/blog/handy-reminder-schreibtisch/).
+**Zweitmonitor** verdient eine eigene Zeile: Ein ruhiges Fenster neben der Arbeit ist oft die freundlichste **Stehschreibtisch-Erinnerung**. Du siehst den Wechsel kommen — ohne dass etwas schreit. Warum Handy-Pushes am Desk oft trotzdem versagen (Ort des Cues): [Handy-Erinnerung am Schreibtisch](/blog/handy-reminder-schreibtisch/).
 
 Was bei mir (und vielen Desk-Tagen) wirkt: die **Kombination** aus visuellem Cue und optionalem, leisen Signal. Nicht Sirene — eher ein leichter physiologischer Nudge im Hintergrund, plus etwas, das du **sehen** kannst. Der Mensch neigt dann eher dazu mitzumachen, ohne dass es sich wie ein Befehl anfühlt.
 

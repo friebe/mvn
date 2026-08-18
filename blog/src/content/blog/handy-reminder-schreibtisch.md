@@ -1,7 +1,8 @@
 ---
-title: 'Warum Handy-Reminder am Schreibtisch oft nicht greifen'
-description: 'Handy-Reminder am Desk greifen oft nicht: Cue neben der Arbeit, zu viel Reibung. Schon Handy-Blick ist oft zu viel — Sit/Stand braucht Sichtfeld-Desktop.'
+title: 'Handy-Erinnerung am Schreibtisch — warum sie oft nicht reicht'
+description: 'Handy-Erinnerung am Schreibtisch reicht oft nicht: Cue neben der Arbeit, zu viel Reibung. Sit/Stand braucht ein Signal im Sichtfeld am Desktop.'
 pubDate: 2026-08-12
+updatedDate: 2026-08-18
 faq:
   - question: 'Warum helfen Handy-Erinnerungen am Schreibtisch oft nicht?'
     answer: 'Weil Ort und Reibung nicht stimmen. Der Cue liegt neben der Arbeit; schon zum Handy schauen ist oft ein Schritt zu viel. Sit/Stand braucht ein Signal im Sichtfeld — so wenig Aufwand, dass du es trotz Flow noch tust.'
@@ -16,7 +17,7 @@ faq:
   - question: 'Brauche ich dafür eine App oder PWA?'
     answer: 'Nein. Sticky am Monitor, OS-Timer am Desktop oder ein kleines Browserfenster reichen. Eine installierbare Desk-App (PWA) ist nur praktisch, wenn du den Rhythmus dauerhaft sichtbar halten und optional Browser-Toasts willst — ohne Account.'
   - question: 'Warum vergesse ich trotz Reminder-App aufzustehen?'
-    answer: 'Oft stimmen Ort und Aufwand nicht: Signal auf dem Handy, Blick am Desktop, und schon der Griff zum Telefon ist zu viel. Weichere, sichtbare Cues am Desk ohne Gerätewechsel halten länger — siehe auch Aufsteh-Erinnerung ohne Alarm-Stress.'
+    answer: 'Oft stimmen Ort und Aufwand nicht: Signal auf dem Handy, Blick am Desktop, und schon der Griff zum Telefon ist zu viel. Weichere, sichtbare Cues am Desk ohne Gerätewechsel halten länger — siehe auch Aufsteh-Erinnerung am Stehschreibtisch ohne Stress.'
 ---
 
 **Kurzantwort:** **Handy-Reminder am Schreibtisch** greifen oft nicht, weil der Cue **neben** der Arbeit liegt — und weil die **Reibung** zu hoch ist. Schon zum Handy schauen, entsperren, lesen ist in der Praxis oft ein Schritt zu viel. Sit/Stand braucht eine Erinnerung im **aktiven Sichtfeld** (Desktop / Zweitmonitor), mit so wenig Aufwand, dass du sie trotz Flow noch umsetzt.
@@ -31,7 +32,7 @@ Ich kenne das aus dem eigenen Alltag: Beruflich sitze ich meist am **Desktop**. 
 
 Das Problem ist selten „zu wenig Disziplin“. Es ist oft **Ort des Signals** — und **wie teuer** der nächste Schritt ist.
 
-Wie weich der Cue sein sollte (Ton vs. Sichtbarkeit, Pause erlaubt): [Aufsteh-Erinnerung ohne Alarm-Stress](/blog/aufsteh-erinnerung-ohne-stress/). Wie oft wechseln: [Sit/Stand-Wechsel](/blog/sit-stand-wechsel-wie-oft/).
+Wie weich der Cue sein sollte (Ton vs. Sichtbarkeit, Pause erlaubt): [Aufsteh-Erinnerung am Stehschreibtisch ohne Stress](/blog/aufsteh-erinnerung-ohne-stress/). Wie oft wechseln: [Sit/Stand-Wechsel](/blog/sit-stand-wechsel-wie-oft/).
 
 ## Friction muss winzig sein — sonst machst du es eh nicht
 

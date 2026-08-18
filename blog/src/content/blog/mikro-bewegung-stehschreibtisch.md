@@ -1,7 +1,8 @@
 ---
-title: 'Mikro-Bewegung am Stehschreibtisch — 15 Sekunden statt Workout'
-description: 'Mikro-Bewegung am Stehschreibtisch: ~15 Sekunden während der Tisch fährt — Schultern, Nacken, Blick. Kein Gym, Prävention am Desk.'
+title: 'Mikro-Bewegung am Stehschreibtisch: was in 15 Sekunden reicht'
+description: 'Mikro-Bewegung am Stehschreibtisch: was in ~15 Sekunden reicht, während der Tisch fährt — Schultern, Nacken, Blick. Kein Gym, Prävention am Desk.'
 pubDate: 2026-08-08
+updatedDate: 2026-08-18
 faq:
   - question: 'Was ist Mikro-Bewegung am Stehschreibtisch?'
     answer: 'Eine sehr kurze Körper-Cue (oft ~15 Sekunden), während der Tisch hoch- oder runterfährt: Stretch, Schultern, Blick in die Ferne. Kein Workout, kein Satz, kein Schweiß.'
@@ -25,7 +26,7 @@ Der Tisch braucht ein paar Sekunden. In der Zeit passiert meist nichts: Du warte
 
 Ich nutze genau diese Sekunden. Nicht weil ich „sportlich“ bin — eher weil sonst die Lücke leer verstreicht und der Körper den ganzen Block wieder in derselben Starre landet. Der Wechsel ist schon geplant (Reminder, Takt, Vorsatz). Die Mikro-Bewegung hängt sich nur dran.
 
-Zum Rhythmus und zur Erinnerung (ohne diesen Artikel zu wiederholen): [Sit/Stand-Wechsel: wie oft?](/blog/sit-stand-wechsel-wie-oft/), [Aufsteh-Erinnerung ohne Alarm-Stress](/blog/aufsteh-erinnerung-ohne-stress/).
+Zum Rhythmus und zur Erinnerung (ohne diesen Artikel zu wiederholen): [Sit/Stand-Wechsel: wie oft?](/blog/sit-stand-wechsel-wie-oft/), [Aufsteh-Erinnerung am Stehschreibtisch ohne Stress](/blog/aufsteh-erinnerung-ohne-stress/).
 
 ## Was „Mikro“ heißt
 

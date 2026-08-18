@@ -1,7 +1,8 @@
 ---
-title: 'Stehschreibtisch im Home-Office — warum der Rhythmus oft stirbt'
-description: 'Stehschreibtisch im Home-Office ungenutzt? Warum Sit/Stand stirbt — Calls, Flow, Abend — und wie Umgebung statt Motivation den Rhythmus hält.'
+title: 'Stehschreibtisch im Home-Office nutzen — warum Sit/Stand oft liegen bleibt'
+description: 'Stehschreibtisch im Home-Office ungenutzt? Warum Sit/Stand oft liegen bleibt — Calls, Flow, Abend — und wie Umgebung statt Motivation den Rhythmus hält.'
 pubDate: 2026-08-17
+updatedDate: 2026-08-18
 faq:
   - question: 'Warum nutze ich meinen Stehschreibtisch im Home-Office kaum?'
     answer: 'Weil der Kauf die leichte Entscheidung war — der Alltag die schwere. Calls, Deep Work und „nur noch kurz“ lassen den Tisch auf Sitzhöhe einfrieren. Ohne sichtbares System und wenig Reibung gewinnt Bequemlichkeit.'
@@ -71,7 +72,7 @@ Was bei mir (und vielen Home-Office-Tagen) den Unterschied macht — klein, konk
 
 1. **Default-Höhe wählen.** Entweder den Tag sitzend starten und den ersten Wechsel an etwas koppeln, das sowieso passiert (erste Pause, Mail-Batch fertig). Oder eine Woche **stehend starten** — Sitzen wird dann die bewusste Taste. Kein Heldentum: wenn die Füße nach 10 Minuten meckern, Default zurück und Stehphasen kürzer.
 2. **Tisch-Taste in Reichweite, nicht hinterm Monitor.** Klingt albern, bis du merkst, dass du den Controller suchst. Reibung tötet Sit/Stand früher als fehlende Einsicht — dieselbe Logik wie beim [Handy-Reminder neben dem Laptop](/blog/handy-reminder-schreibtisch/).
-3. **Ein sichtbares Ding im Arbeitsblick.** Sticky am Monitor-Rand, kleines Fenster, Zweitmonitor. Nicht die beste App — der kürzeste Weg von „jetzt?“ zur Taste. Wie weich das Signal sein darf: [Aufsteh-Erinnerung ohne Alarm-Stress](/blog/aufsteh-erinnerung-ohne-stress/).
+3. **Ein sichtbares Ding im Arbeitsblick.** Sticky am Monitor-Rand, kleines Fenster, Zweitmonitor. Nicht die beste App — der kürzeste Weg von „jetzt?“ zur Taste. Wie weich das Signal sein darf: [Aufsteh-Erinnerung am Stehschreibtisch ohne Stress](/blog/aufsteh-erinnerung-ohne-stress/).
 4. **Call-Regel vorher festlegen.** Nicht „ich stehe im Meeting“. Sondern: *nach* dem Call einmal Höhe wechseln, auch wenn der Cue währenddessen ignoriert wurde. Sonst erbt der Nachmittag die Sitzhöhe des Daily.
 5. **Schuhe / Matte / Licht ehrlich machen.** Barfuß auf Hartboden, Blendung, kalter Raum — der Körper boykottiert Stehen, und du nennst es Faulheit. Erst den Boden klären, dann den Takt.
 

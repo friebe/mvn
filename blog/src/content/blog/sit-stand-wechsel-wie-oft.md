@@ -74,7 +74,7 @@ Zeichen, dass der Takt sitzt: Du wechselst, **ohne** dich gehetzt zu fühlen, un
 - Stehfunktion nur „fürs Foto“
 - Abends merkst du Nacken/Hüfte stärker als früher mit festem Tisch
 
-→ Kürzeren Sit-Block wählen (z. B. Richtung „leicht“), Wechsel an **Task-Grenzen** koppeln (Mail fertig → Tisch), weiche Erinnerung statt stiller Hoffnung. Wenn der Tisch im Home-Office Wochen auf einer Höhe bleibt, ist oft die Gewohnheit kaputt, nicht die Minuten: [Stehschreibtisch im Home-Office — warum der Rhythmus oft stirbt](/blog/stehschreibtisch-home-office-rhythmus/).
+→ Kürzeren Sit-Block wählen (z. B. Richtung „leicht“), Wechsel an **Task-Grenzen** koppeln (Mail fertig → Tisch), weiche Erinnerung statt stiller Hoffnung. Wenn der Tisch im Home-Office Wochen auf einer Höhe bleibt, ist oft die Gewohnheit kaputt, nicht die Minuten: [Stehschreibtisch im Home-Office nutzen](/blog/stehschreibtisch-home-office-rhythmus/).
 
 ## Weiche Erinnerung statt Alarm-Stress
 
@@ -86,7 +86,7 @@ Praktisch:
 - Ton und System-Toast **optional** und getrennt schaltbar
 - „Nicht jetzt“ / Pause erlauben — Körperpflege, kein Streak
 
-Tiefe dazu (Signal-Arten, warum weniger besser ist): [Aufsteh-Erinnerung ohne Alarm-Stress](/blog/aufsteh-erinnerung-ohne-stress/).  
+Tiefe dazu (Signal-Arten, warum weniger besser ist): [Aufsteh-Erinnerung am Stehschreibtisch ohne Stress](/blog/aufsteh-erinnerung-ohne-stress/).  
 Wie das in einer lokalen Stehschreibtisch-App aussehen kann: [Stehschreibtisch-App: Erinnerung, Sound & Benachrichtigungen](/blog/stehschreibtisch-app-erinnerung-sound-settings/).
 
 [Stint](/) ist dafür gebaut: lange Sit/Stand-Blöcke, optional Micro-Move beim Wechsel, chill auf dem Zweitmonitor — **not a focus timer**. Kein Muss für den Ratgeber oben.
@@ -97,6 +97,6 @@ Wie das in einer lokalen Stehschreibtisch-App aussehen kann: [Stehschreibtisch-A
 2. Wechsle lieber **regelmäßig** als „irgendwann viel stehen“.  
 3. Stehphasen bei Beschwerden sofort verkürzen — kein Hero-Modus.  
 4. Optional: kurze Mikro-Bewegung **nur** wenn der Tisch fährt — [Cues](/blog/mikro-bewegung-stehschreibtisch/).  
-5. Erinnerung so leise einstellen, dass du sie nicht hasst — [ohne Alarm-Stress](/blog/aufsteh-erinnerung-ohne-stress/).
+5. Erinnerung so leise einstellen, dass du sie nicht hasst — [ohne Stress](/blog/aufsteh-erinnerung-ohne-stress/).
 
 **Kern:** Der beste Sit/Stand-Wechsel ist der, den du morgen noch machst — ruhig, wiederholbar, ohne dich anzuschreien.
