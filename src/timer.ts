@@ -56,7 +56,7 @@ let awayNudgeId: number | null = null
 let awayNudgeKind: AttentionKind | null = null
 let awayNudgeTitle = ''
 let awayNudgeBody = ''
-/** Away re-toasts include a Yes action for mid-phase check-in. */
+/** Away re-toasts include a Yes action for mid-stand check-in. */
 let awayNudgeCheckIn = false
 /** Away re-toasts include +5 min on threshold. */
 let awayNudgeSnooze = false
@@ -300,6 +300,7 @@ function onTick(): void {
     return
   }
 
+  maybeDismissSitCheckIn()
   maybeShowCheckIn()
   maybeTimeoutCheckIn()
 
@@ -319,8 +320,24 @@ function onTick(): void {
   emit()
 }
 
+function maybeDismissSitCheckIn(): void {
+  if (state.phase === 'stand') return
+  if (state.checkInAt == null && state.checkInShownAt == null) return
+  const wasVisible = state.checkInShownAt != null && !state.checkInHandled
+  state = {
+    ...state,
+    checkInAt: null,
+    checkInShownAt: null,
+    checkInHandled: true,
+  }
+  if (wasVisible) {
+    clearAttention()
+    setBaseTitle(`Stint · ${phaseLabel(state.phase)}`)
+  }
+}
+
 function maybeShowCheckIn(): void {
-  if (state.phase !== 'sit' && state.phase !== 'stand') return
+  if (state.phase !== 'stand') return
   if (state.checkInHandled || state.checkInShownAt != null) return
   if (state.checkInAt == null || Date.now() < state.checkInAt) return
 
@@ -333,10 +350,10 @@ function maybeShowCheckIn(): void {
 
 function maybeTimeoutCheckIn(): void {
   if (state.checkInShownAt == null || state.checkInHandled) return
-  if (state.phase !== 'sit' && state.phase !== 'stand') return
+  if (state.phase !== 'stand') return
   if (Date.now() - state.checkInShownAt < checkInTimeoutMs()) return
 
-  // Missed Yes — drop the prompt, keep the sit/stand block. Ending the phase here
+  // Missed Yes — drop the prompt, keep the stand block. Ending the phase here
   // cut a 15 min stand down to ~8.5 min whenever the cue was ignored.
   state = {
     ...state,
@@ -349,7 +366,7 @@ function maybeTimeoutCheckIn(): void {
 }
 
 function checkInPrompt(): string {
-  return state.phase === 'stand' ? 'Still standing?' : 'Still at your desk?'
+  return 'Still standing?'
 }
 
 function permissionGranted(): boolean {
@@ -698,8 +715,7 @@ function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): vo
     resumeToThreshold: false,
     resumeAfterAfterplay: false,
     momentChoiceIds: null,
-    checkInAt:
-      phase === 'sit' || phase === 'stand' ? Date.now() + ms * CHECKIN_RATIO : null,
+    checkInAt: phase === 'stand' ? Date.now() + ms * CHECKIN_RATIO : null,
     checkInShownAt: null,
     checkInHandled: false,
   }
@@ -783,8 +799,9 @@ export function rerollMoment(): void {
 }
 
 export function confirmCheckIn(): void {
+  if (state.phase !== 'stand') return
   if (state.checkInShownAt == null || state.checkInHandled) return
-  // Mid-phase Yes (sit or stand) = presence confirmed for the day.
+  // Mid-stand Yes = standing confirmed for the day. Sit is not rewarded.
   recordStat('desk_confirmed')
   state = {
     ...state,
@@ -1027,7 +1044,7 @@ export function formatTime(ms: number): string {
 }
 
 export function isCheckInVisible(): boolean {
-  return state.checkInShownAt != null && !state.checkInHandled
+  return state.phase === 'stand' && state.checkInShownAt != null && !state.checkInHandled
 }
 
 export function refreshUi(): void {

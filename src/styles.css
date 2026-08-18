@@ -1,5 +1,6 @@
 @import './tokens.css';
 @import './brand.css';
+@import './week-bars.css';
 
 *,
 *::before,
@@ -789,7 +790,6 @@ body {
 .exercise,
 .freeze-prompt,
 .pick,
-.check-in,
 .day-close-reward,
 .walkthrough {
   padding: clamp(0.75rem, 2vmin, 1.5rem) 0 0;
@@ -819,7 +819,6 @@ body {
 .exercise[hidden],
 .freeze-prompt[hidden],
 .pick[hidden],
-.check-in[hidden],
 .day-close-reward[hidden],
 .walkthrough[hidden],
 .ambient[hidden],
@@ -983,15 +982,6 @@ button[hidden] {
   max-width: 36rem;
 }
 
-.check-in-q {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 5.5vmin, 3.25rem);
-  font-weight: 600;
-  font-style: normal;
-  line-height: 1.1;
-}
-
 .day-close-kicker {
   margin: 0;
   font-size: clamp(1rem, 2.2vmin, 1.25rem);
@@ -1057,6 +1047,27 @@ button[hidden] {
 
 .day-close-stat[data-tone='freeze'] .day-close-stat-value {
   color: var(--color-freeze);
+}
+
+.day-close-week {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-width: 28rem;
+  margin-top: 0.15rem;
+}
+
+.day-close-week-label {
+  margin: 0;
+  font-size: clamp(0.85rem, 1.8vmin, 1rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-2);
+}
+
+.day-close-week .week-bars {
+  min-height: 4.5rem;
 }
 
 .day-close-more {
@@ -1187,6 +1198,10 @@ button[hidden] {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.shell[data-compact='true'] .day-close-week .week-bars {
+  min-height: 3.4rem;
 }
 
 .controls {

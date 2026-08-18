@@ -142,8 +142,8 @@ function render(): void {
             <p class="setting-note">
               Browser toasts — best as an installed app. With this on, when another window is focused
               Stint repeats desk / check-in cues every ~75s (one toast at a time, auto-dismisses).
-              Check-in toasts include a Yes button — confirm without switching apps; ignoring the toast
-              is not a desk proof. Desk toasts include +5 min — stay in the current posture without
+              Standing check-in toasts include a Yes button — optional proof you stayed up, without switching
+              apps. After ~15s without Yes, it does not count. Sit has no check-in. Desk toasts include +5 min — stay in the current posture without
               focusing Stint (twice per cue).
             </p>
           </div>

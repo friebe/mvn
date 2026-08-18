@@ -52,7 +52,7 @@ export interface StatsSummary {
   ritual_skip: number
   /** Freeze gesamt (Schwelle + manuell) */
   freeze_total: number
-  /** Echte Wechsel = mid-phase check-in Yes (sit or stand) */
+  /** Echte Wechsel = mid-stand check-in Yes */
   rounds: number
 }
 
@@ -223,6 +223,28 @@ export function lastDayBuckets(n: number): DayBucket[] {
   return out
 }
 
+/** Monday–Sunday of the current week. Future days stay empty slots. */
+export function thisWeekBuckets(at = new Date()): DayBucket[] {
+  const store = loadStats()
+  const start = startOfIsoWeek(at)
+  const out: DayBucket[] = []
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start)
+    d.setDate(start.getDate() + i)
+    const key = todayKey(d)
+    out.push({ ...emptyDay(key), ...(store.days[key] ?? {}) })
+  }
+  return out
+}
+
+function startOfIsoWeek(at: Date): Date {
+  const d = new Date(at.getFullYear(), at.getMonth(), at.getDate())
+  const dow = d.getDay()
+  const offset = dow === 0 ? -6 : 1 - dow
+  d.setDate(d.getDate() + offset)
+  return d
+}
+
 /** Compare today with the same weekday 1–4 weeks ago. */
 export function buildDayCloseComparison(at = new Date()): string | null {
   const today = summarizeToday()
@@ -293,7 +315,7 @@ export function buildDayStory(s: StatsSummary): string {
     return 'Check-ins confirmed and moments taken.'
   }
   if (s.rounds > 0) return 'Check-ins confirmed — you answered when the desk asked.'
-  if (s.rise > 0) return 'Desk raised — mid-phase check-in often without a tap.'
+  if (s.rise > 0) return 'Desk raised — standing check-in often without a tap.'
   if (s.freeze_total > 0) return 'Calls interrupted the flow — freeze protected you.'
   if (s.lazy_choice > 0) return 'Softer desk days were in the mix.'
   return 'The day is running. No switches yet — ok.'

@@ -17,6 +17,7 @@ import { intervalSummary, resolveIntervals } from './intervals'
 import { appPath } from './paths'
 import { canSnoozePostureNow, isCheckInVisible } from './timer'
 import { buildDayCloseComparison, buildDayStory, type StatsSummary } from './stats'
+import { weekBarsHtml } from './week-bars'
 import { shortcutHintLabel, type ShortcutId } from './shortcuts'
 import { detailMode, isBarOnly } from './atmosphere-display'
 import { brandLockupHtml } from './brand-mark'
@@ -328,14 +329,6 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             <p class="mute-hint" id="mute-hint" hidden></p>
           </main>
 
-          <section class="check-in" id="check-in" hidden>
-            <p class="check-in-q" id="check-in-q">Still at your desk?</p>
-            <button type="button" class="btn btn-primary has-kbd" id="btn-check-in" data-shortcut="checkIn">
-              <span class="btn-text">Yes</span>
-              <span class="btn-kbd" aria-hidden="true">↵</span>
-            </button>
-          </section>
-
           <section class="threshold" id="threshold" hidden>
             <p class="threshold-lead" id="threshold-lead">Desk wants up.</p>
             <p class="threshold-sub" id="threshold-sub">Nothing to prove. Pick what works today.</p>
@@ -362,6 +355,10 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             <p class="day-close-story" id="day-close-story"></p>
             <p class="day-close-line" id="day-close-line" hidden></p>
             <div class="day-close-stats" id="day-close-stats" aria-label="Day stats"></div>
+            <div class="day-close-week" id="day-close-week">
+              <p class="day-close-week-label">This week</p>
+              <div class="day-close-week-bars" id="day-close-week-bars"></div>
+            </div>
             <a class="day-close-more" id="day-close-more" href="${appPath('analytics.html')}">All analytics</a>
           </section>
 
@@ -400,6 +397,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             </div>
             <div class="row run-actions" id="run-controls" hidden>
               ${actionButton('btn-freeze', 'btn btn-danger', 'Freeze', 'freeze')}
+              ${actionButton('btn-check-in', 'btn btn-ghost', 'Yes', 'checkIn', true)}
               ${actionButton('btn-resume', 'btn btn-primary', 'Continue', 'resume', true)}
             </div>
             <div class="row threshold-actions" id="threshold-actions" hidden>
@@ -583,9 +581,9 @@ export function renderUi(
   const exercise = qs(root, 'exercise')
   const freezePrompt = qs(root, 'freeze-prompt')
   const pick = qs(root, 'pick')
-  const checkIn = qs(root, 'check-in')
   const setupControls = qs(root, 'setup-controls')
   const runControls = qs(root, 'run-controls')
+  const btnCheckIn = qs<HTMLButtonElement>(root, 'btn-check-in')
   const btnFreeze = qs<HTMLButtonElement>(root, 'btn-freeze')
   const btnResume = qs<HTMLButtonElement>(root, 'btn-resume')
   const btnRise = qs<HTMLButtonElement>(root, 'btn-rise')
@@ -614,7 +612,6 @@ export function renderUi(
       isThreshold ||
       isExercise ||
       isPick ||
-      checkInVisible ||
       dayCloseVisible ||
       walkthroughVisible,
   )
@@ -628,13 +625,19 @@ export function renderUi(
   setHidden(dayCloseActions, !dayCloseVisible)
   setHidden(walkthroughActions, !walkthroughVisible)
   setHidden(walkthroughCues, !walkCues)
+  setHidden(
+    btnCheckIn,
+    !checkInVisible || isFrozen || isThreshold || isExercise || isPick || dayCloseVisible || walkthroughVisible,
+  )
+  if (checkInVisible) {
+    setButtonLabel(btnCheckIn, 'Still standing')
+  }
   setHidden(btnFreeze, isFrozen || isThreshold || isExercise || isPick || dayCloseVisible || walkthroughVisible)
   setHidden(btnResume, !isFrozen || showFreezePrompt || dayCloseVisible || walkthroughVisible)
   setHidden(freezePrompt, !(isFrozen && showFreezePrompt) || dayCloseVisible || walkthroughVisible)
   setHidden(exercise, !isExercise || dayCloseVisible || walkthroughVisible)
   setHidden(threshold, !(isThreshold || walkThreshold) || dayCloseVisible || (walkthroughVisible && !walkThreshold))
   setHidden(pick, !(isPick || walkPick) || dayCloseVisible || (walkthroughVisible && !walkPick))
-  setHidden(checkIn, !checkInVisible || dayCloseVisible || walkthroughVisible)
   setHidden(dayCloseReward, !dayCloseVisible)
   // Tour chrome always on during walkthrough — progress is the shared first line.
   setHidden(walkthrough, !walkthroughVisible)
@@ -740,7 +743,7 @@ export function renderUi(
       setHidden(lineEl, true)
     }
     const statsEl = qs(root, 'day-close-stats')
-    const statsKey = `${dayCloseSummary.rounds},${dayCloseSummary.rise},${dayCloseSummary.ritual_done}`
+    const statsKey = `${dayCloseSummary.rounds},${dayCloseSummary.rise},${dayCloseSummary.ritual_done},${dayCloseSummary.stand_done}`
     if (statsEl.dataset.statsKey !== statsKey) {
       statsEl.dataset.statsKey = statsKey
       statsEl.innerHTML = `
@@ -757,6 +760,11 @@ export function renderUi(
         <p class="day-close-stat-label">Moments</p>
       </div>
     `
+    }
+    const weekEl = qs(root, 'day-close-week-bars')
+    if (weekEl.dataset.weekKey !== statsKey) {
+      weekEl.dataset.weekKey = statsKey
+      weekEl.innerHTML = weekBarsHtml(72)
     }
   }
 
@@ -897,12 +905,6 @@ export function renderUi(
 
   if (dayCloseVisible || walkthroughVisible) {
     // hint hidden — story / walkthrough copy carry the message
-  } else if (checkInVisible) {
-    setText(
-      qs(root, 'check-in-q'),
-      state.phase === 'stand' ? 'Still standing?' : 'Still at your desk?',
-    )
-    setHintText(hint, 'Tap Yes — that counts as confirmed for today.')
   } else if (isSetup) {
     const intervals = resolveIntervals(state.intervals)
     if (state.demo) {
@@ -955,7 +957,7 @@ export function renderUi(
       walkPick ||
       dayCloseVisible ||
       walkCopy ||
-      (barOnly && (isRunning || isExercise || isFrozen) && !checkInVisible && !dayCloseVisible),
+      (barOnly && (isRunning || isExercise || isFrozen) && !dayCloseVisible),
   )
 
   if (isExercise) {

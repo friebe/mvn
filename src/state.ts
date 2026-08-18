@@ -56,7 +56,7 @@ export interface AppState {
   momentChoiceIds: string[] | null
   /** Already used "Anderer Moment" once */
   momentRerolled: boolean
-  /** Soft check-in due at this timestamp (sit/stand mid-phase) */
+  /** Soft check-in due at this timestamp (stand mid-phase only) */
   checkInAt: number | null
   /** Check-in visible since */
   checkInShownAt: number | null
@@ -94,11 +94,12 @@ export const MOMENT_MS = EXERCISE_MS
 export const FORESHADOW_RATIO = 0.1
 /** Mid-phase soft check-in */
 export const CHECKIN_RATIO = 0.5
-export const CHECKIN_TIMEOUT_MS = 60 * 1000
-export const DEMO_CHECKIN_TIMEOUT_MS = 8 * 1000
 /** Auto-advance to moment pick at threshold unless user opts out */
 export const THRESHOLD_MOMENT_MS = 15 * 1000
 export const DEMO_THRESHOLD_MOMENT_MS = 5 * 1000
+/** Same 15s beat as moment / threshold — ignore it and it is not proof */
+export const CHECKIN_TIMEOUT_MS = THRESHOLD_MOMENT_MS
+export const DEMO_CHECKIN_TIMEOUT_MS = DEMO_THRESHOLD_MOMENT_MS
 
 function migrateAtmosphereDisplay(parsed: Partial<AppState>): AtmosphereDisplay {
   if (

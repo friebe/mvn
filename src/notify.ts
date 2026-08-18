@@ -1,6 +1,6 @@
 import { absoluteAssetUrl } from './paths'
 
-/** SW notification action — confirm mid-phase check-in without focusing Stint. */
+/** SW notification action — confirm mid-stand check-in without focusing Stint. */
 export const CHECK_IN_YES_ACTION = 'check-in-yes'
 
 /** postMessage / client bridge type */

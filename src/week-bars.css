@@ -1,0 +1,59 @@
+.week-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.45rem;
+  min-height: 5.5rem;
+  padding-top: 0.15rem;
+}
+
+.bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.bar {
+  width: 100%;
+  max-width: 2.5rem;
+  border-radius: 6px 6px 2px 2px;
+  background: var(--color-stand);
+  min-height: 4px;
+  opacity: 0.55;
+  transition: height 0.3s var(--ease);
+}
+
+.bar-col.is-today .bar {
+  opacity: 1;
+}
+
+.bar-col.is-empty .bar {
+  background: var(--color-paper-3);
+  opacity: 1;
+}
+
+.bar-col.is-today.is-empty .bar {
+  background: color-mix(in oklch, var(--color-stand) 35%, var(--color-paper-3));
+}
+
+.bar-col.is-future .bar {
+  background: var(--color-paper-3);
+  opacity: 0.7;
+}
+
+.bar-col.is-future .bar-label {
+  opacity: 0.7;
+}
+
+.bar-label {
+  font-size: 0.85rem;
+  color: var(--color-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.bar-col.is-today .bar-label {
+  color: var(--color-ink);
+  font-weight: 600;
+}

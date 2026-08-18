@@ -8,7 +8,6 @@ import {
   activeDayCount,
   buildDayStory,
   clearStats,
-  lastDayBuckets,
   summarizeAll,
   summarizeLastDays,
   summarizeToday,
@@ -17,6 +16,7 @@ import {
 import { appPath } from './paths'
 import { loadState } from './state'
 import { applyThemeFromState, bindSystemThemeListener } from './theme'
+import { weekBarsHtml } from './week-bars'
 
 applyThemeFromState(loadState())
 bindSystemThemeListener(() => loadState().theme)
@@ -27,12 +27,6 @@ function summaryFor(period: Period): StatsSummary {
   if (period === 'today') return summarizeToday()
   if (period === '7d') return summarizeLastDays(7)
   return summarizeAll()
-}
-
-function weekdayShort(dateKey: string): string {
-  const [y, m, d] = dateKey.split('-').map(Number)
-  const dt = new Date(y!, m! - 1, d!)
-  return dt.toLocaleDateString('en-US', { weekday: 'short' })
 }
 
 function isEmpty(s: StatsSummary): boolean {
@@ -49,8 +43,6 @@ function isEmpty(s: StatsSummary): boolean {
 function render(period: Period): void {
   const root = document.querySelector<HTMLElement>('#app')!
   const s = summaryFor(period)
-  const spark = lastDayBuckets(7)
-  const maxRounds = Math.max(1, ...spark.map((d) => d.sit_done))
   const empty = isEmpty(s)
   const activeDays =
     period === 'today' ? null : period === '7d' ? activeDayCount(7) : activeDayCount()
@@ -129,7 +121,7 @@ function render(period: Period): void {
           <p class="stat-label">Skipped</p>
         </div>
       </section>
-      <p class="section-note">Confirmed = Yes on a mid-phase check-in. Moments = tapped a card at desk switch.</p>
+      <p class="section-note">Confirmed = Yes on a mid-stand check-in. Moments = tapped a card at desk switch.</p>
 
       ${
         s.freeze_total > 0
@@ -143,19 +135,9 @@ function render(period: Period): void {
       }
 
       <section>
-        <h2 class="section-title">Last 7 days</h2>
-        <p class="section-note">Bars = finished sit phases per day.</p>
-        <div class="bars" aria-hidden="${empty ? 'true' : 'false'}">
-          ${spark
-            .map((d) => {
-              const h = Math.max(4, Math.round((d.sit_done / maxRounds) * 120))
-              return `<div class="bar-col">
-                <div class="bar" style="height:${h}px" title="${d.sit_done}"></div>
-                <span class="bar-label">${weekdayShort(d.date)}</span>
-              </div>`
-            })
-            .join('')}
-        </div>
+        <h2 class="section-title">This week</h2>
+        <p class="section-note">Bars = finished stand blocks. Empty days stay quiet — not a streak.</p>
+        ${weekBarsHtml(120)}
       </section>
 
       ${

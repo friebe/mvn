@@ -43,7 +43,7 @@ export const SHORTCUTS: ShortcutDef[] = [
   { id: 'resume', keys: ['Enter', ' '], label: '↵', action: 'Continue', context: 'Freeze' },
   { id: 'afterplay', keys: ['a', 'A'], label: 'A', action: 'Call cooldown', context: 'Freeze prompt' },
   { id: 'extendFreeze', keys: ['e', 'E'], label: 'E', action: '15 more min', context: 'Freeze prompt' },
-  { id: 'checkIn', keys: ['Enter', ' '], label: '↵', action: 'Still standing / at desk', context: 'Check-in' },
+  { id: 'checkIn', keys: ['Enter', ' '], label: '↵', action: 'Still standing', context: 'Stand' },
   { id: 'dayCloseDone', keys: ['Enter', ' '], label: '↵', action: 'Continue', context: 'Day close' },
 ]
 
@@ -71,7 +71,6 @@ export function availableShortcuts(ctx: ShortcutContext): Set<ShortcutId> {
 
   if (checkInVisible) {
     active.add('checkIn')
-    return active
   }
 
   const phase = state.phase
