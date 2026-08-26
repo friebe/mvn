@@ -45,4 +45,9 @@
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
   </url>
+  <url>
+    <loc>https://getstint.de/blog/sit-stand-timer-vs-pomodoro-vs-bewegung/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
 </urlset>
