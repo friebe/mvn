@@ -46,7 +46,7 @@ Ehrlich auch das: Ich kann dir **nicht** versprechen, dass du nach einer Woche (
 
 Wenn man so will: eine **Micro-Habit**. Kein Workout. Nur der Loop Signal → Tisch wechseln → weiterarbeiten. Klein genug, dass er überlebt; klar genug, dass er zählt. Optional noch eine kurze Körper-Cue in derselben Lücke: [Mikro-Bewegung am Stehschreibtisch](/blog/mikro-bewegung-stehschreibtisch/).
 
-Mehr zum Takt selbst (wie oft wechseln): [Sit/Stand-Wechsel: wie oft umstellen?](/blog/sit-stand-wechsel-wie-oft/). Warum das kein Pomodoro ist: [Stehschreibtisch-Rhythmus ohne Pomodoro](/blog/sit-stand-ohne-pomodoro/).
+Mehr zum Takt selbst (wie oft stehen/sitzen): [Höhenverstellbarer Schreibtisch: wie oft stehen?](/blog/sit-stand-wechsel-wie-oft/). Warum das kein Pomodoro ist: [Stehschreibtisch-Rhythmus ohne Pomodoro](/blog/sit-stand-ohne-pomodoro/).
 
 ## Das Problem: Erinnerung = Unterbrechung
 

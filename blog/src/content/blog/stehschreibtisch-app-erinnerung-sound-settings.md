@@ -15,13 +15,13 @@ faq:
   - question: 'Wo liegen meine Daten?'
     answer: 'In LocalStorage auf deinem Gerät. Kein Account, kein Cloud-Sync, keine Tracking-Pixel hinter den Settings.'
   - question: 'Wie oft sollte ich die Intervalle setzen?'
-    answer: 'Es gibt keine Universallösung. Praxis-Ranges und Alltagstakte: Artikel „Sit/Stand-Wechsel: wie oft umstellen?“.'
+    answer: 'Es gibt keine Universallösung. Praxis-Ranges und Alltagstakte: Artikel „Höhenverstellbarer Schreibtisch: wie oft stehen und sitzen?“.'
 ---
 
 **Kurzantwort:** [Stint](/) ist eine lokale **Stehschreibtisch-App** (PWA): lange **Sit**- und **Stand**-Blöcke, optional ~15 s **Micro-move** beim Tischwechsel, dazu **optionale** Sound- und Browser-Erinnerungen. Kein Account, keine Cloud, kein Fitness-Druck — **Sit · micro-move · stand — not a focus timer.**
 
 Philosophie (warum kein Pomodoro): [Stehschreibtisch-Rhythmus ohne Pomodoro](/blog/sit-stand-ohne-pomodoro/).  
-Intervalle wählen: [Sit/Stand-Wechsel: wie oft umstellen?](/blog/sit-stand-wechsel-wie-oft/).  
+Intervalle wählen: [Höhenverstellbarer Schreibtisch: wie oft stehen?](/blog/sit-stand-wechsel-wie-oft/).  
 Hier: Settings — was du einschaltest und warum weniger oft mehr ist.
 
 ## Was die App im Alltag macht

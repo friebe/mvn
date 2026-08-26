@@ -13,7 +13,7 @@ faq:
   - question: 'Brauche ich dafür eine App?'
     answer: 'Nicht zwingend. Ein klarer Rhythmus plus weiche Erinnerung reicht. Eine lokale Desk-App hilft, wenn du den Takt sichtbar halten willst, ohne Streaks oder Cloud.'
   - question: 'Wie oft sollte ich Sit und Stand wechseln?'
-    answer: 'Es gibt keine Magie-Zahl; Praxis-Ranges liegen oft bei etwa alle 30–60 Minuten. Details und Alltagstakte: im Artikel „Sit/Stand-Wechsel: wie oft umstellen?“.'
+    answer: 'Es gibt keine Magie-Zahl; Praxis-Ranges liegen oft bei etwa alle 30–60 Minuten. Details und Alltagstakte: im Artikel „Höhenverstellbarer Schreibtisch: wie oft stehen und sitzen?“.'
 ---
 
 **Kurzantwort:** Ein **Stehschreibtisch** löst das Problem nicht allein — **stundenlang dieselbe Haltung** schon. Pomodoro taktet *Arbeit* in kurzen Sprints. Ein **Sit/Stand-Rhythmus** taktet *Haltung*: lange Sitz- oder Stehblöcke, Wechsel am Tisch, optional eine kurze Mikro-Bewegung dazwischen. Das ist **Körperpflege am Schreibtisch**, kein Fokus-Timer.
@@ -31,7 +31,7 @@ Kein medizinischer Rat; bei Beschwerden Fachperson.
 
 Viele Tools vermischen beides. Dann fühlst du dich gehetzt *und* stehst trotzdem zu wenig auf — oder stehst alle paar Minuten und verlierst den Faden.
 
-Mehr zur Intervall-Praxis: [Sit/Stand-Wechsel: wie oft am Stehschreibtisch umstellen?](/blog/sit-stand-wechsel-wie-oft/).
+Mehr zur Intervall-Praxis: [Höhenverstellbarer Schreibtisch: wie oft stehen und sitzen?](/blog/sit-stand-wechsel-wie-oft/).
 
 ## Nicht noch ein Fokus-Timer
 

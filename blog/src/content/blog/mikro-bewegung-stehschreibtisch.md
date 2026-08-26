@@ -26,7 +26,7 @@ Der Tisch braucht ein paar Sekunden. In der Zeit passiert meist nichts: Du warte
 
 Ich nutze genau diese Sekunden. Nicht weil ich „sportlich“ bin — eher weil sonst die Lücke leer verstreicht und der Körper den ganzen Block wieder in derselben Starre landet. Der Wechsel ist schon geplant (Reminder, Takt, Vorsatz). Die Mikro-Bewegung hängt sich nur dran.
 
-Zum Rhythmus und zur Erinnerung (ohne diesen Artikel zu wiederholen): [Sit/Stand-Wechsel: wie oft?](/blog/sit-stand-wechsel-wie-oft/), [Aufsteh-Erinnerung am Stehschreibtisch ohne Stress](/blog/aufsteh-erinnerung-ohne-stress/).
+Zum Rhythmus und zur Erinnerung (ohne diesen Artikel zu wiederholen): [wie oft stehen am höhenverstellbaren Schreibtisch?](/blog/sit-stand-wechsel-wie-oft/), [Aufsteh-Erinnerung am Stehschreibtisch ohne Stress](/blog/aufsteh-erinnerung-ohne-stress/).
 
 ## Was „Mikro“ heißt
 

@@ -1,11 +1,13 @@
 ---
-title: 'Sit/Stand-Wechsel: wie oft am Stehschreibtisch umstellen?'
-description: 'Wie oft Sit/Stand am Stehschreibtisch wechseln? Praxis-Ranges statt Dogma: Intervalle, Zeichen für zu viel/zu wenig, weiche Erinnerung — Körperpflege, kein Fokus-Timer.'
+title: 'Höhenverstellbarer Schreibtisch: wie oft stehen und sitzen?'
+description: 'Höhenverstellbarer Schreibtisch: wie oft stehen und sitzen? Praxis-Ranges ~30–60 Min wechseln, kurze Stehphasen — kein Maximal-Stehen, kein Fokus-Timer.'
 pubDate: 2026-08-05
-updatedDate: 2026-08-08
+updatedDate: 2026-08-26
 faq:
+  - question: 'Höhenverstellbarer Schreibtisch — wie oft stehen?'
+    answer: 'Nicht den ganzen Tag. Praxis: etwa alle 30–60 Minuten die Haltung wechseln; Stehphasen anfangs kurz (oft 5–15 Minuten) und steigern. Ziel ist Variation, nicht Maximal-Stehen.'
   - question: 'Wie oft Sit/Stand am Stehschreibtisch wechseln?'
-    answer: 'Als Praxis-Range etwa alle 30–60 Minuten die Haltung wechseln und Stehen anfangs kurz halten. Passe an Komfort, Aufgabe und Tagesform an — nicht an eine starre App-Default.'
+    answer: 'Als Praxis-Range etwa alle 30–60 Minuten die Haltung wechseln und Stehen anfangs kurz halten. Passe an Komfort, Aufgabe und Tagesform an — nicht an eine starre App-Default. Stehschreibtisch und höhenverstellbarer Schreibtisch meinen denselben Job.'
   - question: 'Ist 30 Minuten sitzen und 5 Minuten stehen okay?'
     answer: 'Ja, für viele ein tragbarer Start (eher fokussierter Takt). Wenn 5 Minuten Stehen zu kurz oder zu anstrengend wirken, justiere nur eine Variable pro Woche.'
   - question: 'Soll ich den ganzen Tag stehen?'
@@ -16,9 +18,20 @@ faq:
     answer: 'Nicht zwingend — Timer oder Task-Grenzen reichen. Eine ruhige Desk-App hilft, wenn du den Rhythmus sichtbar halten willst, ohne Produktivitäts-Theater.'
 ---
 
-**Kurzantwort:** Es gibt keine magische Minuten-Zahl. Ergonomie-Leitlinien betonen vor allem **häufigen Haltungswechsel** — oft im Bereich alle **~30–60 Minuten** die Position wechseln, Stehphasen anfangs kurz halten und steigern. Entscheidend ist ein Rhythmus, den du **über Wochen** durchhältst, nicht ein Plan, der nach drei Tagen nervt.
+**Kurzantwort:** Am **höhenverstellbaren Schreibtisch** (Stehschreibtisch) gibt es keine magische Minuten-Zahl. Ergonomie-Leitlinien betonen vor allem **häufigen Haltungswechsel** — oft alle **~30–60 Minuten** sitzen und stehen abwechseln, Stehphasen anfangs kurz halten und steigern. Entscheidend ist ein Rhythmus, den du **über Wochen** durchhältst, nicht Maximal-Stehen und nicht ein Plan, der nach drei Tagen nervt.
 
-Dieser Artikel beantwortet die Frage *„Wie oft soll ich am Stehschreibtisch zwischen Sitzen und Stehen wechseln?“* als Praxis-Ratgeber. Kein medizinischer Rat; bei anhaltenden Beschwerden bitte eine Fachperson.
+Dieser Artikel beantwortet: *„Höhenverstellbarer Schreibtisch — wie oft stehen?“* und *„Wie oft Sit/Stand wechseln?“* Kein medizinischer Rat; bei anhaltenden Beschwerden bitte eine Fachperson.
+
+## Wie oft stehen?
+
+Kurz und klar:
+
+- **Nicht** den ganzen Tag stehen.
+- **Oft wechseln** — grob alle **30–60 Minuten** die Höhe ändern (sitzen ↔ stehen).
+- **Stehphasen kurz starten** — viele liegen bei **5–15 Minuten**, dann steigern.
+- **Tagesdosis** als grobe Orientierung mancherorts ~**2 Stunden** Stehen/Tag — individuell, ohne in den Schmerz zu gehen.
+
+„Wie oft stehen?“ heißt in der Praxis meist: **wie oft wechseln** — nicht „wie viele Stunden Maximal-Stehen“. Details und Alltagstakte folgen darunter.
 
 ## Warum „alle 20 Minuten“ oft scheitert
 
