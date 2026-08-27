@@ -34,6 +34,10 @@ export const SIT_OPTIONS: number[] = [20, 25, 30, 35, 40, 45, 50, 60, 75, 90]
 export const STAND_OPTIONS: number[] = [3, 5, 7, 10, 12, 15, 20]
 export const RESET_OPTIONS: number[] = [1, 2, 3, 5]
 
+/** Micro-move after picking a moment card — seconds (not minutes). */
+export const MOMENT_DURATION_OPTIONS_SEC: number[] = [15, 30, 45]
+export const DEFAULT_MOMENT_MS = 15 * SEC
+
 export function defaultIntervals(): UserIntervals {
   return { ...PRESETS }
 }
@@ -91,6 +95,33 @@ export function msFromMinutes(minutes: number): number {
 
 export function minutesFromMs(ms: number): number {
   return Math.round(ms / MIN)
+}
+
+export function secondsFromMs(ms: number): number {
+  return Math.round(ms / SEC)
+}
+
+export function msFromSeconds(seconds: number): number {
+  return seconds * SEC
+}
+
+export function resolveMomentDuration(custom: number | null | undefined): number {
+  if (custom == null) return DEFAULT_MOMENT_MS
+  if (MOMENT_DURATION_OPTIONS_SEC.includes(secondsFromMs(custom))) return custom
+  return DEFAULT_MOMENT_MS
+}
+
+export function normalizeStoredMomentDuration(
+  custom: number | null | undefined,
+): number | null {
+  if (custom == null) return null
+  const resolved = resolveMomentDuration(custom)
+  return resolved === DEFAULT_MOMENT_MS ? null : resolved
+}
+
+/** 30s and 45s — prefer hold-depth moments and longer prompts. */
+export function isLongMomentDuration(ms: number): boolean {
+  return secondsFromMs(ms) >= 30
 }
 
 export function intervalSummary(intervals: UserIntervals): string {

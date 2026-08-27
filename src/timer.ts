@@ -12,7 +12,6 @@ import {
   CHECKIN_TIMEOUT_MS,
   DEMO_CHECKIN_TIMEOUT_MS,
   DEMO_THRESHOLD_MOMENT_MS,
-  EXERCISE_MS,
   FORESHADOW_RATIO,
   FREEZE_EXTEND_MS,
   FREEZE_PROMPT_MS,
@@ -30,6 +29,7 @@ import {
   nextActivePhase,
   phaseLabel,
 } from './modes'
+import { resolveMomentDuration } from './intervals'
 import { getMoment, pickMoment, pickMomentCards, rememberId } from './exercises'
 import { pickAmbient, pickMotivation, rememberMotivation, shouldShowRareAmbient, ambientMilestoneAfterShow } from './motivation'
 import { CHECK_IN_YES_ACTION, notifyPhase, SNOOZE_POSTURE_ACTION } from './notify'
@@ -206,7 +206,25 @@ function freezeExtendMs(): number {
 }
 
 function momentMs(): number {
-  return state.demo ? DEMO_EXERCISE_MS : EXERCISE_MS
+  if (state.demo) return DEMO_EXERCISE_MS
+  return resolveMomentDuration(state.momentDurationMs)
+}
+
+function momentDurationMs(): number {
+  return momentMs()
+}
+
+function momentPosture(): 'sit' | 'stand' {
+  if (state.pendingNextPhase === 'sit' || state.pendingNextPhase === 'stand') {
+    return state.pendingNextPhase
+  }
+  if (state.frozenPhase === 'sit' || state.frozenPhase === 'stand') {
+    return state.frozenPhase
+  }
+  if (state.phase === 'sit' || state.phase === 'stand') {
+    return state.phase
+  }
+  return 'stand'
 }
 
 function checkInTimeoutMs(): number {
@@ -634,7 +652,11 @@ export function canSnoozePostureNow(): boolean {
 }
 
 function enterPick(): void {
-  const cards = pickMomentCards(state.recentExerciseIds)
+  const cards = pickMomentCards(
+    state.recentExerciseIds,
+    momentPosture(),
+    momentDurationMs(),
+  )
   clearAttention()
   state = {
     ...state,
@@ -652,7 +674,9 @@ function enterPick(): void {
 }
 
 function enterRitualWithMoment(momentId: string): void {
-  const moment = getMoment(momentId) ?? pickMoment(state.recentExerciseIds)
+  const moment =
+    getMoment(momentId) ??
+    pickMoment(state.recentExerciseIds, undefined, momentPosture(), momentDurationMs())
   const next = state.pendingNextPhase ?? 'sit'
   motivationPickCount += 1
   const motivation = pickMotivation(state.recentMotivationIds, motivationPickCount)
@@ -781,21 +805,6 @@ export function completeMoment(): void {
   if (state.phase !== 'exercise') return
   state = { ...state, phaseEndsAt: Date.now() }
   onPhaseComplete()
-}
-
-export function rerollMoment(): void {
-  if (state.phase !== 'exercise' || state.momentRerolled) return
-  const moment = pickMoment(state.recentExerciseIds)
-  state = {
-    ...state,
-    currentExerciseId: moment.id,
-    recentExerciseIds: rememberId(state.recentExerciseIds, moment.id),
-    momentRerolled: true,
-    phaseEndsAt: Date.now() + momentMs(),
-    phaseDurationMs: momentMs(),
-  }
-  signalAttention('ritual', 'Moment', moment.title)
-  emit()
 }
 
 export function confirmCheckIn(): void {
@@ -1002,7 +1011,12 @@ export function startFreezeAfterplay(): void {
     return
   }
 
-  const moment = pickMoment(state.recentExerciseIds)
+  const moment = pickMoment(
+    state.recentExerciseIds,
+    undefined,
+    momentPosture(),
+    momentDurationMs(),
+  )
   clearAttention()
   state = {
     ...state,

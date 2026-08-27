@@ -70,6 +70,8 @@ export interface AppState {
   dayClosedKey: string | null
   /** Custom sit/stand/reset durations; null = defaults */
   intervals: UserIntervals | null
+  /** Micro-move duration after picking a card; null = 15s default */
+  momentDurationMs: number | null
   /** Nordstern line already shown today */
   northShownKey: string | null
   /** desk_confirmed count at last milestone ambient line */
@@ -87,7 +89,7 @@ export interface AppState {
 export const STORAGE_KEY = STATE_KEY
 export const FREEZE_PROMPT_MS = 30 * 60 * 1000
 export const FREEZE_EXTEND_MS = 15 * 60 * 1000
-/** Micro-moment duration (was 60s exercise) */
+/** Default micro-moment duration — override via `momentDurationMs` (15 / 30 / 45s). */
 export const EXERCISE_MS = 15 * 1000
 export const MOMENT_MS = EXERCISE_MS
 /** Soft foreshadow when this fraction of the phase remains */
@@ -149,6 +151,7 @@ export function defaultState(): AppState {
     pendingNextPhase: null,
     dayClosedKey: null,
     intervals: null,
+    momentDurationMs: null,
     northShownKey: null,
     ambientMilestone: 0,
     shortcutHintsEnabled: true,

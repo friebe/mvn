@@ -9,7 +9,6 @@ export type ShortcutId =
   | 'afterplay'
   | 'extendFreeze'
   | 'doneMoment'
-  | 'reroll'
   | 'checkIn'
   | 'dayCloseDone'
   | 'pick1'
@@ -39,7 +38,6 @@ export const SHORTCUTS: ShortcutDef[] = [
   { id: 'pick3', keys: ['3'], label: '3', action: 'Moment 3', context: 'Pick moment' },
   { id: 'freeze', keys: ['f', 'F'], label: 'F', action: 'Freeze', context: 'Sit / Stand / Reset' },
   { id: 'doneMoment', keys: ['Enter', ' '], label: '↵', action: 'Done', context: 'Moment' },
-  { id: 'reroll', keys: ['r', 'R'], label: 'R', action: 'Another moment', context: 'Moment' },
   { id: 'resume', keys: ['Enter', ' '], label: '↵', action: 'Continue', context: 'Freeze' },
   { id: 'afterplay', keys: ['a', 'A'], label: 'A', action: 'Call cooldown', context: 'Freeze prompt' },
   { id: 'extendFreeze', keys: ['e', 'E'], label: 'E', action: '15 more min', context: 'Freeze prompt' },
@@ -98,8 +96,6 @@ export function availableShortcuts(ctx: ShortcutContext): Set<ShortcutId> {
     }
   } else if (phase === 'exercise') {
     active.add('doneMoment')
-    if (!state.momentRerolled) active.add('reroll')
-    active.add('skipStanding')
   } else if (phase === 'sit' || phase === 'stand' || phase === 'reset') {
     active.add('freeze')
   }
@@ -133,7 +129,6 @@ export interface ShortcutHandlers {
   onAfterplay: () => void
   onSkipStanding: () => void
   onCompleteMoment: () => void
-  onRerollMoment: () => void
   onChooseMoment: (id: string) => void
   onConfirmCheckIn: () => void
   onChooseRise: () => void
@@ -177,9 +172,6 @@ export function bindShortcuts(
         break
       case 'doneMoment':
         handlers.onCompleteMoment()
-        break
-      case 'reroll':
-        handlers.onRerollMoment()
         break
       case 'checkIn':
         handlers.onConfirmCheckIn()

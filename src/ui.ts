@@ -1,5 +1,6 @@
 import type { AppState } from './state'
-import { getMoment, kindLabel, MOMENTS } from './exercises'
+import { getMoment, kindLabel, momentPrompt, MOMENTS } from './exercises'
+import { resolveMomentDuration } from './intervals'
 import { MOTIVATIONS } from './motivation'
 import {
   momentOrderHint,
@@ -44,7 +45,6 @@ export interface UiHandlers {
   onAfterplay: () => void
   onSkipStanding: () => void
   onCompleteMoment: () => void
-  onRerollMoment: () => void
   onChooseMoment: (id: string) => void
   onConfirmCheckIn: () => void
   onSnoozePosture: () => void
@@ -116,17 +116,18 @@ function setHintText(hint: HTMLElement, text: string): void {
 function setMomentCards(
   cards: HTMLElement,
   ids: string[],
-  opts: { showPrompt?: boolean } = {},
+  opts: { showPrompt?: boolean; durationMs?: number } = {},
 ): boolean {
   const showPrompt = opts.showPrompt === true
-  const key = `${ids.join(',')}|${showPrompt ? 'p' : ''}`
+  const durationMs = opts.durationMs ?? resolveMomentDuration(null)
+  const key = `${ids.join(',')}|${showPrompt ? 'p' : ''}|${durationMs}`
   if (cards.dataset.momentIds === key) return false
   cards.dataset.momentIds = key
   cards.innerHTML = ids
     .map((id) => {
       const m = getMoment(id) ?? MOMENTS[0]!
       const prompt = showPrompt
-        ? `<span class="moment-prompt">${m.prompt}</span>`
+        ? `<span class="moment-prompt">${momentPrompt(m, durationMs)}</span>`
         : ''
       return `<button type="button" class="moment-choice" data-moment-id="${m.id}">
           <span class="moment-kind">${kindLabel(m.kind)}</span>
@@ -415,8 +416,6 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             </div>
             <div class="row exercise-actions" id="exercise-actions" hidden>
               ${actionButton('btn-done-moment', 'btn btn-primary', 'Done', 'doneMoment')}
-              ${actionButton('btn-reroll', 'btn btn-ghost', 'Another moment', 'reroll')}
-              ${actionButton('btn-skip-standing-ex', 'btn btn-ghost', 'Standing is enough today', 'skipStanding')}
             </div>
             <div class="row quick-actions" id="quick-actions">
               ${actionButton('btn-close-day', 'btn btn-ghost btn-end-day', 'End day', null, true)}
@@ -442,10 +441,8 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   qs(root, 'btn-afterplay').addEventListener('click', handlers.onAfterplay)
   qs(root, 'btn-extend').addEventListener('click', handlers.onExtendFreeze)
   qs(root, 'btn-skip-standing').addEventListener('click', handlers.onSkipStanding)
-  qs(root, 'btn-skip-standing-ex').addEventListener('click', handlers.onSkipStanding)
   qs(root, 'btn-threshold-skip').addEventListener('click', handlers.onSkipStanding)
   qs(root, 'btn-done-moment').addEventListener('click', handlers.onCompleteMoment)
-  qs(root, 'btn-reroll').addEventListener('click', handlers.onRerollMoment)
   qs(root, 'btn-check-in').addEventListener('click', handlers.onConfirmCheckIn)
   qs(root, 'btn-close-day').addEventListener('click', handlers.onCloseDay)
   qs(root, 'btn-theme').addEventListener('click', handlers.onToggleTheme)
@@ -589,7 +586,6 @@ export function renderUi(
   const btnRise = qs<HTMLButtonElement>(root, 'btn-rise')
   const thresholdSkip = qs<HTMLButtonElement>(root, 'btn-threshold-skip')
   const btnSnooze = qs<HTMLButtonElement>(root, 'btn-snooze')
-  const btnReroll = qs<HTMLButtonElement>(root, 'btn-reroll')
   const thresholdActions = qs(root, 'threshold-actions')
   const pickActions = qs(root, 'pick-actions')
   const freezeActions = qs(root, 'freeze-actions')
@@ -648,7 +644,6 @@ export function renderUi(
 
   const btnCloseDay = qs<HTMLButtonElement>(root, 'btn-close-day')
   setHidden(btnCloseDay, isSetup || dayCloseVisible || walkthroughVisible)
-  setHidden(btnReroll, state.momentRerolled)
 
   // Tour: hide real day actions — only Next / Skip navigate.
   setHidden(btnSnooze, !isThreshold || dayCloseVisible || walkthroughVisible || !canSnoozePostureNow())
@@ -728,7 +723,10 @@ export function renderUi(
   if (walkPick) {
     const ids = getWalkthroughMomentIds() ?? []
     setText(qs(root, 'pick-lead'), pickLead('stand'))
-    momentsChanged = setMomentCards(qs(root, 'moment-cards'), ids, { showPrompt: true })
+    momentsChanged = setMomentCards(qs(root, 'moment-cards'), ids, {
+      showPrompt: true,
+      durationMs: resolveMomentDuration(state.momentDurationMs),
+    })
   }
 
   if (dayCloseVisible && dayCloseSummary) {
@@ -769,11 +767,9 @@ export function renderUi(
   }
 
   const skipStand = qs(root, 'btn-skip-standing')
-  const skipStandEx = qs(root, 'btn-skip-standing-ex')
   if (!walkPick) {
     const skipLabel = skipMomentLabel(state.pendingNextPhase)
     setButtonLabel(skipStand, skipLabel)
-    setButtonLabel(skipStandEx, skipLabel)
   }
 
   if (!walkThreshold) {
@@ -924,7 +920,9 @@ export function renderUi(
         ? 'Desk down and a moment — or sit right away.'
         : 'Desk up and a moment — or stand right away.',
     )
-    momentsChanged = setMomentCards(qs(root, 'moment-cards'), state.momentChoiceIds ?? [])
+    momentsChanged = setMomentCards(qs(root, 'moment-cards'), state.momentChoiceIds ?? [], {
+      durationMs: resolveMomentDuration(state.momentDurationMs),
+    })
   } else if (isFrozen) {
     setHintText(
       hint,
@@ -963,13 +961,15 @@ export function renderUi(
   if (isExercise) {
     const ex = getMoment(state.currentExerciseId)
     const mot = MOTIVATIONS.find((m) => m.id === state.currentMotivationId)
-    setText(
-      qs(root, 'ritual-kicker'),
-      state.resumeAfterAfterplay ? 'Cooldown' : ex ? kindLabel(ex.kind) : 'Moment',
-    )
+    const durationMs =
+      state.phaseDurationMs ?? resolveMomentDuration(state.momentDurationMs)
+    const ritualKicker = qs(root, 'ritual-kicker')
+    const isCooldown = state.resumeAfterAfterplay
+    setHidden(ritualKicker, !isCooldown)
+    if (isCooldown) setText(ritualKicker, 'Cooldown')
     setText(qs(root, 'exercise-title'), ex?.title ?? 'Moment')
-    setText(qs(root, 'exercise-hint'), ex?.prompt ?? '')
-    setText(qs(root, 'motivation'), state.resumeAfterAfterplay ? '' : (mot?.text ?? ''))
+    setText(qs(root, 'exercise-hint'), ex ? momentPrompt(ex, durationMs) : '')
+    setText(qs(root, 'motivation'), isCooldown ? '' : (mot?.text ?? ''))
   }
 
   if (momentsChanged || state !== lastShortcutHintState) {

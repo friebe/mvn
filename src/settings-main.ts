@@ -5,18 +5,22 @@ import './settings.css'
 import { ensureNotificationPermission } from './notify'
 import {
   getResolvedIntervals,
+  getResolvedMomentDuration,
   readPreferences,
   setIntervals,
+  setMomentDuration,
   togglePreference,
   writePreferences,
 } from './preferences'
 import { appPath } from './paths'
 import {
+  MOMENT_DURATION_OPTIONS_SEC,
   SIT_OPTIONS,
   STAND_OPTIONS,
   intervalSummary,
   minutesFromMs,
   msFromMinutes,
+  secondsFromMs,
   type UserIntervals,
 } from './intervals'
 import {
@@ -99,10 +103,19 @@ function intervalSelect(
   return `<select class="setting-select" data-phase="${phase}" aria-label="${phase}">${opts}</select>`
 }
 
+function momentDurationSelect(currentSec: number): string {
+  const opts = MOMENT_DURATION_OPTIONS_SEC.map(
+    (s) =>
+      `<option value="${s}"${s === currentSec ? ' selected' : ''}>${s} s</option>`,
+  ).join('')
+  return `<select class="setting-select" data-moment-duration aria-label="Micro-move duration">${opts}</select>`
+}
+
 function render(): void {
   const root = document.querySelector<HTMLElement>('#app')!
   const s = readPreferences()
   const intervals = getResolvedIntervals()
+  const momentDurationSec = secondsFromMs(getResolvedMomentDuration())
   const shortcutGroups = shortcutsByContext()
 
   root.innerHTML = `
@@ -221,7 +234,7 @@ function render(): void {
       <section class="settings-group" aria-label="Intervals">
         <h2 class="settings-group-title">Intervals</h2>
         <p class="settings-hint">
-          Long sit and stand blocks — not Pomodoro. At each desk switch, an optional ~15s micro-move.
+          Long sit and stand blocks — not Pomodoro. At each desk switch, an optional micro-move.
         </p>
         <p class="interval-summary">${intervalSummary(intervals)}</p>
         <div class="setting-row">
@@ -235,6 +248,16 @@ function render(): void {
             <p class="setting-label">Standing</p>
           </div>
           ${intervalSelect('stand', STAND_OPTIONS, intervals)}
+        </div>
+        <div class="setting-row">
+          <div class="setting-copy">
+            <p class="setting-label">Micro-move</p>
+            <p class="setting-note">
+              How long a moment runs after you pick a card. Done (↵) anytime — desk maintenance, not a workout.
+              At 30s or 45s, hold-style moves and longer cues are preferred.
+            </p>
+          </div>
+          ${momentDurationSelect(momentDurationSec)}
         </div>
       </section>
 
@@ -365,7 +388,7 @@ function render(): void {
     })
   })
 
-  root.querySelectorAll<HTMLSelectElement>('.setting-select').forEach((select) => {
+  root.querySelectorAll<HTMLSelectElement>('.setting-select[data-phase]').forEach((select) => {
     select.addEventListener('change', () => {
       const phase = select.dataset.phase as IntervalPhase
       const minutes = Number(select.value)
@@ -373,6 +396,12 @@ function render(): void {
       setIntervals(next)
       render()
     })
+  })
+
+  root.querySelector<HTMLSelectElement>('[data-moment-duration]')?.addEventListener('change', (e) => {
+    const seconds = Number((e.currentTarget as HTMLSelectElement).value)
+    setMomentDuration(seconds)
+    render()
   })
 }
 

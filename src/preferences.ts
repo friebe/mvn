@@ -1,6 +1,12 @@
 import { loadState, saveState, type AppState } from './state'
 import type { UserIntervals } from './intervals'
-import { normalizeStoredIntervals, resolveIntervals } from './intervals'
+import {
+  msFromSeconds,
+  normalizeStoredIntervals,
+  normalizeStoredMomentDuration,
+  resolveIntervals,
+  resolveMomentDuration,
+} from './intervals'
 import { buildDayCloseLine, recordStat, summarizeToday, todayKey } from './stats'
 
 export type PreferenceKey =
@@ -8,6 +14,7 @@ export type PreferenceKey =
   | 'notificationsEnabled'
   | 'demo'
   | 'intervals'
+  | 'momentDurationMs'
   | 'shortcutHintsEnabled'
   | 'notificationPersistent'
   | 'atmosphereDisplay'
@@ -38,6 +45,19 @@ export function setIntervals(intervals: UserIntervals): AppState {
 
 export function getResolvedIntervals(): UserIntervals {
   return resolveIntervals(loadState().intervals)
+}
+
+export function setMomentDuration(seconds: number): AppState {
+  const next = {
+    ...loadState(),
+    momentDurationMs: normalizeStoredMomentDuration(msFromSeconds(seconds)),
+  }
+  saveState(next)
+  return next
+}
+
+export function getResolvedMomentDuration(): number {
+  return resolveMomentDuration(loadState().momentDurationMs)
 }
 
 export function closeDayInStorage(): { state: AppState; story: string } {

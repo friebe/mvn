@@ -1,470 +1,80 @@
 [
   {
     "id": "nacken-seite",
-    "mode": "both",
     "kind": "body",
     "part": "neck",
     "posture": "either",
+    "depth": "hold",
     "title": "Nacken-Seite",
-    "prompt": "Ohr zur Schulter, halten. Andere Seite. Kein Rucken."
+    "prompt": "Ohr zur Schulter, kurz halten. Andere Seite. Kein Rucken.",
+    "promptLong": "Ohr zur Schulter, je Seite langsam halten und atmen. Andere Seite. Kein Rucken."
   },
   {
-    "id": "nacken-nick",
-    "mode": "both",
-    "kind": "body",
-    "part": "neck",
-    "posture": "either",
-    "title": "Kinn-Nick",
-    "prompt": "Kinn leicht zur Brust, wieder hoch — fünf Mal, langsam."
-  },
-  {
-    "id": "nacken-blick",
-    "mode": "lazy",
-    "kind": "body",
-    "part": "neck",
-    "posture": "sit",
-    "title": "Blick-Wende",
-    "prompt": "Nur den Kopf: links, Mitte, rechts. Schultern bleiben."
-  },
-  {
-    "id": "schulterkreisen",
-    "mode": "high",
+    "id": "schulterblatt-zug",
     "kind": "body",
     "part": "shoulders",
     "posture": "either",
-    "title": "Schulterkreisen",
-    "prompt": "Große Kreise rückwärts — acht Mal."
-  },
-  {
-    "id": "schulter-heben",
-    "mode": "both",
-    "kind": "body",
-    "part": "shoulders",
-    "posture": "either",
-    "title": "Schulter-Hoch",
-    "prompt": "Schultern zu den Ohren, fallen lassen. Fünf Mal."
-  },
-  {
-    "id": "schulterblatt-ziehen",
-    "mode": "high",
-    "kind": "body",
-    "part": "shoulders",
-    "posture": "either",
+    "depth": "quick",
     "title": "Schulterblatt-Zug",
-    "prompt": "Schulterblätter hinten zusammenziehen, loslassen — acht Mal."
-  },
-  {
-    "id": "schulter-fallen",
-    "mode": "lazy",
-    "kind": "breath",
-    "part": "shoulders",
-    "posture": "either",
-    "title": "Schultern fallen",
-    "prompt": "Einatmen hoch, ausatmen fallen. Dreimal."
-  },
-  {
-    "id": "handgelenk-kreise",
-    "mode": "both",
-    "kind": "body",
-    "part": "wrists",
-    "posture": "either",
-    "title": "Handgelenk-Kreise",
-    "prompt": "Fäuste lockern, beide Handgelenke kreisen — zehn Mal je Richtung."
-  },
-  {
-    "id": "handgelenk-beugen",
-    "mode": "both",
-    "kind": "body",
-    "part": "wrists",
-    "posture": "sit",
-    "title": "Handgelenk-Beugen",
-    "prompt": "Handfläche nach oben, Finger mit der anderen Hand sanft ziehen. Seitenwechsel."
-  },
-  {
-    "id": "handgelenk-strecken",
-    "mode": "both",
-    "kind": "body",
-    "part": "wrists",
-    "posture": "sit",
-    "title": "Handgelenk-Strecken",
-    "prompt": "Handfläche nach unten, Finger sanft nach unten ziehen. Andere Hand."
-  },
-  {
-    "id": "finger-spreizen",
-    "mode": "both",
-    "kind": "body",
-    "part": "hands",
-    "posture": "either",
-    "title": "Finger-Spreiz",
-    "prompt": "Finger weit spreizen, Faust. Zehn Mal."
-  },
-  {
-    "id": "finger-welle",
-    "mode": "both",
-    "kind": "body",
-    "part": "hands",
-    "posture": "either",
-    "title": "Finger-Welle",
-    "prompt": "Jeden Finger einzeln strecken — einmal durch."
-  },
-  {
-    "id": "daumen-kreise",
-    "mode": "lazy",
-    "kind": "body",
-    "part": "hands",
-    "posture": "sit",
-    "title": "Daumen-Kreise",
-    "prompt": "Beide Daumen kreisen. Zehn Mal."
-  },
-  {
-    "id": "unterarm-drehen",
-    "mode": "high",
-    "kind": "body",
-    "part": "forearms",
-    "posture": "either",
-    "title": "Unterarm-Dreh",
-    "prompt": "Ellbogen am Körper, Handflächen hoch-runter drehen — zehn Mal."
-  },
-  {
-    "id": "brust-oeffnen",
-    "mode": "high",
-    "kind": "body",
-    "part": "chest",
-    "posture": "stand",
-    "title": "Brust-Öffnen",
-    "prompt": "Hände hinter dem Rücken verschränken, Brust leicht öffnen. Halten."
-  },
-  {
-    "id": "arm-hoch",
-    "mode": "both",
-    "kind": "body",
-    "part": "chest",
-    "posture": "either",
-    "title": "Arme hoch",
-    "prompt": "Beide Arme nach oben, Finger verschränken, kurz ziehen."
-  },
-  {
-    "id": "faules-strecken",
-    "mode": "lazy",
-    "kind": "body",
-    "part": "chest",
-    "posture": "either",
-    "title": "Faules Strecken",
-    "prompt": "Arme hoch, laut gähnen. Das zählt."
+    "prompt": "Schulterblätter hinten zusammenziehen, loslassen — fünf Mal.",
+    "promptLong": "Schulterblätter hinten zusammenziehen, fünf Sekunden halten, loslassen — dreimal."
   },
   {
     "id": "thorax-drehen",
-    "mode": "high",
     "kind": "body",
     "part": "back",
     "posture": "sit",
+    "depth": "hold",
     "title": "Sitz-Drehung",
-    "prompt": "Aufrecht sitzen, Oberkörper links, dann rechts. Langsam."
+    "prompt": "Aufrecht sitzen, Oberkörper langsam links, dann rechts.",
+    "promptLong": "Aufrecht sitzen, links drehen und atmen, dann rechts — je Seite langsam halten."
   },
   {
     "id": "katzenbuckel-stuhl",
-    "mode": "both",
     "kind": "body",
     "part": "back",
     "posture": "sit",
+    "depth": "quick",
     "title": "Rund-Flach",
-    "prompt": "Rücken rund machen, dann aufrichten — fünf Mal."
-  },
-  {
-    "id": "mini-hinge",
-    "mode": "high",
-    "kind": "body",
-    "part": "back",
-    "posture": "stand",
-    "title": "Mini-Hinge",
-    "prompt": "Hüfte leicht knicken, Rücken lang — fünf Mal."
-  },
-  {
-    "id": "seitneige",
-    "mode": "both",
-    "kind": "body",
-    "part": "back",
-    "posture": "stand",
-    "title": "Seitneige",
-    "prompt": "Eine Hand am Kopf, zur Seite neigen. Andere Seite."
+    "prompt": "Rücken rund machen, dann aufrichten — fünf Mal.",
+    "promptLong": "Rücken rund, langsam aufrichten — acht Mal, ohne Hetze."
   },
   {
     "id": "lenden-druck",
-    "mode": "lazy",
     "kind": "body",
     "part": "back",
     "posture": "sit",
+    "depth": "quick",
     "title": "Lenden-Druck",
-    "prompt": "Kreuz leicht in die Lehne drücken, loslassen — fünf Mal."
+    "prompt": "Kreuz leicht in die Lehne drücken, loslassen — fünf Mal.",
+    "promptLong": "Kreuz in die Lehne drücken, drei Atemzüge halten, loslassen — dreimal."
   },
   {
-    "id": "hueftkreisen",
-    "mode": "high",
+    "id": "brust-oeffnen",
     "kind": "body",
-    "part": "hips",
+    "part": "back",
     "posture": "stand",
-    "title": "Hüftkreisen",
-    "prompt": "Hände an die Hüfte, große Kreise — acht Mal je Richtung."
-  },
-  {
-    "id": "hueftbeuger-stand",
-    "mode": "high",
-    "kind": "body",
-    "part": "hips",
-    "posture": "stand",
-    "title": "Hüftbeuger-Tipp",
-    "prompt": "Ein Bein zurückstellen, Becken leicht nach vorn. Seitenwechsel."
-  },
-  {
-    "id": "sitz-gewicht",
-    "mode": "lazy",
-    "kind": "body",
-    "part": "hips",
-    "posture": "sit",
-    "title": "Sitz-Gewicht",
-    "prompt": "Gewicht auf die linke Gesäßseite, dann rechts — langsam."
-  },
-  {
-    "id": "po-anspannen",
-    "mode": "both",
-    "kind": "body",
-    "part": "glutes",
-    "posture": "either",
-    "title": "Po-Anspannen",
-    "prompt": "Po fest anspannen, halten, los. Zehn Mal."
-  },
-  {
-    "id": "oberschenkel-drücken",
-    "mode": "lazy",
-    "kind": "body",
-    "part": "legs",
-    "posture": "sit",
-    "title": "Oberschenkel-Druck",
-    "prompt": "Füße fest, Oberschenkel in den Sitz drücken — fünf Atemzüge."
-  },
-  {
-    "id": "knieheben-sitz",
-    "mode": "high",
-    "kind": "body",
-    "part": "legs",
-    "posture": "sit",
-    "title": "Knie-Hoch",
-    "prompt": "Ein Knie unter dem Tisch heben, halten. Andere Seite."
-  },
-  {
-    "id": "bein-strecken-sitz",
-    "mode": "both",
-    "kind": "body",
-    "part": "legs",
-    "posture": "sit",
-    "title": "Bein-Strecken",
-    "prompt": "Ein Bein unter dem Tisch strecken, Fuß anziehen. Seitenwechsel."
-  },
-  {
-    "id": "stand-kniebeuge-mini",
-    "mode": "high",
-    "kind": "body",
-    "part": "legs",
-    "posture": "stand",
-    "title": "Mini-Kniebeuge",
-    "prompt": "Nur ein Stück runter, wieder hoch — acht Mal."
-  },
-  {
-    "id": "waden-pump",
-    "mode": "high",
-    "kind": "body",
-    "part": "calves",
-    "posture": "stand",
-    "title": "Waden-Pump",
-    "prompt": "Fersen hoch, runter — zehn Mal."
-  },
-  {
-    "id": "waden-sitz",
-    "mode": "lazy",
-    "kind": "body",
-    "part": "calves",
-    "posture": "sit",
-    "title": "Fersen-Tipp",
-    "prompt": "Fersen unter dem Tisch heben und senken — zwanzig Mal."
-  },
-  {
-    "id": "fusskreise",
-    "mode": "both",
-    "kind": "body",
-    "part": "feet",
-    "posture": "sit",
-    "title": "Fußkreise",
-    "prompt": "Einen Fuß kreisen — zehn Mal. Andere Seite."
-  },
-  {
-    "id": "fusswippen",
-    "mode": "lazy",
-    "kind": "body",
-    "part": "feet",
-    "posture": "sit",
-    "title": "Fußwippen",
-    "prompt": "Unter dem Tisch wippen. Zehn Mal."
-  },
-  {
-    "id": "zehen-greifen",
-    "mode": "both",
-    "kind": "body",
-    "part": "feet",
-    "posture": "sit",
-    "title": "Zehen-Greifen",
-    "prompt": "Zehen krallen, spreizen — zehn Mal."
-  },
-  {
-    "id": "stand-gewicht",
-    "mode": "high",
-    "kind": "body",
-    "part": "feet",
-    "posture": "stand",
-    "title": "Stand-Gewicht",
-    "prompt": "Gewicht von Ferse zu Ballen und zurück — zehn Mal."
-  },
-  {
-    "id": "kiefer-lockern",
-    "mode": "lazy",
-    "kind": "body",
-    "part": "jaw",
-    "posture": "either",
-    "title": "Kiefer-Lockern",
-    "prompt": "Mund leicht öffnen, Kiefer kreisen. Schultern runter."
+    "depth": "hold",
+    "title": "Brust-Öffnen",
+    "prompt": "Hände hinter dem Rücken verschränken, Brust leicht öffnen. Kurz halten.",
+    "promptLong": "Hände hinter dem Rücken verschränken, Brust öffnen — zehn Sekunden halten."
   },
   {
     "id": "fensterblick",
-    "mode": "both",
     "kind": "eyes",
     "part": "eyes",
     "posture": "either",
+    "depth": "any",
     "title": "Fensterblick",
-    "prompt": "Weitsehen bis zum Horizont. Zehn Sekunden."
-  },
-  {
-    "id": "fern-name",
-    "mode": "both",
-    "kind": "eyes",
-    "part": "eyes",
-    "posture": "either",
-    "title": "Was siehst du?",
-    "prompt": "Ein Ding in der Ferne benennen. Nur das."
-  },
-  {
-    "id": "blink-reset",
-    "mode": "both",
-    "kind": "eyes",
-    "part": "eyes",
-    "posture": "either",
-    "title": "Blink-Reset",
-    "prompt": "Zehn bewusste Blinzler."
-  },
-  {
-    "id": "augen-acht",
-    "mode": "both",
-    "kind": "eyes",
-    "part": "eyes",
-    "posture": "either",
-    "title": "Augen-Acht",
-    "prompt": "Mit dem Blick eine liegende Acht malen — dreimal."
-  },
-  {
-    "id": "nahe-fern",
-    "mode": "high",
-    "kind": "eyes",
-    "part": "eyes",
-    "posture": "either",
-    "title": "Nah-Fern",
-    "prompt": "Daumen nah fokussieren, dann Fenster — fünf Mal wechseln."
-  },
-  {
-    "id": "atem-vier",
-    "mode": "both",
-    "kind": "breath",
-    "part": "breath",
-    "posture": "either",
-    "title": "Vier-Atem",
-    "prompt": "Vier ein, vier aus. Dreimal."
-  },
-  {
-    "id": "bauch-atem",
-    "mode": "lazy",
-    "kind": "breath",
-    "part": "breath",
-    "posture": "sit",
-    "title": "Bauch-Atem",
-    "prompt": "Hand auf den Bauch, drei ruhige Atemzüge."
+    "prompt": "Weitsehen — Augen vom Bildschirm lösen. Zehn Sekunden."
   },
   {
     "id": "wasser-schluck",
-    "mode": "both",
     "kind": "desk",
     "part": "desk",
     "posture": "either",
+    "depth": "any",
     "title": "Wasserschluck",
     "prompt": "Einen Schluck. Tisch darf warten."
-  },
-  {
-    "id": "stuhl-weg",
-    "mode": "both",
-    "kind": "desk",
-    "part": "desk",
-    "posture": "sit",
-    "title": "Stuhl-Schub",
-    "prompt": "Stuhl einen Handbreit weg. Platz für Beine."
-  },
-  {
-    "id": "tischkante",
-    "mode": "both",
-    "kind": "desk",
-    "part": "desk",
-    "posture": "either",
-    "title": "Tischkante",
-    "prompt": "Hände an die Kante, leicht abstützen, tief atmen."
-  },
-  {
-    "id": "stand-aufrecht",
-    "mode": "high",
-    "kind": "desk",
-    "part": "desk",
-    "posture": "stand",
-    "title": "Stand-Check",
-    "prompt": "Gewicht gleichmäßig, Knie weich, Blick geradeaus."
-  },
-  {
-    "id": "sitz-aufrichten",
-    "mode": "lazy",
-    "kind": "desk",
-    "part": "desk",
-    "posture": "sit",
-    "title": "Sitz-Aufrichten",
-    "prompt": "Becken kippen, Wirbelsäule lang. Kurz halten."
-  },
-  {
-    "id": "laut-gaechnen",
-    "mode": "lazy",
-    "kind": "play",
-    "part": "play",
-    "posture": "either",
-    "title": "Laut gähnen",
-    "prompt": "Absichtlich. Einmal reicht."
-  },
-  {
-    "id": "wolken-spot",
-    "mode": "both",
-    "kind": "play",
-    "part": "play",
-    "posture": "either",
-    "title": "Wolken-Spot",
-    "prompt": "Eine Form am Himmel finden. Oder erfinden."
-  },
-  {
-    "id": "schulter-schütteln",
-    "mode": "both",
-    "kind": "play",
-    "part": "shoulders",
-    "posture": "either",
-    "title": "Schüttel-Reset",
-    "prompt": "Arme und Schultern kurz ausschütteln."
   }
 ]

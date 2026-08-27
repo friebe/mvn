@@ -75,5 +75,5 @@ html[data-theme='dark'] {
 
   /* Secondary-monitor / across-desk readability */
   --ui-distance-scale: clamp(18px, 2.4vmin, 28px);
-  --page-max-width: min(45rem, 100%);
+  --page-max-width: min(30rem, 100%);
 }
