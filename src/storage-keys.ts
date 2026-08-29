@@ -7,3 +7,5 @@ export const PWA_DISMISSED_KEY = 'stint-install-banner-dismissed'
 export const ATMOSPHERE_WORDS_HIDDEN_KEY = 'stint-atmosphere-words-hidden'
 export const SETTINGS_SEEN_KEY = 'stint.settings-seen'
 export const WALKTHROUGH_SEEN_KEY = 'stint.walkthrough-seen'
+/** Purchased / unlocked moment pack ids (JSON string[]). */
+export const OWNED_PACKS_KEY = 'stint.owned-packs.v1'

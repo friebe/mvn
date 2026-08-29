@@ -27,7 +27,7 @@ import {
   shortcutsByContext,
 } from './shortcuts'
 import type { AtmosphereDisplay } from './state'
-import { brandLockupHtml, BRAND_TAG } from './brand-mark'
+import { brandLockupHtml, BRAND_TAG, HEADER_MARK_SIZE } from './brand-mark'
 import {
   ATMOSPHERE_DISPLAY_LABELS,
   ATMOSPHERE_DISPLAY_NOTES,
@@ -129,8 +129,8 @@ function render(): void {
             />
           </svg>
         </a>
-        <div class="settings-heading">
-          ${brandLockupHtml(BRAND_TAG, 28)}
+        <div class="settings-heading app-header-brand">
+          ${brandLockupHtml(BRAND_TAG, HEADER_MARK_SIZE)}
         </div>
       </header>
 

@@ -20,6 +20,11 @@
   to = "/analytics.html"
   status = 200
 
+[[redirects]]
+  from = "/moments"
+  to = "/moments.html"
+  status = 200
+
 # Astro blog (trailingSlash: always) — built into dist/blog by npm run build.
 [[redirects]]
   from = "/blog"

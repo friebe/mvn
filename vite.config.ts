@@ -27,6 +27,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         analytics: resolve(__dirname, 'analytics.html'),
         settings: resolve(__dirname, 'settings.html'),
+        moments: resolve(__dirname, 'moments.html'),
       },
     },
   },
@@ -98,6 +99,7 @@ export default defineConfig({
         navigateFallbackDenylist: [
           new RegExp(`^${basePathNoSlash}/analytics\\.html$`),
           new RegExp(`^${basePathNoSlash}/settings\\.html$`),
+          new RegExp(`^${basePathNoSlash}/moments\\.html$`),
           /^\/blog(\/|$)/,
         ],
       },

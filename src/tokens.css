@@ -75,5 +75,10 @@ html[data-theme='dark'] {
 
   /* Secondary-monitor / across-desk readability */
   --ui-distance-scale: clamp(18px, 2.4vmin, 28px);
-  --page-max-width: min(30rem, 100%);
+  --page-max-width: min(40rem, 100%);
+  /** Atmosphere column + desk-edge bar */
+  --instrument-timeline: 24rem;
+  --instrument-max-width: min(100%, var(--instrument-timeline));
+  /** Primary actions — timeline + 4rem, visibly wider than the bar */
+  --instrument-btn-width: min(100%, calc(var(--instrument-timeline) + 4rem));
 }

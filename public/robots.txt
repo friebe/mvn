@@ -3,5 +3,6 @@ Allow: /
 Allow: /blog/
 Disallow: /analytics.html
 Disallow: /settings.html
+Disallow: /moments.html
 
 Sitemap: https://getstint.de/sitemap.xml

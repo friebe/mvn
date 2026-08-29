@@ -17,6 +17,9 @@ export function brandMarkSvg(size = 28): string {
   </svg>`
 }
 
+/** Mark size for compact header (desk in session + secondary pages). */
+export const HEADER_MARK_SIZE = 23
+
 /** Shared header lockup: mark + Stint + product subline. */
 export function brandLockupHtml(tag: string = BRAND_TAG, markSize = 30): string {
   return `<div class="brand-lockup">

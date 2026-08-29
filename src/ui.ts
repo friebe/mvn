@@ -6,6 +6,7 @@ import {
   momentOrderHint,
   phaseLabel,
   pickLead,
+  pickSub,
   runningPhaseHint,
   skipMomentLabel,
   thresholdLead,
@@ -22,6 +23,7 @@ import { weekBarsHtml } from './week-bars'
 import { shortcutHintLabel, type ShortcutId } from './shortcuts'
 import { detailMode, isBarOnly } from './atmosphere-display'
 import { brandLockupHtml } from './brand-mark'
+import { analyticsNavIconHtml, momentsNavIconHtml } from './nav-icons'
 import { resolveTheme } from './theme'
 import { hasSeenSettings, markSettingsSeen } from './settings-cue'
 import { notificationPermissionDenied } from './notify'
@@ -274,13 +276,11 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
               />
             </svg>
           </button>
+          <a class="icon-link" href="${appPath('moments.html')}" aria-label="Moments" title="Moments">
+            ${momentsNavIconHtml()}
+          </a>
           <a class="icon-link" href="${appPath('analytics.html')}" aria-label="Analytics" title="Analytics">
-            <svg class="icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-              <path
-                fill="currentColor"
-                d="M5 19V9h2.5v10H5Zm5.75 0V5h2.5v14h-2.5ZM16.5 19v-6H19v6h-2.5Z"
-              />
-            </svg>
+            ${analyticsNavIconHtml()}
           </a>
           <a
             class="icon-link${hasSeenSettings() ? '' : ' has-cue'}"
@@ -341,6 +341,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
 
           <section class="pick" id="pick" hidden>
             <p class="pick-lead" id="pick-lead">Raise the desk and move briefly.</p>
+            <p class="pick-sub" id="pick-sub">Or stand right away — one card is enough.</p>
             <div class="moment-list" id="moment-cards"></div>
           </section>
 
@@ -407,7 +408,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
               ${actionButton('btn-snooze', 'btn btn-ghost', '+5 min', null)}
             </div>
             <div class="row pick-actions" id="pick-actions" hidden>
-              ${actionButton('btn-skip-standing', 'btn btn-primary', 'Standing is enough today', 'skipStanding')}
+              ${actionButton('btn-skip-standing', 'btn btn-ghost pick-skip', 'Standing is enough today', 'skipStanding')}
             </div>
             <div class="row freeze-actions" id="freeze-actions" hidden>
               ${actionButton('btn-afterplay', 'btn btn-primary', 'Call cooldown', 'afterplay')}
@@ -723,6 +724,7 @@ export function renderUi(
   if (walkPick) {
     const ids = getWalkthroughMomentIds() ?? []
     setText(qs(root, 'pick-lead'), pickLead('stand'))
+    setText(qs(root, 'pick-sub'), pickSub('stand'))
     momentsChanged = setMomentCards(qs(root, 'moment-cards'), ids, {
       showPrompt: true,
       durationMs: resolveMomentDuration(state.momentDurationMs),
@@ -794,7 +796,7 @@ export function renderUi(
     setHidden(phaseEl, true)
   } else {
     setText(phaseEl, dayCloseVisible ? 'Day close' : phaseLabel(state.phase))
-    setHidden(phaseEl, isThreshold || dayCloseVisible)
+    setHidden(phaseEl, isThreshold || isPick || dayCloseVisible)
   }
 
   const pausedFill = isFrozen
@@ -914,12 +916,7 @@ export function renderUi(
     setText(qs(root, 'threshold-sub'), thresholdSub(state.endedPhase))
   } else if (isPick) {
     setText(qs(root, 'pick-lead'), pickLead(state.pendingNextPhase))
-    setHintText(
-      hint,
-      state.pendingNextPhase === 'sit'
-        ? 'Desk down and a moment — or sit right away.'
-        : 'Desk up and a moment — or stand right away.',
-    )
+    setText(qs(root, 'pick-sub'), pickSub(state.pendingNextPhase))
     momentsChanged = setMomentCards(qs(root, 'moment-cards'), state.momentChoiceIds ?? [], {
       durationMs: resolveMomentDuration(state.momentDurationMs),
     })
@@ -951,6 +948,7 @@ export function renderUi(
   setHidden(
     hint,
     isThreshold ||
+      isPick ||
       walkThreshold ||
       walkPick ||
       dayCloseVisible ||

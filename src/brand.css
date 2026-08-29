@@ -37,11 +37,35 @@
 .tag {
   margin: 0;
   max-width: 22rem;
-  font-size: clamp(0.85rem, 1.7vmin, 1.05rem);
+  font-size: clamp(0.85rem, 1.7vmin, 0.92rem);
   font-weight: 400;
   line-height: 1.25;
   color: var(--color-ink-3);
   letter-spacing: 0.01em;
+}
+
+/* App chrome — desk (in session) + moments / analytics / settings */
+.app-header-brand .brand,
+.shell[data-started='true'] .top-brand .brand {
+  font-size: clamp(1.35rem, 4vmin, 2rem);
+  line-height: 0.92;
+}
+
+.app-header-brand .brand-mark,
+.shell[data-started='true'] .top-brand .brand-mark {
+  width: 1.45rem;
+  height: 1.45rem;
+}
+
+.app-header-brand .brand-text,
+.shell[data-started='true'] .top-brand .brand-text {
+  gap: 0;
+  padding-top: 0.05rem;
+}
+
+.app-header-brand .tag,
+.shell[data-started='true'] .top-brand .tag {
+  display: none;
 }
 
 /* Hallmark · component: splash · genre: modern-minimal · theme: Desk Daylight/Evening

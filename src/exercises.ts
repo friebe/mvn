@@ -1,5 +1,6 @@
 import momentsJson from './moments.json'
 import { isLongMomentDuration } from './intervals'
+import { rhythmMoments } from './moment-packs'
 
 export type MomentKind = 'body' | 'eyes' | 'desk'
 
@@ -22,6 +23,10 @@ export interface Moment {
 
 /** Micro-moments (15–45s in settings) — edit [`moments.json`](./moments.json) to extend. */
 export const MOMENTS: Moment[] = momentsJson as Moment[]
+
+function momentPool(): Moment[] {
+  return rhythmMoments()
+}
 
 const CORE_PARTS: MomentPart[] = ['neck', 'shoulders', 'back']
 
@@ -60,7 +65,7 @@ function poolFor(
   nextPosture?: 'sit' | 'stand',
   durationMs?: number,
 ): Moment[] {
-  let pool = kind == null ? MOMENTS : MOMENTS.filter((m) => m.kind === kind)
+  let pool = kind == null ? momentPool() : momentPool().filter((m) => m.kind === kind)
   if (nextPosture) pool = pool.filter((m) => matchesPosture(m, nextPosture))
   if (durationMs != null) {
     const byDepth = pool.filter((m) => matchesDepth(m, durationMs))
@@ -71,7 +76,7 @@ function poolFor(
 
 function preferFresh(pool: Moment[], recentIds: string[]): Moment[] {
   const fresh = pool.filter((m) => !recentIds.includes(m.id))
-  return fresh.length > 0 ? fresh : pool.length > 0 ? pool : MOMENTS
+  return fresh.length > 0 ? fresh : pool.length > 0 ? pool : momentPool()
 }
 
 function pickRandom(candidates: Moment[]): Moment {

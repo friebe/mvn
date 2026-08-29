@@ -1,0 +1,230 @@
+/* Shared moment exercise UI — matches desk compact exercise layout */
+
+.moment-player-shell {
+  position: relative;
+  width: 100%;
+  max-width: var(--instrument-max-width);
+  --atmosphere-hue: var(--color-accent-2);
+}
+
+.moment-player-shell .frame {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.moment-player-shell .content-area {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 0;
+}
+
+.moment-player-shell .middle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.moment-player-shell .stage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0;
+  width: 100%;
+}
+
+.moment-player-shell .phase-label {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(0.95rem, 2vmin, 1.15rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-accent);
+}
+
+.moment-player-shell .atmosphere {
+  --atmo-size: clamp(3rem, 13vmin, 6.5rem);
+  --atmo-lh: 0.94;
+  --atmo-lines: 2;
+  margin: 0;
+  width: 100%;
+  max-width: var(--instrument-max-width);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+}
+
+.moment-player-shell .atmosphere-hit {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  width: 100%;
+  min-height: calc(var(--atmo-size) * var(--atmo-lh) * var(--atmo-lines));
+  display: flex;
+  align-items: flex-end;
+}
+
+.moment-player-shell .atmosphere-label {
+  display: block;
+  margin: 0;
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: var(--atmo-size);
+  font-weight: 600;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: var(--atmo-lh);
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.moment-player-shell .desk-edge-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: var(--instrument-timeline);
+}
+
+.moment-player-shell .desk-edge {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: block;
+  height: 3px;
+  background: var(--color-paper-3);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.moment-player-shell .desk-edge-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  background: var(--atmosphere-hue);
+  transition: transform 0.28s linear, background 0.4s var(--ease);
+}
+
+.moment-player-shell .exercise {
+  padding: 0.5rem 0 0;
+  border-top: 1px solid var(--color-paper-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.moment-player-shell .exercise-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3.5vmin, 2rem);
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.1;
+}
+
+.moment-player-shell .exercise-hint {
+  margin: 0;
+  color: var(--color-ink-2);
+  font-size: clamp(0.95rem, 2vmin, 1.1rem);
+  line-height: 1.38;
+}
+
+.moment-player-shell .primary-actions {
+  width: 100%;
+  padding: 0.65rem 0 0;
+}
+
+.moment-player-shell .primary-actions .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  width: var(--instrument-btn-width);
+  max-width: 100%;
+}
+
+.moment-player-shell .primary-actions .row + .row {
+  margin-top: 0.15rem;
+}
+
+.moment-player-shell .primary-actions .row.pick-actions {
+  width: var(--instrument-max-width);
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.moment-player-shell .primary-actions .btn {
+  appearance: none;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  min-height: 2.65rem;
+  padding: 0.65rem 1rem;
+  font-family: var(--font-body);
+  font-size: clamp(0.95rem, 2vmin, 1.1rem);
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s var(--ease),
+    color 0.15s var(--ease),
+    border-color 0.15s var(--ease),
+    transform 0.1s var(--ease);
+}
+
+.moment-player-shell .primary-actions .btn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.moment-player-shell .primary-actions .btn:active {
+  transform: translateY(1px);
+}
+
+.moment-player-shell .primary-actions .btn-primary {
+  width: 100%;
+  background: var(--color-accent);
+  color: var(--color-paper);
+  border-color: var(--color-accent);
+}
+
+.moment-player-shell .primary-actions .btn-primary:hover {
+  background: var(--color-accent-2);
+  border-color: var(--color-accent-2);
+}
+
+.moment-player-shell .primary-actions .pick-skip {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: clamp(0.9rem, 2vmin, 1rem);
+  font-weight: 500;
+  color: var(--color-ink-3);
+  background: transparent;
+  border-color: transparent;
+}
+
+.moment-player-shell .primary-actions .pick-skip:hover {
+  color: var(--color-ink-2);
+  background: var(--color-paper-2);
+  border-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moment-player-shell .desk-edge-fill,
+  .moment-player-shell .primary-actions .btn {
+    transition: none;
+  }
+}

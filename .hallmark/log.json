@@ -1,6 +1,11 @@
 [
   {
-    "date": "2026-08-02",
+    "date": "2026-08-29",
+    "macrostructure": "Workbench",
+    "theme": "Stint tokens (Desk Daylight / Evening)",
+    "enrichment": "none",
+    "brief": "Stint moments library — zone-grouped pack tiles + sequenced player"
+  },
     "macrostructure": "Long Document",
     "theme": "custom",
     "theme_axes": "light / high-contrast-serif / chromatic-other",

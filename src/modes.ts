@@ -88,6 +88,11 @@ export function pickLead(pendingNext: ActivePhase | null, at = new Date()): stri
   return pickCopy(PICK_LEAD_UP, copyKey('pick-lead-up', at))
 }
 
+export function pickSub(pendingNext: ActivePhase | null): string {
+  if (pendingNext === 'sit') return 'Or sit right away — one card is enough.'
+  return 'Or stand right away — one card is enough.'
+}
+
 export function runningPhaseHint(at = new Date()): string {
   return pickCopy(RUNNING_HINTS, copyKey('hint-run', at))
 }

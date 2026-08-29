@@ -72,15 +72,6 @@ body {
   padding-top: 0.15rem;
 }
 
-.settings-heading .brand {
-  font-size: clamp(2rem, 6vmin, 3.25rem);
-}
-
-.settings-heading .brand-mark {
-  width: clamp(1.55rem, 4.5vmin, 2.25rem);
-  height: clamp(1.55rem, 4.5vmin, 2.25rem);
-}
-
 .settings-group {
   display: flex;
   flex-direction: column;
