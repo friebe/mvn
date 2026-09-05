@@ -50,6 +50,7 @@ import {
   shouldOfferInstall,
 } from './pwa'
 import { markSettingsSeen } from './settings-cue'
+import { CONTACT_EMAIL, contactMailto } from './contact'
 
 registerPwa()
 markSettingsSeen()
@@ -326,6 +327,15 @@ function render(): void {
             </p>
           </div>
           <a class="setting-link" id="link-blog" href="${appPath('blog/')}">Open</a>
+        </div>
+        <div class="setting-row">
+          <div class="setting-copy">
+            <p class="setting-label">Mail</p>
+            <p class="setting-note">
+              Questions, bugs, ideas —
+              <a class="settings-mail" href="${contactMailto()}">${CONTACT_EMAIL}</a>
+            </p>
+          </div>
         </div>
         <p class="settings-hint">
           Micro-moments (exercises) stay in German for now — clearer body cues.

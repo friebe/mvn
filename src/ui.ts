@@ -38,6 +38,7 @@ import {
   shouldOfferWalkthrough,
 } from './walkthrough'
 import { featuredOnHtml, shouldShowFeaturedOn } from './featured-on'
+import { contactCornerHtml } from './contact'
 
 export interface UiHandlers {
   onStart: () => void
@@ -427,6 +428,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
         </div>
       </div>
       </div>
+      ${contactCornerHtml()}
     </div>
   `
 

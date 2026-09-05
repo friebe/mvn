@@ -308,6 +308,24 @@ body {
   outline-offset: 2px;
 }
 
+.settings-mail {
+  color: var(--color-ink-2);
+  text-decoration: none;
+}
+
+.settings-mail:hover {
+  color: var(--color-ink);
+}
+
+.settings-mail:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.settings-mail:active {
+  opacity: 0.75;
+}
+
 .settings-version {
   margin: 1.25rem 0 0;
   font-size: 0.75rem;

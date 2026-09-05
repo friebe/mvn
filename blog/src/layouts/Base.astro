@@ -5,6 +5,7 @@ import '@fontsource/source-sans-3/600.css'
 import '../styles/global.css'
 import BrandLockup from '../components/BrandLockup.astro'
 import { appHref, blogHref } from '../lib/urls'
+import { CONTACT_EMAIL, contactMailto } from '../../../src/contact'
 
 interface Props {
   title: string
@@ -157,10 +158,14 @@ const faqJsonLd =
             <a href={appHref}>Stint</a>
             {' · '}
             Sit · micro-move · stand — not a focus timer.
+            {' · '}
+            <a href={contactMailto()}>{CONTACT_EMAIL}</a>
           </p>
         </footer>
       </div>
     </div>
+
+    <a class="contact-corner" href={contactMailto()}>{CONTACT_EMAIL}</a>
 
     {/* Narrow-style floating dock — Stint tokens, not a theme clone */}
     <nav class="dock" aria-label="Quick">

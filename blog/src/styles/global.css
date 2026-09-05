@@ -555,3 +555,49 @@ html[data-theme='dark'] .btn-primary {
 .site-footer a:hover {
   color: var(--color-ink);
 }
+
+.site-footer a:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.contact-corner {
+  position: fixed;
+  z-index: 30;
+  right: max(var(--space-3), env(safe-area-inset-right));
+  bottom: max(var(--space-3), env(safe-area-inset-bottom));
+  max-width: calc(50% - 7rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  color: var(--color-ink-3);
+  text-decoration: none;
+  opacity: 0.55;
+}
+
+.contact-corner:hover {
+  color: var(--color-ink-2);
+  opacity: 0.9;
+}
+
+.contact-corner:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+  opacity: 1;
+}
+
+.contact-corner:active {
+  opacity: 0.75;
+}
+
+@media (max-width: 520px) {
+  .contact-corner {
+    bottom: max(4.5rem, calc(env(safe-area-inset-bottom) + 4.25rem));
+    max-width: calc(100% - 1.5rem);
+  }
+}
