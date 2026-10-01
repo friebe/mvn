@@ -6,11 +6,15 @@ import './styles.css'
 import { loadState, saveState } from './state'
 import { summarizeToday } from './stats'
 import {
+  applyPwaUpdate,
   dismissInstallBanner,
+  dismissUpdateBanner,
   onInstallAvailability,
+  onUpdateAvailability,
   promptInstallPwa,
   registerPwa,
   shouldShowInstallBanner,
+  shouldShowUpdateBanner,
 } from './pwa'
 import {
   bindCompactMode,
@@ -20,6 +24,7 @@ import {
   mountUi,
   renderUi,
   setInstallVisible,
+  setUpdateVisible,
   showDayCloseReward,
 } from './ui'
 import { cycleAtmosphereDisplay } from './atmosphere-display'
@@ -190,6 +195,17 @@ mountUi(app, {
   onDismissInstall: () => {
     dismissInstallBanner()
   },
+  onApplyUpdate: async () => {
+    const btn = app.querySelector<HTMLButtonElement>('#btn-update')
+    if (btn) {
+      btn.disabled = true
+      btn.textContent = 'Reloading…'
+    }
+    await applyPwaUpdate()
+  },
+  onDismissUpdate: () => {
+    dismissUpdateBanner()
+  },
   onCloseDay: () => {
     if (!confirm('Close the day — reset and start fresh?')) return
     const summary = summarizeToday()
@@ -206,10 +222,12 @@ bindReturnOrientation(() => {
 })
 
 function updateInstallBanner(): void {
+  setUpdateVisible(app, shouldShowUpdateBanner())
   setInstallVisible(app, shouldShowInstallBanner())
 }
 
 onInstallAvailability(updateInstallBanner)
+onUpdateAvailability(updateInstallBanner)
 updateInstallBanner()
 
 subscribe((state, remaining, showFreezePrompt, approaching) => {

@@ -56,6 +56,8 @@ export interface UiHandlers {
   onToggleTheme: () => void
   onInstall: () => void
   onDismissInstall: () => void
+  onApplyUpdate: () => void
+  onDismissUpdate: () => void
   onChooseRise: () => void
   onCloseDay: () => void
   onDismissDayClose: () => void
@@ -247,6 +249,16 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   root.innerHTML = `
     <div class="shell" data-phase="setup">
       <div class="frame">
+      <section class="install-banner" id="update-banner" hidden aria-label="App update">
+        <div class="install-copy">
+          <p class="install-title">Update ready</p>
+          <p class="install-text">Reload when you can pause — your day stays on this device.</p>
+        </div>
+        <div class="install-actions">
+          <button type="button" class="btn btn-primary" id="btn-update">Reload</button>
+          <button type="button" class="install-dismiss" id="btn-update-dismiss">Later</button>
+        </div>
+      </section>
       <section class="install-banner" id="install-banner" hidden>
         <div class="install-copy">
           <p class="install-title">Install Stint</p>
@@ -458,6 +470,8 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   qs(root, 'btn-desk-edge').addEventListener('click', handlers.onToggleClock)
   qs(root, 'btn-install').addEventListener('click', handlers.onInstall)
   qs(root, 'btn-install-dismiss').addEventListener('click', handlers.onDismissInstall)
+  qs(root, 'btn-update').addEventListener('click', handlers.onApplyUpdate)
+  qs(root, 'btn-update-dismiss').addEventListener('click', handlers.onDismissUpdate)
   qs(root, 'btn-rise').addEventListener('click', handlers.onChooseRise)
   qs(root, 'btn-snooze').addEventListener('click', handlers.onSnoozePosture)
   qs(root, 'btn-day-close-done').addEventListener('click', handlers.onDismissDayClose)
@@ -477,6 +491,12 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
 
 export function setInstallVisible(root: HTMLElement, visible: boolean): void {
   const banner = qs<HTMLElement>(root, 'install-banner')
+  if (!banner) return
+  setHidden(banner, !visible)
+}
+
+export function setUpdateVisible(root: HTMLElement, visible: boolean): void {
+  const banner = qs<HTMLElement>(root, 'update-banner')
   if (!banner) return
   setHidden(banner, !visible)
 }

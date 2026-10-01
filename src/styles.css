@@ -326,6 +326,11 @@ body {
   background: var(--color-paper-2);
 }
 
+.install-dismiss:disabled:hover {
+  color: var(--color-ink-2);
+  background: transparent;
+}
+
 .install-dismiss:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
@@ -333,6 +338,11 @@ body {
 
 .install-dismiss:active {
   opacity: 0.75;
+}
+
+.install-dismiss:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .install-copy {
@@ -1383,6 +1393,12 @@ button[hidden] {
   transform: translateY(1px);
 }
 
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn-primary {
   background: var(--color-accent);
   color: var(--color-paper);
@@ -1390,6 +1406,10 @@ button[hidden] {
 
 .btn-primary:hover {
   background: var(--color-accent-2);
+}
+
+.btn-primary:disabled:hover {
+  background: var(--color-accent);
 }
 
 .btn-ghost {

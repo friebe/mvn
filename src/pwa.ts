@@ -13,7 +13,13 @@ const DISMISS_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000
 
 let deferredPrompt: InstallPromptEvent | null = null
 let bannerDismissedSession = false
+let updateReady = false
+let updateDismissedSession = false
+let pwaRegistered = false
+let applyUpdateFn: ((reloadPage?: boolean) => Promise<void>) | null = null
+const UPDATE_CHECK_MS = 60 * 60 * 1000
 const installListeners = new Set<() => void>()
+const updateListeners = new Set<() => void>()
 
 export function onInstallAvailability(fn: () => void): () => void {
   installListeners.add(fn)
@@ -21,8 +27,18 @@ export function onInstallAvailability(fn: () => void): () => void {
   return () => installListeners.delete(fn)
 }
 
+export function onUpdateAvailability(fn: () => void): () => void {
+  updateListeners.add(fn)
+  fn()
+  return () => updateListeners.delete(fn)
+}
+
 function emitInstall(): void {
   for (const fn of installListeners) fn()
+}
+
+function emitUpdate(): void {
+  for (const fn of updateListeners) fn()
 }
 
 export function markPwaInstalled(): void {
@@ -80,7 +96,26 @@ export function dismissInstallBanner(): void {
 }
 
 export function shouldShowInstallBanner(): boolean {
+  if (shouldShowUpdateBanner()) return false
   return canInstallPwa() && !isStandaloneDisplay() && !isInstallBannerDismissed()
+}
+
+export function shouldShowUpdateBanner(): boolean {
+  return updateReady && !updateDismissedSession
+}
+
+export function dismissUpdateBanner(): void {
+  updateDismissedSession = true
+  emitUpdate()
+  emitInstall()
+}
+
+export async function applyPwaUpdate(): Promise<void> {
+  if (applyUpdateFn) {
+    await applyUpdateFn(true)
+    return
+  }
+  window.location.reload()
 }
 
 /** True when we should offer install somewhere (Settings), not only the home banner. */
@@ -98,13 +133,28 @@ export function registerPwa(): void {
     bannerDismissedSession = false
   }
 
-  registerSW({
-    immediate: true,
-    onRegisteredSW(_url, registration) {
-      // Keep SW warm so notifications can use registration.showNotification
-      void registration
-    },
-  })
+  if (!pwaRegistered) {
+    pwaRegistered = true
+    applyUpdateFn = registerSW({
+      immediate: true,
+      onNeedRefresh() {
+        updateReady = true
+        updateDismissedSession = false
+        emitUpdate()
+        emitInstall()
+      },
+      onRegisteredSW(_url, registration) {
+        if (!registration) return
+        const check = () => {
+          void registration.update()
+        }
+        window.setInterval(check, UPDATE_CHECK_MS)
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') check()
+        })
+      },
+    })
+  }
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault()
