@@ -1,5 +1,6 @@
 import type { AppState } from './state'
 import { getMoment, kindLabel, momentPrompt, MOMENTS } from './exercises'
+import { momentFigureHtml } from './moment-figures'
 import { resolveMomentDuration } from './intervals'
 import { MOTIVATIONS } from './motivation'
 import {
@@ -136,9 +137,11 @@ function setMomentCards(
         ? `<span class="moment-prompt">${momentPrompt(m, durationMs)}</span>`
         : ''
       return `<button type="button" class="moment-choice" data-moment-id="${m.id}">
-          <span class="moment-kind">${kindLabel(m.kind)}</span>
-          <span class="moment-title">${m.title}</span>
-          ${prompt}
+          <span class="moment-choice-copy">
+            <span class="moment-kind">${kindLabel(m.kind)}</span>
+            <span class="moment-title">${m.title}</span>
+            ${prompt}
+          </span>
         </button>`
     })
     .join('')
@@ -361,8 +364,13 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
 
           <section class="exercise" id="exercise" hidden>
             <p class="ritual-kicker" id="ritual-kicker">Moment</p>
-            <p class="exercise-title" id="exercise-title"></p>
-            <p class="exercise-hint" id="exercise-hint"></p>
+            <div class="exercise-focus">
+              <div class="exercise-figure" id="exercise-figure" hidden></div>
+              <div class="exercise-copy">
+                <p class="exercise-title" id="exercise-title"></p>
+                <p class="exercise-hint" id="exercise-hint"></p>
+              </div>
+            </div>
             <p class="motivation" id="motivation"></p>
           </section>
 
@@ -995,6 +1003,10 @@ export function renderUi(
     setText(qs(root, 'exercise-title'), ex?.title ?? 'Moment')
     setText(qs(root, 'exercise-hint'), ex ? momentPrompt(ex, durationMs) : '')
     setText(qs(root, 'motivation'), isCooldown ? '' : (mot?.text ?? ''))
+    const figureEl = qs(root, 'exercise-figure')
+    const figure = ex ? momentFigureHtml(ex.figureId, 'stage') : ''
+    if (figureEl.innerHTML !== figure) figureEl.innerHTML = figure
+    setHidden(figureEl, figure === '')
   }
 
   if (momentsChanged || state !== lastShortcutHintState) {

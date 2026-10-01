@@ -6,6 +6,7 @@ export interface MomentPlayerState {
   hint: string
   remainingMs: number
   durationMs: number
+  figureHtml?: string
 }
 
 export interface MomentPlayerExtraActions {
@@ -55,8 +56,13 @@ export function momentPlayerHtml(
               </div>
             </main>
             <section class="exercise">
-              <p class="exercise-title" data-mp="title">${state.title}</p>
-              <p class="exercise-hint" data-mp="hint">${state.hint}</p>
+              <div class="exercise-focus">
+                <div class="exercise-figure" data-mp="figure"${state.figureHtml ? '' : ' hidden'}>${state.figureHtml ?? ''}</div>
+                <div class="exercise-copy">
+                  <p class="exercise-title" data-mp="title">${state.title}</p>
+                  <p class="exercise-hint" data-mp="hint">${state.hint}</p>
+                </div>
+              </div>
             </section>
           </div>
           <nav class="primary-actions" aria-label="Actions">
@@ -87,6 +93,7 @@ export function updateMomentPlayer(root: HTMLElement, state: MomentPlayerState):
   const bar = shell.querySelector<HTMLElement>('[data-mp="bar"]')
   const title = shell.querySelector<HTMLElement>('[data-mp="title"]')
   const hint = shell.querySelector<HTMLElement>('[data-mp="hint"]')
+  const figure = shell.querySelector<HTMLElement>('[data-mp="figure"]')
 
   const nextClock = formatExactTime(state.remainingMs)
   if (clock && clock.textContent !== nextClock) clock.textContent = nextClock
@@ -96,6 +103,10 @@ export function updateMomentPlayer(root: HTMLElement, state: MomentPlayerState):
 
   if (title && title.textContent !== state.title) title.textContent = state.title
   if (hint && hint.textContent !== state.hint) hint.textContent = state.hint
+  if (figure && state.figureHtml !== undefined) {
+    if (figure.innerHTML !== state.figureHtml) figure.innerHTML = state.figureHtml
+    figure.hidden = state.figureHtml === ''
+  }
 }
 
 export function bindMomentPlayer(root: HTMLElement, handlers: MomentPlayerHandlers): void {

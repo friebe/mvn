@@ -12,6 +12,7 @@ import {
   settingsNavIconHtml,
 } from './nav-icons'
 import { getMoment, momentPrompt, type Moment } from './exercises'
+import { momentFigureHtml } from './moment-figures'
 import { secondsFromMs } from './intervals'
 import {
   bindMomentPlayer,
@@ -144,9 +145,10 @@ function packRowHtml(pack: MomentPack): string {
 
 function momentPickHtml(moment: Moment, durationMs: number): string {
   const on = isMomentInLoop(moment.id)
+  const figure = momentFigureHtml(moment.figureId, 'thumb')
   return `
     <li>
-      <label class="moment-pick">
+      <label class="moment-pick${figure ? ' has-figure' : ''}">
         <input
           type="checkbox"
           class="moment-pick-input"
@@ -154,6 +156,7 @@ function momentPickHtml(moment: Moment, durationMs: number): string {
           ${on ? 'checked' : ''}
         />
         <span class="moment-pick-ui" aria-hidden="true" data-checked="${on ? 'true' : 'false'}"></span>
+        ${figure}
         <span class="moment-pick-copy">
           <span class="moment-step-title">${moment.title}</span>
           <span class="moment-step-prompt">${momentPrompt(moment, durationMs)}</span>
@@ -372,6 +375,7 @@ function renderPlay(root: HTMLElement, v: Extract<View, { kind: 'play' }>): void
     hint: momentPrompt(moment, v.durationMs),
     remainingMs: rem,
     durationMs: v.durationMs,
+    figureHtml: momentFigureHtml(moment.figureId, 'stage'),
   }
 
   root.innerHTML = `
@@ -408,6 +412,7 @@ function renderPlay(root: HTMLElement, v: Extract<View, { kind: 'play' }>): void
       hint: momentPrompt(m, view.durationMs),
       remainingMs: left,
       durationMs: view.durationMs,
+      figureHtml: momentFigureHtml(m.figureId, 'stage'),
     })
     if (left <= 0) advancePlay(root, true)
   }, TICK_MS)

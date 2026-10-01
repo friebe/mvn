@@ -122,6 +122,40 @@
   width: 100%;
 }
 
+.moment-player-shell .exercise-figure[hidden] {
+  display: none;
+}
+
+.moment-player-shell .exercise-focus {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.moment-player-shell
+  .exercise-focus:has(.exercise-figure:not([hidden])) {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  gap: clamp(1rem, 2.5vmin, 1.5rem);
+  align-items: center;
+}
+
+.moment-player-shell .exercise-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.moment-player-shell .exercise-figure .moment-figure--stage {
+  width: 9rem;
+  height: 9rem;
+  padding: 0.35rem;
+  background: transparent;
+  border-radius: 0;
+}
+
 .moment-player-shell .exercise-title {
   margin: 0;
   font-family: var(--font-display);
@@ -133,9 +167,23 @@
 
 .moment-player-shell .exercise-hint {
   margin: 0;
+  max-width: 30rem;
   color: var(--color-ink-2);
   font-size: clamp(0.95rem, 2vmin, 1.1rem);
   line-height: 1.38;
+}
+
+@media (max-width: 520px) {
+  .moment-player-shell
+    .exercise-focus:has(.exercise-figure:not([hidden])) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.45rem;
+  }
+
+  .moment-player-shell .exercise-figure .moment-figure--stage {
+    width: 7.5rem;
+    height: 7.5rem;
+  }
 }
 
 .moment-player-shell .primary-actions {

@@ -603,6 +603,18 @@ body {
   overflow: hidden;
 }
 
+.shell[data-compact='true'] .exercise-figure .moment-figure--stage {
+  width: 7rem;
+  height: 7rem;
+  padding: 0.25rem;
+}
+
+.shell[data-compact='true']
+  .exercise-focus:has(.exercise-figure:not([hidden])) {
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.85rem;
+}
+
 .shell[data-compact='true'] .exercise {
   padding: 0.5rem 0 0;
   border-top: 1px solid var(--color-paper-3);
@@ -948,11 +960,64 @@ button[hidden] {
   line-height: 1.1;
 }
 
+.exercise-figure[hidden] {
+  display: none;
+}
+
+.exercise-focus {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.35rem, 1vmin, 0.6rem);
+  width: 100%;
+}
+
+.exercise-focus:has(.exercise-figure:not([hidden])) {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  gap: clamp(1rem, 2.5vmin, 1.5rem);
+  align-items: center;
+}
+
+.exercise-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.exercise-figure .moment-figure--stage {
+  width: 9rem;
+  height: 9rem;
+  padding: 0.35rem;
+  color: var(--color-ink);
+  background: transparent;
+  border-radius: 0;
+}
+
+.exercise-focus:has(.exercise-figure:not([hidden])) .exercise-title {
+  font-size: clamp(1.5rem, 3.8vmin, 2.2rem);
+}
+
 .exercise-hint {
   margin: 0;
+  max-width: 30rem;
   color: var(--color-ink-2);
   font-size: clamp(1.15rem, 2.5vmin, 1.45rem);
   line-height: 1.4;
+}
+
+@media (max-width: 520px) {
+  .exercise-focus:has(.exercise-figure:not([hidden])),
+  .shell[data-compact='true']
+    .exercise-focus:has(.exercise-figure:not([hidden])) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.45rem;
+  }
+
+  .exercise-figure .moment-figure--stage {
+    width: 7.5rem;
+    height: 7.5rem;
+  }
 }
 
 .motivation {
@@ -1044,6 +1109,34 @@ button[hidden] {
   cursor: pointer;
   font-family: var(--font-body);
   color: var(--color-ink);
+}
+
+.moment-choice-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.moment-figure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  border-radius: var(--radius);
+}
+
+.moment-figure svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.moment-figure .figure-move {
+  color: var(--color-accent);
 }
 
 .moment-choice:last-child {
@@ -1379,8 +1472,9 @@ button[hidden] {
 
 .moment-choice .btn-kbd {
   position: absolute;
-  top: 0.65rem;
+  top: 50%;
   right: 0.65rem;
+  transform: translateY(-50%);
   font-size: 0.72rem;
 }
 

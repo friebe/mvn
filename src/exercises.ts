@@ -16,6 +16,7 @@ export interface Moment {
   part: MomentPart
   posture: MomentPosture
   depth: MomentDepth
+  figureId?: string
   title: string
   prompt: string
   promptLong?: string

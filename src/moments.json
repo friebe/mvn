@@ -5,6 +5,7 @@
     "part": "neck",
     "posture": "either",
     "depth": "hold",
+    "figureId": "nacken-seite",
     "title": "Nacken-Seite",
     "prompt": "Ohr zur Schulter, kurz halten. Andere Seite. Kein Rucken.",
     "promptLong": "Ohr zur Schulter, je Seite langsam halten und atmen. Andere Seite. Kein Rucken."
@@ -15,6 +16,7 @@
     "part": "shoulders",
     "posture": "either",
     "depth": "quick",
+    "figureId": "schulterblatt-zug",
     "title": "Schulterblatt-Zug",
     "prompt": "Schulterblätter hinten zusammenziehen, loslassen — fünf Mal.",
     "promptLong": "Schulterblätter hinten zusammenziehen, fünf Sekunden halten, loslassen — dreimal."
