@@ -15,6 +15,8 @@ let deferredPrompt: InstallPromptEvent | null = null
 let bannerDismissedSession = false
 let updateReady = false
 let updateDismissedSession = false
+let updatePreview = false
+let installPreview = false
 let pwaRegistered = false
 let applyUpdateFn: ((reloadPage?: boolean) => Promise<void>) | null = null
 const UPDATE_CHECK_MS = 60 * 60 * 1000
@@ -86,6 +88,11 @@ export function isInstallBannerDismissed(): boolean {
 }
 
 export function dismissInstallBanner(): void {
+  if (installPreview) {
+    installPreview = false
+    emitInstall()
+    return
+  }
   bannerDismissedSession = true
   try {
     localStorage.setItem(DISMISSED_KEY, String(Date.now()))
@@ -97,15 +104,55 @@ export function dismissInstallBanner(): void {
 
 export function shouldShowInstallBanner(): boolean {
   if (shouldShowUpdateBanner()) return false
+  if (installPreview) return true
   return canInstallPwa() && !isStandaloneDisplay() && !isInstallBannerDismissed()
 }
 
+export function isInstallBannerPreview(): boolean {
+  return installPreview
+}
+
+export function setInstallBannerPreview(on: boolean): void {
+  installPreview = on
+  if (on) bannerDismissedSession = false
+  emitInstall()
+}
+
+export function toggleInstallBannerPreview(): boolean {
+  const next = !installPreview
+  setInstallBannerPreview(next)
+  return next
+}
+
 export function shouldShowUpdateBanner(): boolean {
-  return updateReady && !updateDismissedSession
+  return (updateReady || updatePreview) && !updateDismissedSession
+}
+
+export function isUpdateBannerPreview(): boolean {
+  return updatePreview && shouldShowUpdateBanner()
+}
+
+export function setUpdateBannerPreview(on: boolean): void {
+  updatePreview = on
+  if (on) {
+    updateDismissedSession = false
+  }
+  emitUpdate()
+  emitInstall()
+}
+
+export function toggleUpdateBannerPreview(): boolean {
+  if (shouldShowUpdateBanner()) {
+    dismissUpdateBanner()
+    return false
+  }
+  setUpdateBannerPreview(true)
+  return true
 }
 
 export function dismissUpdateBanner(): void {
   updateDismissedSession = true
+  updatePreview = false
   emitUpdate()
   emitInstall()
 }

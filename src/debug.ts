@@ -1,4 +1,19 @@
-import { isLocalDebugHost, wantsDebugPauseFromUrl } from './debug-host'
+import {
+  isLocalDebugHost,
+  wantsDebugInstallFromUrl,
+  wantsDebugPauseFromUrl,
+  wantsDebugSplashFromUrl,
+  wantsDebugUpdateFromUrl,
+} from './debug-host'
+import {
+  dismissUpdateBanner,
+  isInstallBannerPreview,
+  onInstallAvailability,
+  onUpdateAvailability,
+  setInstallBannerPreview,
+  setUpdateBannerPreview,
+  shouldShowUpdateBanner,
+} from './pwa'
 import {
   bindSplashDebugEvent,
   isSplashVisible,
@@ -14,9 +29,74 @@ import {
   toggleTimerPaused,
 } from './timer'
 
-/** Floating pause + splash preview — only mounts on localhost / 127.0.0.1. */
+type DebugFeature = {
+  id: string
+  shortcut: string
+  label: (on: boolean) => string
+  title: string
+  get: () => boolean
+  toggle: () => void
+}
+
+function debugFeatures(): DebugFeature[] {
+  return [
+    {
+      id: 'pause',
+      shortcut: 'p',
+      label: (on) => (on ? '▶ Continue' : '⏸ Pause'),
+      title: 'Shift+P — freeze the clock',
+      get: isTimerPaused,
+      toggle: toggleTimerPaused,
+    },
+    {
+      id: 'splash',
+      shortcut: 's',
+      label: (on) => (on ? 'Splash on' : 'Splash'),
+      title: `Shift+S — or dispatchEvent(new Event('${SPLASH_DEBUG_EVENT}'))`,
+      get: isSplashVisible,
+      toggle: () => {
+        toggleLaunchSplashPreview()
+      },
+    },
+    {
+      id: 'update',
+      shortcut: 'u',
+      label: (on) => (on ? 'Update on' : 'Update'),
+      title: 'Shift+U — preview the PWA update banner',
+      get: shouldShowUpdateBanner,
+      toggle: () => {
+        if (shouldShowUpdateBanner()) {
+          dismissUpdateBanner()
+          return
+        }
+        setInstallBannerPreview(false)
+        setUpdateBannerPreview(true)
+      },
+    },
+    {
+      id: 'install',
+      shortcut: 'i',
+      label: (on) => (on ? 'Install on' : 'Install'),
+      title: 'Shift+I — preview the install banner',
+      get: isInstallBannerPreview,
+      toggle: () => {
+        if (isInstallBannerPreview()) {
+          setInstallBannerPreview(false)
+          return
+        }
+        dismissUpdateBanner()
+        setInstallBannerPreview(true)
+      },
+    },
+  ]
+}
+
+/** Feature-toggle bar — only mounts on localhost / 127.0.0.1. */
 export function mountDebugToolbar(): void {
   if (!isLocalDebugHost()) return
+  if (document.querySelector('.debug-bar')) return
+
+  const features = debugFeatures()
 
   const bar = document.createElement('div')
   bar.className = 'debug-bar'
@@ -26,42 +106,40 @@ export function mountDebugToolbar(): void {
   const phaseEl = document.createElement('span')
   phaseEl.className = 'debug-bar-phase'
 
-  const btnPause = document.createElement('button')
-  btnPause.type = 'button'
-  btnPause.className = 'debug-bar-btn'
-
-  const btnSplash = document.createElement('button')
-  btnSplash.type = 'button'
-  btnSplash.className = 'debug-bar-btn'
-  btnSplash.title = `Or: dispatchEvent(new Event('${SPLASH_DEBUG_EVENT}'))`
+  const buttons = new Map<string, HTMLButtonElement>()
+  for (const feature of features) {
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = 'debug-bar-btn'
+    btn.dataset.feature = feature.id
+    btn.title = feature.title
+    btn.addEventListener('click', () => {
+      feature.toggle()
+      render()
+    })
+    buttons.set(feature.id, btn)
+  }
 
   const hint = document.createElement('span')
   hint.className = 'debug-bar-hint'
-  hint.textContent = 'Shift+P · Shift+S'
+  hint.textContent = `Shift+${features.map((f) => f.shortcut.toUpperCase()).join(' ')}`
 
-  bar.append(phaseEl, btnPause, btnSplash, hint)
+  bar.append(phaseEl, ...buttons.values(), hint)
   document.body.appendChild(bar)
 
   const unbindSplashEvent = bindSplashDebugEvent()
 
   const render = () => {
-    const paused = isTimerPaused()
-    const { phase } = getState()
-    const splashOn = isSplashVisible()
-    phaseEl.textContent = phase
-    btnPause.textContent = paused ? '▶ Continue' : '⏸ Pause'
-    btnPause.setAttribute('aria-pressed', paused ? 'true' : 'false')
-    btnSplash.textContent = splashOn ? 'Splash on' : 'Splash'
-    btnSplash.setAttribute('aria-pressed', splashOn ? 'true' : 'false')
-    bar.dataset.paused = paused ? 'true' : 'false'
-    bar.dataset.splash = splashOn ? 'true' : 'false'
+    phaseEl.textContent = getState().phase
+    bar.dataset.paused = isTimerPaused() ? 'true' : 'false'
+    for (const feature of features) {
+      const btn = buttons.get(feature.id)
+      if (!btn) continue
+      const on = feature.get()
+      btn.textContent = feature.label(on)
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false')
+    }
   }
-
-  btnPause.addEventListener('click', () => toggleTimerPaused())
-  btnSplash.addEventListener('click', () => {
-    toggleLaunchSplashPreview()
-    render()
-  })
 
   window.addEventListener('keydown', (e) => {
     if (!e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return
@@ -71,31 +149,34 @@ export function mountDebugToolbar(): void {
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || t.isContentEditable) return
     }
     const key = e.key.toLowerCase()
-    if (key === 'p') {
-      e.preventDefault()
-      toggleTimerPaused()
-      return
-    }
-    if (key === 's') {
-      e.preventDefault()
-      toggleLaunchSplashPreview()
-      render()
-    }
+    const feature = features.find((f) => f.shortcut === key)
+    if (!feature) return
+    e.preventDefault()
+    feature.toggle()
+    render()
   })
 
-  // Keep Splash button label in sync when toggled via custom event.
   window.addEventListener(SPLASH_DEBUG_EVENT, () => {
     window.setTimeout(render, 0)
   })
 
   subscribe(() => render())
   subscribeTimerPause(render)
+  onInstallAvailability(render)
+  onUpdateAvailability(render)
   render()
 
-  if (wantsDebugPauseFromUrl()) {
-    setTimerPaused(true)
+  if (wantsDebugPauseFromUrl()) setTimerPaused(true)
+  if (wantsDebugSplashFromUrl()) toggleLaunchSplashPreview()
+  if (wantsDebugUpdateFromUrl()) {
+    setInstallBannerPreview(false)
+    setUpdateBannerPreview(true)
   }
+  if (wantsDebugInstallFromUrl()) {
+    dismissUpdateBanner()
+    setInstallBannerPreview(true)
+  }
+  render()
 
-  // Keep unsubscribe reachable for hot reload / tests (toolbar is session-long).
   void unbindSplashEvent
 }

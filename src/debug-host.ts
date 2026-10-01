@@ -6,8 +6,23 @@ export function isLocalDebugHost(): boolean {
   return host === 'localhost' || host === '127.0.0.1' || host === '[::1]'
 }
 
-export function wantsDebugPauseFromUrl(): boolean {
+function debugFlag(name: string): boolean {
   if (!isLocalDebugHost()) return false
-  const params = new URLSearchParams(window.location.search)
-  return params.get('pause') === '1' || params.get('debugPause') === '1'
+  return new URLSearchParams(window.location.search).get(name) === '1'
+}
+
+export function wantsDebugPauseFromUrl(): boolean {
+  return debugFlag('pause') || debugFlag('debugPause')
+}
+
+export function wantsDebugSplashFromUrl(): boolean {
+  return debugFlag('splash')
+}
+
+export function wantsDebugUpdateFromUrl(): boolean {
+  return debugFlag('update')
+}
+
+export function wantsDebugInstallFromUrl(): boolean {
+  return debugFlag('install')
 }
