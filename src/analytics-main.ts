@@ -18,6 +18,7 @@ import { appPath } from './paths'
 import { loadState } from './state'
 import { applyThemeFromState, bindSystemThemeListener } from './theme'
 import { weekBarsHtml } from './week-bars'
+import { pageDockHtml } from './page-dock'
 
 applyThemeFromState(loadState())
 bindSystemThemeListener(() => loadState().theme)
@@ -161,6 +162,7 @@ function render(period: Period): void {
       </section>`
           : ''
       }
+      ${pageDockHtml(appPath(), 'Back to app')}
     </div>
   `
 

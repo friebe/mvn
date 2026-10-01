@@ -33,6 +33,7 @@ import {
   type MomentPack,
 } from './moment-packs'
 import { appPath } from './paths'
+import { pageDockHtml } from './page-dock'
 import { getResolvedMomentDuration } from './preferences'
 import { loadState } from './state'
 import { applyThemeFromState, bindSystemThemeListener, normalizeTheme } from './theme'
@@ -199,6 +200,7 @@ function renderBrowse(root: HTMLElement): void {
         </li>
         ${packs.map((pack) => packRowHtml(pack)).join('')}
       </ul>
+      ${pageDockHtml(appPath(), 'Back to app')}
     </div>
   `
 

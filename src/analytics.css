@@ -1,6 +1,7 @@
 @import './tokens.css';
 @import './brand.css';
 @import './week-bars.css';
+@import './edge-dock.css';
 
 *,
 *::before,
@@ -43,7 +44,7 @@ body {
 .analytics-top {
   display: flex;
   flex-wrap: nowrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
 }
@@ -51,7 +52,6 @@ body {
 .analytics-heading {
   min-width: 0;
   flex: 1 1 auto;
-  padding-top: 0.15rem;
 }
 
 .analytics-nav {
@@ -60,7 +60,6 @@ body {
   flex-wrap: nowrap;
   align-items: center;
   gap: 0.15rem;
-  margin-top: 0.15rem;
 }
 
 .icon-link {
@@ -83,7 +82,7 @@ body {
 }
 
 .icon-link.back-link {
-  margin: 0.35rem 0 0 -0.45rem;
+  margin: 0 0 0 -0.45rem;
 }
 
 .icon-link:hover {

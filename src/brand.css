@@ -45,6 +45,11 @@
 }
 
 /* App chrome — desk (in session) + moments / analytics / settings */
+.app-header-brand .brand-lockup,
+.shell[data-started='true'] .top-brand .brand-lockup {
+  min-height: 2.5rem;
+}
+
 .app-header-brand .brand,
 .shell[data-started='true'] .top-brand .brand {
   font-size: clamp(1.35rem, 4vmin, 2rem);
@@ -60,12 +65,28 @@
 .app-header-brand .brand-text,
 .shell[data-started='true'] .top-brand .brand-text {
   gap: 0;
-  padding-top: 0.05rem;
+  padding-top: 0;
 }
 
 .app-header-brand .tag,
-.shell[data-started='true'] .top-brand .tag {
+.shell[data-started='true'] .top-brand .tag,
+.shell[data-compact='true'] .top-brand .tag {
   display: none;
+}
+
+@media (max-width: 1280px) {
+  .top-brand .tag {
+    display: none;
+  }
+
+  .top-brand .brand-text {
+    gap: 0;
+    padding-top: 0;
+  }
+
+  .top-brand .brand-lockup {
+    min-height: 2.5rem;
+  }
 }
 
 /* Hallmark · component: splash · genre: modern-minimal · theme: Desk Daylight/Evening

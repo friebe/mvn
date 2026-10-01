@@ -1,5 +1,6 @@
 @import './tokens.css';
 @import './brand.css';
+@import './edge-dock.css';
 
 *,
 *::before,
@@ -42,7 +43,7 @@ body {
 .moments-top {
   display: flex;
   flex-wrap: nowrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
 }
@@ -50,7 +51,6 @@ body {
 .moments-heading {
   min-width: 0;
   flex: 1 1 auto;
-  padding-top: 0.15rem;
 }
 
 .moments-nav {
@@ -59,7 +59,6 @@ body {
   flex-wrap: nowrap;
   align-items: center;
   gap: 0.15rem;
-  margin-top: 0.15rem;
 }
 
 .icon-link {
@@ -413,6 +412,28 @@ body {
   width: var(--instrument-max-width);
   max-width: 100%;
   padding-top: 0.15rem;
+}
+
+@media (max-width: 1000px) {
+  .pack-detail {
+    flex: 1 1 auto;
+    max-width: none;
+    width: 100%;
+  }
+
+  .moments-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 8;
+    margin-top: auto;
+    width: 100%;
+    padding: 0.55rem 0 calc(0.45rem + env(safe-area-inset-bottom));
+  }
+
+  .moments-row .btn,
+  .moments-row-secondary .btn {
+    width: 100%;
+  }
 }
 
 .moments-row {

@@ -51,6 +51,7 @@ import {
 } from './pwa'
 import { markSettingsSeen } from './settings-cue'
 import { CONTACT_EMAIL, contactMailto } from './contact'
+import { pageDockHtml } from './page-dock'
 
 registerPwa()
 markSettingsSeen()
@@ -342,6 +343,7 @@ function render(): void {
         </p>
         <p class="settings-version">Stint ${__APP_VERSION__}</p>
       </section>
+      ${pageDockHtml(appPath(), 'Back to app')}
     </div>
   `
 

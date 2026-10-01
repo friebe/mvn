@@ -1,6 +1,7 @@
 @import './tokens.css';
 @import './brand.css';
 @import './week-bars.css';
+@import './edge-dock.css';
 
 *,
 *::before,
@@ -130,6 +131,13 @@ body {
   overflow: auto;
 }
 
+.middle-body {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.85rem, 2.5vmin, 1.5rem);
+  min-width: 0;
+}
+
 .primary-actions {
   flex: 0 0 auto;
   padding: 0;
@@ -196,6 +204,44 @@ body {
 
 .primary-actions .row:is(.setup-actions, .threshold-actions, .freeze-actions) .btn-text {
   white-space: nowrap;
+}
+
+@media (max-width: 1000px) {
+  .frame {
+    padding-bottom: 0;
+  }
+
+  .middle,
+  .shell[data-compact='true'] .middle {
+    justify-content: stretch;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  .middle-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    justify-content: safe center;
+    padding-bottom: 0.35rem;
+  }
+
+  .primary-actions {
+    width: 100%;
+    padding: 0.55rem 0 calc(0.45rem + env(safe-area-inset-bottom));
+  }
+
+  .primary-actions .row {
+    width: 100%;
+  }
+
+  .featured-on {
+    display: none !important;
+  }
+
+  .contact-corner {
+    display: none;
+  }
 }
 
 .quick-actions {
@@ -436,7 +482,7 @@ body {
 .top {
   flex: 0 0 auto;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
@@ -450,7 +496,6 @@ body {
   display: flex;
   align-items: center;
   gap: 0.15rem;
-  margin-top: 0.15rem;
 }
 
 .icon-link {
@@ -541,6 +586,10 @@ body {
 }
 
 .shell[data-compact='true'] .middle {
+  gap: 0.65rem;
+}
+
+.shell[data-compact='true'] .middle-body {
   gap: 0.65rem;
 }
 
@@ -639,6 +688,12 @@ body {
 
 .shell[data-compact='true'] .primary-actions {
   padding: 0;
+}
+
+@media (max-width: 1000px) {
+  .shell[data-compact='true'] .primary-actions {
+    padding: 0.55rem 0 calc(0.45rem + env(safe-area-inset-bottom));
+  }
 }
 
 .shell[data-compact='true'] .primary-actions .btn {
@@ -1585,7 +1640,7 @@ button[hidden] {
   opacity: 0.75;
 }
 
-body:has(.debug-bar) .contact-corner {
+body:has(.debug-bar:not([hidden])) .contact-corner {
   left: auto;
   right: max(var(--space-3), env(safe-area-inset-right));
 }
@@ -1610,6 +1665,18 @@ body:has(.debug-bar) .contact-corner {
   font-family: var(--font-body);
   font-size: 0.75rem;
   color: var(--color-ink-2);
+}
+
+.debug-bar[hidden] {
+  display: none !important;
+}
+
+.debug-bar-close {
+  min-width: 1.6rem;
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+  color: var(--color-ink-3);
+  font-weight: 500;
 }
 
 .debug-bar[data-paused='true'] {

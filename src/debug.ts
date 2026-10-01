@@ -29,6 +29,25 @@ import {
   toggleTimerPaused,
 } from './timer'
 
+const BAR_HIDDEN_KEY = 'stint.debug-bar-hidden'
+
+function readBarHidden(): boolean {
+  try {
+    return sessionStorage.getItem(BAR_HIDDEN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function writeBarHidden(on: boolean): void {
+  try {
+    if (on) sessionStorage.setItem(BAR_HIDDEN_KEY, '1')
+    else sessionStorage.removeItem(BAR_HIDDEN_KEY)
+  } catch {
+    // session flag still applied in the DOM
+  }
+}
+
 type DebugFeature = {
   id: string
   shortcut: string
@@ -122,10 +141,25 @@ export function mountDebugToolbar(): void {
 
   const hint = document.createElement('span')
   hint.className = 'debug-bar-hint'
-  hint.textContent = `Shift+${features.map((f) => f.shortcut.toUpperCase()).join(' ')}`
+  hint.textContent = `Shift+${features.map((f) => f.shortcut.toUpperCase()).join(' ')} D`
 
-  bar.append(phaseEl, ...buttons.values(), hint)
+  const close = document.createElement('button')
+  close.type = 'button'
+  close.className = 'debug-bar-btn debug-bar-close'
+  close.setAttribute('aria-label', 'Hide debug bar')
+  close.title = 'Hide — Shift+D to show again'
+  close.textContent = '×'
+
+  bar.append(phaseEl, ...buttons.values(), hint, close)
   document.body.appendChild(bar)
+
+  const setCollapsed = (on: boolean) => {
+    bar.hidden = on
+    writeBarHidden(on)
+  }
+
+  close.addEventListener('click', () => setCollapsed(true))
+  setCollapsed(readBarHidden())
 
   const unbindSplashEvent = bindSplashDebugEvent()
 
@@ -149,6 +183,11 @@ export function mountDebugToolbar(): void {
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || t.isContentEditable) return
     }
     const key = e.key.toLowerCase()
+    if (key === 'd') {
+      e.preventDefault()
+      setCollapsed(!bar.hidden)
+      return
+    }
     const feature = features.find((f) => f.shortcut === key)
     if (!feature) return
     e.preventDefault()

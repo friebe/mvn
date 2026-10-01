@@ -319,6 +319,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
 
       <div class="content-area">
         <div class="middle">
+          <div class="middle-body">
           <main class="stage">
             <p class="phase-label" id="phase-label">Ready</p>
             <div class="atmosphere" id="atmosphere">
@@ -402,6 +403,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             </div>
             <p class="walkthrough-cue-feedback" id="walkthrough-cue-feedback" hidden></p>
           </section>
+          </div>
 
           <nav class="primary-actions" id="primary-actions" aria-label="Actions">
             <div class="row day-close-actions" id="day-close-actions" hidden>
