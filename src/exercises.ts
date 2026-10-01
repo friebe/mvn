@@ -79,8 +79,13 @@ function preferFresh(pool: Moment[], recentIds: string[]): Moment[] {
   return fresh.length > 0 ? fresh : pool.length > 0 ? pool : momentPool()
 }
 
-function pickRandom(candidates: Moment[]): Moment {
-  return candidates[Math.floor(Math.random() * candidates.length)]!
+function pickRandom(candidates: Moment[]): Moment | undefined {
+  if (candidates.length === 0) return undefined
+  return candidates[Math.floor(Math.random() * candidates.length)]
+}
+
+function lastResortMoment(): Moment {
+  return momentPool()[0] ?? MOMENTS[0]!
 }
 
 export function pickMoment(
@@ -90,9 +95,11 @@ export function pickMoment(
   durationMs?: number,
 ): Moment {
   const pool = poolFor(kind, nextPosture, durationMs)
-  const candidates = preferFresh(pool, recentIds)
-  return pickRandom(
-    candidates.length > 0 ? candidates : poolFor(undefined, nextPosture, durationMs),
+  return (
+    pickRandom(preferFresh(pool, recentIds)) ??
+    pickRandom(preferFresh(poolFor(undefined, nextPosture, durationMs), recentIds)) ??
+    pickRandom(preferFresh(momentPool(), recentIds)) ??
+    lastResortMoment()
   )
 }
 
@@ -111,13 +118,17 @@ function pickMomentAvoidingParts(
   if (parts?.length) pool = pool.filter((m) => parts.includes(m.part))
 
   const fresh = pool.filter((m) => !recentIds.includes(m.id) && !usedParts.has(m.part))
-  if (fresh.length > 0) return pickRandom(fresh)
+  const fromFresh = pickRandom(fresh)
+  if (fromFresh) return fromFresh
 
   const byPart = pool.filter((m) => !usedParts.has(m.part))
-  const partCandidates = preferFresh(byPart, recentIds)
-  if (partCandidates.length > 0) return pickRandom(partCandidates)
+  const fromPart = pickRandom(preferFresh(byPart, recentIds))
+  if (fromPart) return fromPart
 
-  return pickRandom(preferFresh(pool, recentIds))
+  return (
+    pickRandom(preferFresh(pool, recentIds)) ??
+    pickMoment(recentIds, undefined, nextPosture, durationMs)
+  )
 }
 
 /** Three choices: two core desk zones, third slot sometimes ritual or eyes. */
@@ -138,6 +149,7 @@ export function pickMomentCards(
       nextPosture,
       durationMs,
     })
+    if (used.has(m.id)) break
     picked.push(m)
     used.add(m.id)
     usedParts.add(m.part)
@@ -171,7 +183,7 @@ export function pickMomentCards(
   return picked.slice(0, 3)
 }
 
-/** Avoid immediate repeats — pool is small (8 moments). */
+/** Avoid immediate repeats — pool is small. */
 export function rememberId(recent: string[], id: string, max = 6): string[] {
   return [id, ...recent.filter((x) => x !== id)].slice(0, max)
 }

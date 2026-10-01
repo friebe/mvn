@@ -822,7 +822,7 @@ export function confirmCheckIn(): void {
   emit()
 }
 
-export function startDay(): void {
+export function startDay(phase: 'sit' | 'stand' = 'sit'): void {
   recordStat('day_start')
   resetPostureSnooze()
   if (isWalkthroughActive()) skipWalkthrough()
@@ -840,7 +840,7 @@ export function startDay(): void {
     northShownKey: null,
     ambientMilestone: 0,
   }
-  enterActivePhase('sit')
+  enterActivePhase(phase)
 }
 
 export function resetDay(): string {

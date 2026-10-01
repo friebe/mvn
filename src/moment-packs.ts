@@ -1,6 +1,6 @@
 import momentsJson from './moments.json'
 import type { Moment } from './exercises'
-import { OWNED_PACKS_KEY } from './storage-keys'
+import { LOOP_MOMENTS_KEY, OWNED_PACKS_KEY } from './storage-keys'
 
 const ALL_MOMENTS: Moment[] = momentsJson as Moment[]
 
@@ -56,8 +56,16 @@ export const MOMENT_PACKS: MomentPack[] = [
     id: 'back',
     zone: 'body',
     title: 'Back',
-    description: 'Sit twists, cat-cow, lumbar press, chest open — full desk back round.',
-    momentIds: ['thorax-drehen', 'katzenbuckel-stuhl', 'lenden-druck', 'brust-oeffnen'],
+    description: 'Pelvis, cat-cow, lumbar press, twist, chest open — desk back, not a workout.',
+    momentIds: [
+      'thorax-drehen',
+      'katzenbuckel-stuhl',
+      'lenden-druck',
+      'becken-kreis',
+      'becken-kipp',
+      'tisch-lehnen',
+      'brust-oeffnen',
+    ],
     tier: 'free',
   },
   {
@@ -135,12 +143,91 @@ export function unlockPack(packId: string): void {
   }
 }
 
-/** Moments eligible for sit/stand pick — owned packs only. */
-export function rhythmMoments(): Moment[] {
-  const ownedIds = new Set<string>()
+function ownedMomentIds(): string[] {
+  const ids: string[] = []
   for (const pack of ownedPacks()) {
-    for (const id of pack.momentIds) ownedIds.add(id)
+    for (const id of pack.momentIds) {
+      if (!ids.includes(id)) ids.push(id)
+    }
   }
-  const pool = ALL_MOMENTS.filter((m) => ownedIds.has(m.id))
-  return pool.length > 0 ? pool : ALL_MOMENTS
+  return ids
+}
+
+function readSavedLoopIds(): string[] | null {
+  try {
+    const raw = localStorage.getItem(LOOP_MOMENTS_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) return null
+    return parsed.filter((id): id is string => typeof id === 'string')
+  } catch {
+    return null
+  }
+}
+
+function writeLoopIds(ids: string[]): void {
+  try {
+    localStorage.setItem(LOOP_MOMENTS_KEY, JSON.stringify(ids))
+  } catch {
+    // In-memory only this session.
+  }
+}
+
+/** Ids in the sit/stand loop. Uncustomized → every owned pack moment. */
+export function loopMomentIds(): string[] {
+  const owned = ownedMomentIds()
+  const saved = readSavedLoopIds()
+  if (saved == null) return owned
+  const ownedSet = new Set(owned)
+  return saved.filter((id) => ownedSet.has(id))
+}
+
+export function isMomentInLoop(id: string): boolean {
+  const owned = new Set(ownedMomentIds())
+  if (!owned.has(id)) return false
+  const saved = readSavedLoopIds()
+  if (saved == null) return true
+  return saved.includes(id)
+}
+
+export function setMomentInLoop(id: string, on: boolean): void {
+  const owned = ownedMomentIds()
+  if (!owned.includes(id)) return
+  const next = new Set(loopMomentIds())
+  if (on) next.add(id)
+  else next.delete(id)
+  writeLoopIds([...next])
+}
+
+export function loopMoments(): Moment[] {
+  const enabled = new Set(loopMomentIds())
+  return ALL_MOMENTS.filter((m) => enabled.has(m.id))
+}
+
+export function hasCustomizedLoop(): boolean {
+  return readSavedLoopIds() != null
+}
+
+export function loopCountInPack(pack: MomentPack): number {
+  return pack.momentIds.filter((id) => isMomentInLoop(id)).length
+}
+
+/** Favorites grouped by pack — for the library subpage. */
+export function loopMomentsByPack(): { pack: MomentPack; moments: Moment[] }[] {
+  const enabled = new Set(loopMomentIds())
+  const groups: { pack: MomentPack; moments: Moment[] }[] = []
+  for (const pack of packZoneSections().flatMap((section) => section.packs)) {
+    const moments = getPackMoments(pack).filter((m) => enabled.has(m.id))
+    if (moments.length > 0) groups.push({ pack, moments })
+  }
+  return groups
+}
+
+/** Sit/stand pick pool — checked moments; empty selection falls back to all owned. */
+export function rhythmMoments(): Moment[] {
+  const picked = loopMoments()
+  if (picked.length > 0) return picked
+  const ownedIds = new Set(ownedMomentIds())
+  const fallback = ALL_MOMENTS.filter((m) => ownedIds.has(m.id))
+  return fallback.length > 0 ? fallback : ALL_MOMENTS
 }

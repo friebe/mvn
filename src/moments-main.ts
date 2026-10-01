@@ -11,7 +11,7 @@ import {
   momentsNavIconHtml,
   settingsNavIconHtml,
 } from './nav-icons'
-import { getMoment, momentPrompt } from './exercises'
+import { getMoment, momentPrompt, type Moment } from './exercises'
 import { secondsFromMs } from './intervals'
 import {
   bindMomentPlayer,
@@ -21,9 +21,14 @@ import {
 import {
   getMomentPack,
   getPackMoments,
+  isMomentInLoop,
   isPackOwned,
+  loopCountInPack,
+  loopMomentIds,
+  loopMomentsByPack,
   packZoneSections,
   PACK_ZONE_META,
+  setMomentInLoop,
   type MomentPack,
 } from './moment-packs'
 import { appPath } from './paths'
@@ -37,6 +42,7 @@ bindSystemThemeListener(() => normalizeTheme(loadState().theme))
 
 type View =
   | { kind: 'browse' }
+  | { kind: 'favorites' }
   | { kind: 'pack'; packId: string }
   | {
       kind: 'play'
@@ -76,11 +82,15 @@ function packDurationLabel(momentCount: number): string {
   return `~${min} min`
 }
 
+function libraryHref(): string {
+  return `${appPath('moments.html')}#`
+}
+
 function headerNav(): string {
   return `
     <nav class="moments-nav" aria-label="App">
       ${themeToggleButtonHtml()}
-      <a class="icon-link" href="${appPath('moments.html')}" aria-label="Moments" title="Moments" aria-current="page">
+      <a class="icon-link" href="${libraryHref()}" aria-label="Moments" title="Moments" aria-current="page">
         ${momentsNavIconHtml()}
       </a>
       <a class="icon-link" href="${appPath('analytics.html')}" aria-label="Analytics" title="Analytics">
@@ -113,6 +123,9 @@ function packRowHtml(pack: MomentPack): string {
   const count = getPackMoments(pack).length
   const locked = !isPackOwned(pack.id)
   const zoneTitle = PACK_ZONE_META[pack.zone].title
+  const inLoop = loopCountInPack(pack)
+  const loopMeta =
+    inLoop === count ? `${count} moment${count === 1 ? '' : 's'}` : `${inLoop} of ${count} in the loop`
   return `
     <li>
       <button
@@ -123,15 +136,48 @@ function packRowHtml(pack: MomentPack): string {
       >
         <span class="pack-row-kind">${zoneTitle}</span>
         <span class="pack-row-title">${pack.title}</span>
-        <span class="pack-row-meta">${count} moment${count === 1 ? '' : 's'} · ${packDurationLabel(count)}</span>
+        <span class="pack-row-meta">${loopMeta} · ${packDurationLabel(count)}</span>
       </button>
     </li>
   `
 }
 
+function momentPickHtml(moment: Moment, durationMs: number): string {
+  const on = isMomentInLoop(moment.id)
+  return `
+    <li>
+      <label class="moment-pick">
+        <input
+          type="checkbox"
+          class="moment-pick-input"
+          data-moment-id="${moment.id}"
+          ${on ? 'checked' : ''}
+        />
+        <span class="moment-pick-ui" aria-hidden="true" data-checked="${on ? 'true' : 'false'}"></span>
+        <span class="moment-pick-copy">
+          <span class="moment-step-title">${moment.title}</span>
+          <span class="moment-step-prompt">${momentPrompt(moment, durationMs)}</span>
+        </span>
+      </label>
+    </li>
+  `
+}
+
+function bindMomentPicks(root: HTMLElement, onChange: () => void): void {
+  root.querySelectorAll<HTMLInputElement>('.moment-pick-input').forEach((input) => {
+    input.addEventListener('change', () => {
+      const id = input.dataset.momentId
+      if (!id) return
+      setMomentInLoop(id, input.checked)
+      onChange()
+    })
+  })
+}
+
 function renderBrowse(root: HTMLElement): void {
   stopTick()
   const packs = packZoneSections().flatMap((section) => section.packs)
+  const loopCount = loopMomentIds().length
 
   root.innerHTML = `
     <div class="moments">
@@ -141,10 +187,23 @@ function renderBrowse(root: HTMLElement): void {
         <p class="moments-note">${durationNote()}</p>
       </div>
       <ul class="pack-list" aria-label="Moment packs">
+        <li>
+          <button type="button" class="pack-row" id="btn-favorites">
+            <span class="pack-row-kind">Loop</span>
+            <span class="pack-row-title">Favorites</span>
+            <span class="pack-row-meta">${loopCount} in sit/stand</span>
+          </button>
+        </li>
         ${packs.map((pack) => packRowHtml(pack)).join('')}
       </ul>
     </div>
   `
+
+  root.querySelector('#btn-favorites')?.addEventListener('click', () => {
+    view = { kind: 'favorites' }
+    window.location.hash = 'favorites'
+    render(root)
+  })
 
   root.querySelectorAll<HTMLButtonElement>('[data-pack-id]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -157,42 +216,97 @@ function renderBrowse(root: HTMLElement): void {
   })
 }
 
+function renderFavorites(root: HTMLElement): void {
+  stopTick()
+  const groups = loopMomentsByPack()
+  const durationMs = momentDurationMs()
+  const count = loopMomentIds().length
+  const empty = groups.length === 0
+
+  root.innerHTML = `
+    <div class="moments">
+      ${shellTop(libraryHref(), 'Back to library')}
+      <div class="moments-lede">
+        <p class="pack-kind">Loop</p>
+        <h1 class="moments-title">Favorites</h1>
+        <p class="moments-note">
+          ${
+            empty
+              ? 'Nothing checked. Sit/stand still uses every pack moment until you pick some.'
+              : 'Checked in packs — sit/stand picks from here.'
+          }
+        </p>
+        ${empty ? '' : `<p class="pack-meta">${count} moment${count === 1 ? '' : 's'} · ${durationNote()}</p>`}
+      </div>
+      ${
+        empty
+          ? ''
+          : groups
+              .map(
+                (group) => `
+        <section class="fav-group" aria-label="${group.pack.title}">
+          <p class="pack-kind">${PACK_ZONE_META[group.pack.zone].title}</p>
+          <h2 class="fav-group-title">${group.pack.title}</h2>
+          <ul class="moment-sequence">
+            ${group.moments.map((m) => momentPickHtml(m, durationMs)).join('')}
+          </ul>
+        </section>`,
+              )
+              .join('')
+      }
+      <div class="moments-actions">
+        <div class="moments-row moments-row-secondary">
+          <a class="btn btn-ghost" href="${libraryHref()}">All packs</a>
+        </div>
+      </div>
+    </div>
+  `
+
+  bindMomentPicks(root, () => render(root))
+}
+
 function renderPack(root: HTMLElement, pack: MomentPack): void {
   stopTick()
   const moments = getPackMoments(pack)
   const durationMs = momentDurationMs()
+  const inLoop = loopCountInPack(pack)
 
   root.innerHTML = `
     <div class="moments">
-      ${shellTop(appPath('moments.html'), 'Back to library')}
+      ${shellTop(libraryHref(), 'Back to library')}
       <div class="pack-detail">
         <p class="pack-kind">${PACK_ZONE_META[pack.zone].title}</p>
         <h1 class="pack-title">${pack.title}</h1>
         <p class="pack-desc">${pack.description}</p>
-        <p class="pack-meta">${moments.length} moment${moments.length === 1 ? '' : 's'} · ${packDurationLabel(moments.length)} · ${durationNote()}</p>
+        <p class="pack-meta">${inLoop} of ${moments.length} in the sit/stand loop · ${durationNote()}</p>
         <ol class="moment-sequence" aria-label="Moments in pack">
-          ${moments
-            .map(
-              (m) => `
-            <li class="moment-step">
-              <p class="moment-step-title">${m.title}</p>
-              <p class="moment-step-prompt">${momentPrompt(m, durationMs)}</p>
-            </li>
-          `,
-            )
-            .join('')}
+          ${moments.map((m) => momentPickHtml(m, durationMs)).join('')}
         </ol>
         <div class="moments-actions">
           <div class="moments-row">
             <button type="button" class="btn btn-primary" id="btn-run-pack">Run pack</button>
           </div>
           <div class="moments-row moments-row-secondary">
-            <a class="btn btn-ghost" href="${appPath('moments.html')}">All packs</a>
+            <a class="btn btn-ghost" href="${appPath('moments.html')}#favorites">Favorites</a>
+            <a class="btn btn-ghost" href="${libraryHref()}">All packs</a>
           </div>
         </div>
       </div>
     </div>
   `
+
+  bindMomentPicks(root, () => {
+    const meta = root.querySelector('.pack-meta')
+    if (meta) {
+      meta.textContent = `${loopCountInPack(pack)} of ${moments.length} in the sit/stand loop · ${durationNote()}`
+    }
+    root.querySelectorAll<HTMLInputElement>('.moment-pick-input').forEach((input) => {
+      const box = input.nextElementSibling
+      if (box instanceof HTMLElement && box.classList.contains('moment-pick-ui')) {
+        box.dataset.checked = input.checked ? 'true' : 'false'
+      }
+    })
+  })
 
   root.querySelector('#btn-run-pack')?.addEventListener('click', () => {
     startPlay(pack.id, moments.map((m) => m.id))
@@ -304,7 +418,7 @@ function renderDone(root: HTMLElement, v: Extract<View, { kind: 'done' }>): void
   const pack = getMomentPack(v.packId)
   root.innerHTML = `
     <div class="moments">
-      ${shellTop(appPath('moments.html'), 'Back to library')}
+      ${shellTop(libraryHref(), 'Back to library')}
       <section class="player-done">
         <p class="player-done-lead">Pack done.</p>
         <p class="player-done-sub">${v.count} moment${v.count === 1 ? '' : 's'}${pack ? ` · ${pack.title}` : ''}.</p>
@@ -345,6 +459,11 @@ function render(root: HTMLElement): void {
     wireHeader(root)
     return
   }
+  if (view.kind === 'favorites') {
+    renderFavorites(root)
+    wireHeader(root)
+    return
+  }
   if (view.kind === 'pack') {
     const pack = getMomentPack(view.packId)
     if (!pack || !isPackOwned(view.packId)) {
@@ -369,8 +488,23 @@ function render(root: HTMLElement): void {
 const root = document.querySelector<HTMLElement>('#app')!
 
 const hashPack = window.location.hash.replace(/^#/, '')
-if (hashPack && getMomentPack(hashPack) && isPackOwned(hashPack)) {
+if (hashPack === 'favorites') {
+  view = { kind: 'favorites' }
+} else if (hashPack && getMomentPack(hashPack) && isPackOwned(hashPack)) {
   view = { kind: 'pack', packId: hashPack }
 }
 
 render(root)
+
+window.addEventListener('hashchange', () => {
+  if (view.kind === 'play') return
+  const hash = window.location.hash.replace(/^#/, '')
+  if (hash === 'favorites') {
+    view = { kind: 'favorites' }
+  } else if (hash && getMomentPack(hash) && isPackOwned(hash)) {
+    view = { kind: 'pack', packId: hash }
+  } else {
+    view = { kind: 'browse' }
+  }
+  render(root)
+})

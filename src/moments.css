@@ -244,12 +244,88 @@ body {
   border-top: 1px solid var(--color-paper-3);
 }
 
-.moment-step {
+.moment-pick {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.75rem;
+  align-items: start;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--color-paper-3);
+  cursor: pointer;
+}
+
+.moment-pick-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.moment-pick-ui {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.28rem;
+  border: 1px solid var(--color-ink-3);
+  border-radius: 3px;
+  background: transparent;
+  flex-shrink: 0;
+  transition:
+    background 0.15s var(--ease),
+    border-color 0.15s var(--ease);
+}
+
+.moment-pick:hover .moment-pick-ui {
+  border-color: var(--color-ink);
+  background: var(--color-paper-2);
+}
+
+.moment-pick-input:focus-visible + .moment-pick-ui {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.moment-pick:active .moment-pick-ui {
+  transform: translateY(1px);
+}
+
+.moment-pick-ui[data-checked='true'] {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.moment-pick:hover .moment-pick-ui[data-checked='true'] {
+  background: var(--color-accent-2);
+  border-color: var(--color-accent-2);
+}
+
+.moment-pick-ui[data-checked='true']::after {
+  content: '';
+  width: 0.28rem;
+  height: 0.5rem;
+  margin-top: -0.12rem;
+  border: solid var(--color-paper);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.moment-pick-input:disabled + .moment-pick-ui {
+  opacity: 0.45;
+}
+
+.moment-pick:has(.moment-pick-input:disabled) {
+  cursor: not-allowed;
+}
+
+.moment-pick-copy {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
-  padding: 0.55rem 0;
-  border-bottom: 1px solid var(--color-paper-3);
+  min-width: 0;
 }
 
 .moment-step-title {
@@ -259,6 +335,8 @@ body {
   font-weight: 600;
   font-style: normal;
   line-height: 1.2;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .moment-step-prompt {
@@ -266,6 +344,26 @@ body {
   color: var(--color-ink-2);
   font-size: clamp(0.92rem, 2vmin, 1.02rem);
   line-height: 1.38;
+}
+
+.fav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  max-width: var(--instrument-max-width);
+}
+
+.fav-group-title {
+  margin: 0 0 0.15rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2.5vmin, 1.35rem);
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.15;
+}
+
+.fav-group .moment-sequence {
+  border-top: 1px solid var(--color-paper-3);
 }
 
 .moments-actions {
@@ -385,7 +483,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .icon-link,
   .btn,
-  .pack-row-title {
+  .pack-row-title,
+  .moment-pick-ui {
     transition: none;
+  }
+
+  .moment-pick:active .moment-pick-ui {
+    transform: none;
   }
 }

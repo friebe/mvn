@@ -50,6 +50,36 @@
     "promptLong": "Kreuz in die Lehne drücken, drei Atemzüge halten, loslassen — dreimal."
   },
   {
+    "id": "becken-kreis",
+    "kind": "body",
+    "part": "back",
+    "posture": "either",
+    "depth": "quick",
+    "title": "Becken-Kreis",
+    "prompt": "Kleine Kreise mit dem Becken. Fünf in eine Richtung, fünf zurück. Kein Schwung.",
+    "promptLong": "Langsame Beckenkreise, acht in eine Richtung, acht zurück. Klein bleiben."
+  },
+  {
+    "id": "becken-kipp",
+    "kind": "body",
+    "part": "back",
+    "posture": "sit",
+    "depth": "quick",
+    "title": "Becken-Kipp",
+    "prompt": "Becken vor, Becken zurück — Sitzbeine bleiben. Fünf Mal.",
+    "promptLong": "Becken langsam vor und zurück kippen, je Kipp kurz atmen — acht Mal."
+  },
+  {
+    "id": "tisch-lehnen",
+    "kind": "body",
+    "part": "back",
+    "posture": "stand",
+    "depth": "hold",
+    "title": "Tisch-Lehnen",
+    "prompt": "Hände auf die Kante, Knie weich, Becken leicht zurück. Kreuz lang, kurz halten.",
+    "promptLong": "Hände auf die Tischkante, Knie weich, Hüfte etwas zurück. Kreuz lang — zehn Sekunden atmen."
+  },
+  {
     "id": "brust-oeffnen",
     "kind": "body",
     "part": "back",

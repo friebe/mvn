@@ -174,27 +174,27 @@ body {
 }
 
 /* Shared rows — split instrument width (Freeze · Continue · …) */
-.primary-actions .row:is(.run-actions, .walkthrough-actions, .setup-actions) {
+.primary-actions .row:is(.run-actions, .walkthrough-actions) {
   flex-wrap: wrap;
 }
 
-.primary-actions .row:is(.run-actions, .walkthrough-actions, .setup-actions) .btn {
+.primary-actions .row:is(.run-actions, .walkthrough-actions) .btn {
   flex: 1 1 0;
   min-width: 0;
 }
 
-/* Stacked — long labels stay one line (Move briefly · Call cooldown · …) */
-.primary-actions .row:is(.threshold-actions, .freeze-actions) {
+/* Stacked — long labels stay one line (Start · Already standing · Move briefly · …) */
+.primary-actions .row:is(.setup-actions, .threshold-actions, .freeze-actions) {
   flex-direction: column;
   align-items: stretch;
 }
 
-.primary-actions .row:is(.threshold-actions, .freeze-actions) .btn {
+.primary-actions .row:is(.setup-actions, .threshold-actions, .freeze-actions) .btn {
   width: 100%;
   flex: 0 0 auto;
 }
 
-.primary-actions .row:is(.threshold-actions, .freeze-actions) .btn-text {
+.primary-actions .row:is(.setup-actions, .threshold-actions, .freeze-actions) .btn-text {
   white-space: nowrap;
 }
 
@@ -286,28 +286,36 @@ body {
   flex: 0 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 1rem;
+  gap: 0.65rem 0.85rem;
   align-items: center;
-  padding: 1rem 0 1.15rem;
-  margin-bottom: 0.5rem;
+  padding: 0.45rem 0 0.55rem;
+  margin-bottom: 0.25rem;
   border-bottom: 1px solid var(--color-paper-3);
 }
 
 .install-actions {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.35rem;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.install-banner .btn {
+  min-height: 2.5rem;
+  padding: 0.4rem 0.85rem;
+  font-size: clamp(0.88rem, 1.8vmin, 1rem);
 }
 
 .install-dismiss {
-  padding: 0.35rem 0.5rem;
+  padding: 0.4rem 0.6rem;
+  min-height: 2.5rem;
   border: none;
   border-radius: var(--radius);
   background: transparent;
   color: var(--color-ink-2);
   font-family: var(--font-body);
-  font-size: clamp(0.85rem, 1.8vmin, 0.98rem);
+  font-size: clamp(0.8rem, 1.6vmin, 0.9rem);
   line-height: 1.2;
   text-align: center;
   cursor: pointer;
@@ -318,16 +326,25 @@ body {
   background: var(--color-paper-2);
 }
 
+.install-dismiss:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.install-dismiss:active {
+  opacity: 0.75;
+}
+
 .install-copy {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.1rem;
   min-width: 0;
 }
 
 .install-title {
   margin: 0;
-  font-size: clamp(1.05rem, 2.3vmin, 1.25rem);
+  font-size: clamp(0.92rem, 2vmin, 1.05rem);
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--color-ink);
@@ -336,8 +353,8 @@ body {
 .install-text {
   margin: 0;
   max-width: 32rem;
-  font-size: clamp(0.98rem, 2.05vmin, 1.15rem);
-  line-height: 1.35;
+  font-size: clamp(0.8rem, 1.65vmin, 0.9rem);
+  line-height: 1.3;
   color: var(--color-ink-2);
 }
 
@@ -590,8 +607,8 @@ body {
 }
 
 .shell[data-compact='true'] .install-banner {
-  padding: 0.65rem 0;
-  margin-bottom: 0.25rem;
+  padding: 0.35rem 0;
+  margin-bottom: 0.15rem;
 }
 
 .shell[data-compact='true'] .install-text {
@@ -1402,21 +1419,16 @@ button[hidden] {
   }
 
   .install-banner {
-    grid-template-columns: 1fr;
-    align-items: stretch;
-  }
-
-  .install-actions {
-    width: 100%;
+    gap: 0.5rem 0.65rem;
   }
 
   .run-actions .btn,
-  .walkthrough-actions .btn,
-  .setup-actions .btn {
+  .walkthrough-actions .btn {
     flex: 1 1 calc(50% - 0.375rem);
     min-width: calc(50% - 0.375rem);
   }
 
+  .setup-actions .btn,
   .threshold-actions .btn,
   .freeze-actions .btn {
     width: 100%;

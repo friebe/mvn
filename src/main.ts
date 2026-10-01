@@ -171,6 +171,7 @@ bindShortcuts(
 
 mountUi(app, {
   ...shortcutHandlers,
+  onStartStanding: () => startDay('stand'),
   onToggleClock: () => {
     const next = cycleAtmosphereDisplay(getState().atmosphereDisplay ?? 'clock')
     writePreferences({ atmosphereDisplay: next })

@@ -42,6 +42,7 @@ import { contactCornerHtml } from './contact'
 
 export interface UiHandlers {
   onStart: () => void
+  onStartStanding: () => void
   onFreeze: () => void
   onResume: () => void
   onExtendFreeze: () => void
@@ -388,6 +389,9 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
             </div>
             <div class="row setup-actions" id="setup-controls">
               ${actionButton('btn-start', 'btn btn-primary', 'Start', 'start')}
+              <button type="button" class="btn btn-ghost" id="btn-start-standing">
+                <span class="btn-text">Already standing</span>
+              </button>
               <button type="button" class="btn btn-ghost" id="btn-try-loop" hidden>
                 <span class="btn-text">Try the loop</span>
               </button>
@@ -433,6 +437,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
   `
 
   qs(root, 'btn-start').addEventListener('click', handlers.onStart)
+  qs(root, 'btn-start-standing').addEventListener('click', handlers.onStartStanding)
   qs(root, 'btn-try-loop').addEventListener('click', handlers.onStartWalkthrough)
   qs(root, 'btn-walkthrough-next').addEventListener('click', handlers.onNextWalkthrough)
   qs(root, 'btn-walkthrough-skip').addEventListener('click', handlers.onSkipWalkthrough)
