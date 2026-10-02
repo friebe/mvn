@@ -20,6 +20,8 @@ export interface Moment {
   title: string
   prompt: string
   promptLong?: string
+  /** Pack player: beep at halfway so you change sides. */
+  sideSwitch?: boolean
 }
 
 /** Micro-moments (15–45s in settings) — edit [`moments.json`](./moments.json) to extend. */
@@ -85,22 +87,18 @@ function pickRandom(candidates: Moment[]): Moment | undefined {
   return candidates[Math.floor(Math.random() * candidates.length)]
 }
 
-function lastResortMoment(): Moment {
-  return momentPool()[0] ?? MOMENTS[0]!
-}
-
 export function pickMoment(
   recentIds: string[],
   kind?: MomentKind,
   nextPosture?: 'sit' | 'stand',
   durationMs?: number,
-): Moment {
+): Moment | undefined {
   const pool = poolFor(kind, nextPosture, durationMs)
   return (
     pickRandom(preferFresh(pool, recentIds)) ??
     pickRandom(preferFresh(poolFor(undefined, nextPosture, durationMs), recentIds)) ??
     pickRandom(preferFresh(momentPool(), recentIds)) ??
-    lastResortMoment()
+    momentPool()[0]
   )
 }
 
@@ -113,7 +111,7 @@ function pickMomentAvoidingParts(
     nextPosture?: 'sit' | 'stand'
     durationMs?: number
   } = {},
-): Moment {
+): Moment | undefined {
   const { kind, parts, nextPosture, durationMs } = opts
   let pool = poolFor(kind, nextPosture, durationMs)
   if (parts?.length) pool = pool.filter((m) => parts.includes(m.part))
@@ -150,14 +148,14 @@ export function pickMomentCards(
       nextPosture,
       durationMs,
     })
-    if (used.has(m.id)) break
+    if (!m || used.has(m.id)) break
     picked.push(m)
     used.add(m.id)
     usedParts.add(m.part)
   }
 
   const roll = Math.random()
-  let third: Moment
+  let third: Moment | undefined
   if (roll < 0.28) {
     third = pickMoment(exclude(), 'desk', nextPosture, durationMs)
   } else if (roll < 0.45) {
@@ -166,7 +164,7 @@ export function pickMomentCards(
     third = pickMomentAvoidingParts(exclude(), usedParts, { nextPosture, durationMs })
   }
 
-  if (!used.has(third.id)) {
+  if (third && !used.has(third.id)) {
     picked.push(third)
   } else {
     const fallback = poolFor(undefined, nextPosture, durationMs).find((m) => !used.has(m.id))
@@ -175,7 +173,7 @@ export function pickMomentCards(
 
   while (picked.length < 3) {
     const m = pickMomentAvoidingParts(exclude(), usedParts, { nextPosture, durationMs })
-    if (used.has(m.id)) break
+    if (!m || used.has(m.id)) break
     picked.push(m)
     used.add(m.id)
     usedParts.add(m.part)

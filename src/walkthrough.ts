@@ -1,5 +1,3 @@
-import { pickMomentCards } from './exercises'
-import { getResolvedMomentDuration } from './preferences'
 import { FORESHADOW_RATIO } from './state'
 import { WALKTHROUGH_SEEN_KEY } from './storage-keys'
 
@@ -211,7 +209,7 @@ function prepareStep(index: number): void {
   clearAuto()
 
   if (step.layout === 'pick') {
-    momentChoiceIds = pickMomentCards([], 'stand', getResolvedMomentDuration()).map((m) => m.id)
+    momentChoiceIds = ['nacken-seite', 'schulterblatt-zug', 'fensterblick']
   } else {
     momentChoiceIds = null
   }

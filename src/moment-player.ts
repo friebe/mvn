@@ -7,6 +7,8 @@ export interface MomentPlayerState {
   remainingMs: number
   durationMs: number
   figureHtml?: string
+  cue?: string
+  ending?: boolean
 }
 
 export interface MomentPlayerExtraActions {
@@ -38,7 +40,7 @@ export function momentPlayerHtml(
   const showExtra = extra?.skipLabel || extra?.stopLabel
 
   return `
-    <div class="moment-player-shell" data-phase="exercise" style="${shellStyle()}">
+    <div class="moment-player-shell" data-phase="exercise"${state.ending ? ' data-ending="true"' : ''} style="${shellStyle()}">
       <div class="frame">
         <div class="content-area">
           <div class="middle">
@@ -48,6 +50,7 @@ export function momentPlayerHtml(
                 <div class="atmosphere-hit" aria-hidden="true">
                   <span class="atmosphere-label" data-mp="clock">${clock}</span>
                 </div>
+                <p class="play-cue" data-mp="cue"${state.cue ? '' : ' hidden'}>${state.cue ?? ''}</p>
                 <div class="desk-edge-row">
                   <div class="desk-edge" aria-hidden="true">
                     <span class="desk-edge-fill" data-mp="bar" style="transform: scaleX(${scale})"></span>
@@ -93,6 +96,7 @@ export function updateMomentPlayer(root: HTMLElement, state: MomentPlayerState):
   const bar = shell.querySelector<HTMLElement>('[data-mp="bar"]')
   const title = shell.querySelector<HTMLElement>('[data-mp="title"]')
   const hint = shell.querySelector<HTMLElement>('[data-mp="hint"]')
+  const cue = shell.querySelector<HTMLElement>('[data-mp="cue"]')
   const figure = shell.querySelector<HTMLElement>('[data-mp="figure"]')
 
   const nextClock = formatExactTime(state.remainingMs)
@@ -103,6 +107,13 @@ export function updateMomentPlayer(root: HTMLElement, state: MomentPlayerState):
 
   if (title && title.textContent !== state.title) title.textContent = state.title
   if (hint && hint.textContent !== state.hint) hint.textContent = state.hint
+  const nextCue = state.cue ?? ''
+  if (cue) {
+    if (cue.textContent !== nextCue) cue.textContent = nextCue
+    cue.hidden = nextCue === ''
+  }
+  if (state.ending) shell.dataset.ending = 'true'
+  else delete shell.dataset.ending
   if (figure && state.figureHtml !== undefined) {
     if (figure.innerHTML !== state.figureHtml) figure.innerHTML = state.figureHtml
     figure.hidden = state.figureHtml === ''

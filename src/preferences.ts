@@ -4,8 +4,10 @@ import {
   msFromSeconds,
   normalizeStoredIntervals,
   normalizeStoredMomentDuration,
+  normalizeStoredPackDuration,
   resolveIntervals,
   resolveMomentDuration,
+  resolvePackDuration,
 } from './intervals'
 import { buildDayCloseLine, recordStat, summarizeToday, todayKey } from './stats'
 
@@ -15,6 +17,7 @@ export type PreferenceKey =
   | 'demo'
   | 'intervals'
   | 'momentDurationMs'
+  | 'packDurationMs'
   | 'shortcutHintsEnabled'
   | 'notificationPersistent'
   | 'atmosphereDisplay'
@@ -58,6 +61,19 @@ export function setMomentDuration(seconds: number): AppState {
 
 export function getResolvedMomentDuration(): number {
   return resolveMomentDuration(loadState().momentDurationMs)
+}
+
+export function setPackDuration(seconds: number): AppState {
+  const next = {
+    ...loadState(),
+    packDurationMs: normalizeStoredPackDuration(msFromSeconds(seconds)),
+  }
+  saveState(next)
+  return next
+}
+
+export function getResolvedPackDuration(): number {
+  return resolvePackDuration(loadState().packDurationMs)
 }
 
 export function closeDayInStorage(): { state: AppState; story: string } {

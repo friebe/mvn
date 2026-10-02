@@ -72,6 +72,8 @@ export interface AppState {
   intervals: UserIntervals | null
   /** Micro-move duration after picking a card; null = 15s default */
   momentDurationMs: number | null
+  /** Pack-run duration per moment; null = 45s default */
+  packDurationMs: number | null
   /** Nordstern line already shown today */
   northShownKey: string | null
   /** desk_confirmed count at last milestone ambient line */
@@ -152,6 +154,7 @@ export function defaultState(): AppState {
     dayClosedKey: null,
     intervals: null,
     momentDurationMs: null,
+    packDurationMs: null,
     northShownKey: null,
     ambientMilestone: 0,
     shortcutHintsEnabled: true,

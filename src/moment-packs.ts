@@ -173,21 +173,17 @@ function writeLoopIds(ids: string[]): void {
   }
 }
 
-/** Ids in the sit/stand loop. Uncustomized → every owned pack moment. */
+/** Ids opted into the sit/stand loop. Missing key → none. */
 export function loopMomentIds(): string[] {
   const owned = ownedMomentIds()
   const saved = readSavedLoopIds()
-  if (saved == null) return owned
+  if (saved == null) return []
   const ownedSet = new Set(owned)
   return saved.filter((id) => ownedSet.has(id))
 }
 
 export function isMomentInLoop(id: string): boolean {
-  const owned = new Set(ownedMomentIds())
-  if (!owned.has(id)) return false
-  const saved = readSavedLoopIds()
-  if (saved == null) return true
-  return saved.includes(id)
+  return loopMomentIds().includes(id)
 }
 
 export function setMomentInLoop(id: string, on: boolean): void {
@@ -223,11 +219,11 @@ export function loopMomentsByPack(): { pack: MomentPack; moments: Moment[] }[] {
   return groups
 }
 
-/** Sit/stand pick pool — checked moments; empty selection falls back to all owned. */
+/** Sit/stand pick pool — only opted-in moments. Empty means no micro-moves. */
 export function rhythmMoments(): Moment[] {
-  const picked = loopMoments()
-  if (picked.length > 0) return picked
-  const ownedIds = new Set(ownedMomentIds())
-  const fallback = ALL_MOMENTS.filter((m) => ownedIds.has(m.id))
-  return fallback.length > 0 ? fallback : ALL_MOMENTS
+  return loopMoments()
+}
+
+export function hasRhythmMoments(): boolean {
+  return loopMomentIds().length > 0
 }

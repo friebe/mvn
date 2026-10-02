@@ -25,6 +25,25 @@ function playTone(
   osc.stop(startAt + duration + 0.02)
 }
 
+export function unlockAudio(): void {
+  try {
+    void getCtx().resume()
+  } catch {
+    // Ignore — first user gesture may still be pending.
+  }
+}
+
+/** Pack run: 3s remaining, or switch sides. Shorter than the desk beep. */
+export function playPackCue(enabled: boolean): void {
+  if (!enabled) return
+  try {
+    const ac = getCtx()
+    void ac.resume()
+    playTone(ac, 880, ac.currentTime, 0.16, 0.14)
+  } catch {
+    // Audio may be blocked until user gesture — silent fail
+  }
+}
 /** Short oscillator beep — no media files. */
 export function playBeep(enabled: boolean): void {
   if (!enabled) return

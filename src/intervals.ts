@@ -38,6 +38,10 @@ export const RESET_OPTIONS: number[] = [1, 2, 3, 5]
 export const MOMENT_DURATION_OPTIONS_SEC: number[] = [15, 30, 45]
 export const DEFAULT_MOMENT_MS = 15 * SEC
 
+/** Pack run on the floor — independent of desk micro-move. */
+export const PACK_DURATION_OPTIONS_SEC: number[] = [30, 45, 60]
+export const DEFAULT_PACK_MS = 45 * SEC
+
 export function defaultIntervals(): UserIntervals {
   return { ...PRESETS }
 }
@@ -117,6 +121,20 @@ export function normalizeStoredMomentDuration(
   if (custom == null) return null
   const resolved = resolveMomentDuration(custom)
   return resolved === DEFAULT_MOMENT_MS ? null : resolved
+}
+
+export function resolvePackDuration(custom: number | null | undefined): number {
+  if (custom == null) return DEFAULT_PACK_MS
+  if (PACK_DURATION_OPTIONS_SEC.includes(secondsFromMs(custom))) return custom
+  return DEFAULT_PACK_MS
+}
+
+export function normalizeStoredPackDuration(
+  custom: number | null | undefined,
+): number | null {
+  if (custom == null) return null
+  const resolved = resolvePackDuration(custom)
+  return resolved === DEFAULT_PACK_MS ? null : resolved
 }
 
 /** 30s and 45s — prefer hold-depth moments and longer prompts. */

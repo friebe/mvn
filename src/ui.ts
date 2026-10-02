@@ -563,6 +563,7 @@ export function renderUi(
   const walkApproaching = walkTimed && walkAtmo?.approaching === true
   const momentChoiceAtThreshold =
     isThreshold &&
+    state.phaseEndsAt != null &&
     (state.endedPhase === 'sit' || state.endedPhase === 'stand' || state.endedPhase === 'reset')
   const thresholdTimerActive = momentChoiceAtThreshold && state.phaseEndsAt != null
   const atmosphereDisplay = state.atmosphereDisplay ?? 'clock'

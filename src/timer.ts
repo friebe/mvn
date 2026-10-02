@@ -31,6 +31,7 @@ import {
 } from './modes'
 import { resolveMomentDuration } from './intervals'
 import { getMoment, pickMoment, pickMomentCards, rememberId } from './exercises'
+import { hasRhythmMoments } from './moment-packs'
 import { pickAmbient, pickMotivation, rememberMotivation, shouldShowRareAmbient, ambientMilestoneAfterShow } from './motivation'
 import { CHECK_IN_YES_ACTION, notifyPhase, SNOOZE_POSTURE_ACTION } from './notify'
 import { isAppAway, subscribePresence } from './presence'
@@ -236,8 +237,9 @@ function thresholdMomentMs(): number {
 }
 
 function thresholdMomentChoice(ended: ActivePhase | null = state.endedPhase): boolean {
-  // Desk up (sit→stand) and desk down (stand→sit). Legacy reset phase also gets a moment.
-  return ended === 'sit' || ended === 'stand' || ended === 'reset'
+  // Desk up / down only when the user opted moments into sit/stand.
+  if (ended !== 'sit' && ended !== 'stand' && ended !== 'reset') return false
+  return hasRhythmMoments()
 }
 
 function clearThresholdMomentTimer(): void {
@@ -657,6 +659,10 @@ function enterPick(): void {
     momentPosture(),
     momentDurationMs(),
   )
+  if (cards.length === 0) {
+    enterActivePhase(state.pendingNextPhase ?? 'sit', { soft: true })
+    return
+  }
   clearAttention()
   state = {
     ...state,
@@ -677,6 +683,10 @@ function enterRitualWithMoment(momentId: string): void {
   const moment =
     getMoment(momentId) ??
     pickMoment(state.recentExerciseIds, undefined, momentPosture(), momentDurationMs())
+  if (!moment) {
+    enterActivePhase(state.pendingNextPhase ?? 'sit', { soft: true })
+    return
+  }
   const next = state.pendingNextPhase ?? 'sit'
   motivationPickCount += 1
   const motivation = pickMotivation(state.recentMotivationIds, motivationPickCount)
@@ -1017,6 +1027,10 @@ export function startFreezeAfterplay(): void {
     momentPosture(),
     momentDurationMs(),
   )
+  if (!moment) {
+    resume()
+    return
+  }
   clearAttention()
   state = {
     ...state,

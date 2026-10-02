@@ -8,7 +8,8 @@
     "figureId": "nacken-seite",
     "title": "Nacken-Seite",
     "prompt": "Ohr zur Schulter, kurz halten. Andere Seite. Kein Rucken.",
-    "promptLong": "Ohr zur Schulter, je Seite langsam halten und atmen. Andere Seite. Kein Rucken."
+    "promptLong": "Ohr zur Schulter, je Seite langsam halten und atmen. Andere Seite. Kein Rucken.",
+    "sideSwitch": true
   },
   {
     "id": "schulterblatt-zug",
@@ -29,7 +30,8 @@
     "depth": "hold",
     "title": "Sitz-Drehung",
     "prompt": "Aufrecht sitzen, Oberkörper langsam links, dann rechts.",
-    "promptLong": "Aufrecht sitzen, links drehen und atmen, dann rechts — je Seite langsam halten."
+    "promptLong": "Aufrecht sitzen, links drehen und atmen, dann rechts — je Seite langsam halten.",
+    "sideSwitch": true
   },
   {
     "id": "katzenbuckel-stuhl",

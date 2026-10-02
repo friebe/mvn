@@ -76,8 +76,8 @@ export function availableShortcuts(ctx: ShortcutContext): Set<ShortcutId> {
   if (phase === 'setup') {
     active.add('start')
   } else if (phase === 'threshold') {
-    const momentChoice =
-      state.endedPhase === 'sit' || state.endedPhase === 'stand' || state.endedPhase === 'reset'
+    const momentChoice = state.phaseEndsAt != null &&
+      (state.endedPhase === 'sit' || state.endedPhase === 'stand' || state.endedPhase === 'reset')
     if (momentChoice) active.add('skipStanding')
     active.add('rise')
   } else if (phase === 'pick') {

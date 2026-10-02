@@ -4,8 +4,9 @@
  */
 
 @media (max-width: 1000px) {
-  .back-link,
-  .icon-link.back-link {
+  .settings-top .back-link,
+  .analytics-top .back-link,
+  .moments-top:not(.moments-top-play) .back-link {
     display: none;
   }
 

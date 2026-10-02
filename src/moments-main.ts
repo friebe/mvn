@@ -4,7 +4,7 @@ import '@fontsource/source-sans-3/600.css'
 import './moments.css'
 import './moment-player.css'
 
-import { playMomentDone } from './audio'
+import { playMomentDone, playPackCue, unlockAudio } from './audio'
 import { brandLockupHtml, BRAND_TAG, HEADER_MARK_SIZE } from './brand-mark'
 import {
   analyticsNavIconHtml,
@@ -13,7 +13,7 @@ import {
 } from './nav-icons'
 import { getMoment, momentPrompt, type Moment } from './exercises'
 import { momentFigureHtml } from './moment-figures'
-import { secondsFromMs } from './intervals'
+import { PACK_DURATION_OPTIONS_SEC, secondsFromMs } from './intervals'
 import {
   bindMomentPlayer,
   momentPlayerHtml,
@@ -34,7 +34,12 @@ import {
 } from './moment-packs'
 import { appPath } from './paths'
 import { pageDockHtml } from './page-dock'
-import { getResolvedMomentDuration } from './preferences'
+import { setPackPlayAwake } from './wake-lock'
+import {
+  getResolvedMomentDuration,
+  getResolvedPackDuration,
+  setPackDuration,
+} from './preferences'
 import { loadState } from './state'
 import { applyThemeFromState, bindSystemThemeListener, normalizeTheme } from './theme'
 import { bindThemeToggle, syncThemeToggle, themeToggleButtonHtml } from './theme-toggle'
@@ -53,10 +58,13 @@ type View =
       index: number
       endsAt: number
       durationMs: number
+      warned3: boolean
+      warnedSide: boolean
     }
   | { kind: 'done'; packId: string; count: number }
 
 const TICK_MS = 250
+const PACK_WARN_MS = 3000
 
 let view: View = { kind: 'browse' }
 let tickId: number | null = null
@@ -72,16 +80,38 @@ function momentDurationMs(): number {
   return getResolvedMomentDuration()
 }
 
+function packDurationMs(): number {
+  return getResolvedPackDuration()
+}
+
 function durationNote(): string {
   const sec = secondsFromMs(momentDurationMs())
   return `${sec}s per moment — Settings → Intervals.`
 }
 
 function packDurationLabel(momentCount: number): string {
-  const totalSec = secondsFromMs(momentDurationMs()) * momentCount
+  const totalSec = secondsFromMs(packDurationMs()) * momentCount
   if (totalSec < 60) return `~${totalSec}s`
   const min = Math.max(1, Math.round(totalSec / 60))
   return `~${min} min`
+}
+
+function packDurationTabsHtml(): string {
+  const current = secondsFromMs(packDurationMs())
+  return `
+    <div class="pack-duration" role="radiogroup" aria-label="Seconds per moment">
+      ${PACK_DURATION_OPTIONS_SEC.map(
+        (sec) => `
+        <button
+          type="button"
+          class="pack-duration-tab${sec === current ? ' is-on' : ''}"
+          data-pack-sec="${sec}"
+          role="radio"
+          aria-checked="${sec === current ? 'true' : 'false'}"
+        >${sec}s</button>`,
+      ).join('')}
+    </div>
+  `
 }
 
 function libraryHref(): string {
@@ -105,18 +135,36 @@ function headerNav(): string {
   `
 }
 
-function shellTop(backHref: string, backLabel: string): string {
+function backLinkHtml(href: string, label: string): string {
   return `
-    <header class="moments-top">
-      <a class="icon-link back-link" href="${backHref}" aria-label="${backLabel}" title="${backLabel}">
+      <a class="icon-link back-link" href="${href}" aria-label="${label}" title="${label}">
         <svg class="icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
           <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
         </svg>
-      </a>
+      </a>`
+}
+
+function shellTop(backHref: string, backLabel: string): string {
+  return `
+    <header class="moments-top">
+      ${backLinkHtml(backHref, backLabel)}
       <div class="moments-heading app-header-brand">
         ${brandLockupHtml(BRAND_TAG, HEADER_MARK_SIZE)}
       </div>
       ${headerNav()}
+    </header>
+  `
+}
+
+function playTop(): string {
+  return `
+    <header class="moments-top moments-top-play">
+      <button type="button" class="icon-link back-link" id="btn-play-back" aria-label="Back to pack" title="Back to pack">
+        <svg class="icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+        </svg>
+      </button>
+      ${themeToggleButtonHtml()}
     </header>
   `
 }
@@ -127,7 +175,11 @@ function packRowHtml(pack: MomentPack): string {
   const zoneTitle = PACK_ZONE_META[pack.zone].title
   const inLoop = loopCountInPack(pack)
   const loopMeta =
-    inLoop === count ? `${count} moment${count === 1 ? '' : 's'}` : `${inLoop} of ${count} in the loop`
+    inLoop === 0
+      ? `${count} moment${count === 1 ? '' : 's'}`
+      : inLoop === count
+        ? `${count} moment${count === 1 ? '' : 's'} in sit/stand`
+        : `${inLoop} of ${count} in sit/stand`
   return `
     <li>
       <button
@@ -188,7 +240,7 @@ function renderBrowse(root: HTMLElement): void {
       ${shellTop(appPath(), 'Back to app')}
       <div class="moments-lede">
         <h1 class="moments-title">Moments</h1>
-        <p class="moments-note">${durationNote()}</p>
+        <p class="moments-note">Run a pack, or check moments into sit/stand.</p>
       </div>
       <ul class="pack-list" aria-label="Moment packs">
         <li>
@@ -237,8 +289,8 @@ function renderFavorites(root: HTMLElement): void {
         <p class="moments-note">
           ${
             empty
-              ? 'Nothing checked. Sit/stand still uses every pack moment until you pick some.'
-              : 'Checked in packs — sit/stand picks from here.'
+              ? 'Nothing in sit/stand yet. Check a moment in a pack to opt in.'
+              : 'Sit/stand picks from here.'
           }
         </p>
         ${empty ? '' : `<p class="pack-meta">${count} moment${count === 1 ? '' : 's'} · ${durationNote()}</p>`}
@@ -270,10 +322,17 @@ function renderFavorites(root: HTMLElement): void {
   bindMomentPicks(root, () => render(root))
 }
 
+function packLoopNote(inLoop: number, total: number): string {
+  if (inLoop === 0) {
+    return 'Check a moment to add it to sit/stand. Run pack always plays the full pack.'
+  }
+  return `${inLoop} of ${total} in sit/stand.`
+}
+
 function renderPack(root: HTMLElement, pack: MomentPack): void {
   stopTick()
   const moments = getPackMoments(pack)
-  const durationMs = momentDurationMs()
+  const durationMs = packDurationMs()
   const inLoop = loopCountInPack(pack)
 
   root.innerHTML = `
@@ -283,11 +342,13 @@ function renderPack(root: HTMLElement, pack: MomentPack): void {
         <p class="pack-kind">${PACK_ZONE_META[pack.zone].title}</p>
         <h1 class="pack-title">${pack.title}</h1>
         <p class="pack-desc">${pack.description}</p>
-        <p class="pack-meta">${inLoop} of ${moments.length} in the sit/stand loop · ${durationNote()}</p>
+        <p class="pack-meta">${moments.length} moment${moments.length === 1 ? '' : 's'} · ${packDurationLabel(moments.length)}</p>
+        <p class="pack-loop-note">${packLoopNote(inLoop, moments.length)}</p>
         <ol class="moment-sequence" aria-label="Moments in pack">
           ${moments.map((m) => momentPickHtml(m, durationMs)).join('')}
         </ol>
         <div class="moments-actions">
+          ${packDurationTabsHtml()}
           <div class="moments-row">
             <button type="button" class="btn btn-primary" id="btn-run-pack">Run pack</button>
           </div>
@@ -301,9 +362,9 @@ function renderPack(root: HTMLElement, pack: MomentPack): void {
   `
 
   bindMomentPicks(root, () => {
-    const meta = root.querySelector('.pack-meta')
-    if (meta) {
-      meta.textContent = `${loopCountInPack(pack)} of ${moments.length} in the sit/stand loop · ${durationNote()}`
+    const loopNote = root.querySelector('.pack-loop-note')
+    if (loopNote) {
+      loopNote.textContent = packLoopNote(loopCountInPack(pack), moments.length)
     }
     root.querySelectorAll<HTMLInputElement>('.moment-pick-input').forEach((input) => {
       const box = input.nextElementSibling
@@ -313,7 +374,17 @@ function renderPack(root: HTMLElement, pack: MomentPack): void {
     })
   })
 
+  root.querySelectorAll<HTMLButtonElement>('[data-pack-sec]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const sec = Number(btn.dataset.packSec)
+      if (!Number.isFinite(sec)) return
+      setPackDuration(sec)
+      render(root)
+    })
+  })
+
   root.querySelector('#btn-run-pack')?.addEventListener('click', () => {
+    unlockAudio()
     startPlay(pack.id, moments.map((m) => m.id))
     render(root)
   })
@@ -321,7 +392,7 @@ function renderPack(root: HTMLElement, pack: MomentPack): void {
 
 function startPlay(packId: string, momentIds: string[]): void {
   if (momentIds.length === 0) return
-  const durationMs = momentDurationMs()
+  const durationMs = packDurationMs()
   view = {
     kind: 'play',
     packId,
@@ -329,6 +400,8 @@ function startPlay(packId: string, momentIds: string[]): void {
     index: 0,
     endsAt: Date.now() + durationMs,
     durationMs,
+    warned3: false,
+    warnedSide: false,
   }
 }
 
@@ -351,7 +424,7 @@ function advancePlay(root: HTMLElement, completed: boolean): void {
     return
   }
 
-  const durationMs = momentDurationMs()
+  const durationMs = packDurationMs()
   view = {
     kind: 'play',
     packId,
@@ -359,8 +432,45 @@ function advancePlay(root: HTMLElement, completed: boolean): void {
     index: nextIndex,
     endsAt: Date.now() + durationMs,
     durationMs,
+    warned3: false,
+    warnedSide: false,
   }
   render(root)
+}
+
+function packPlayHint(moment: Moment, durationMs: number): string {
+  return moment.promptLong ?? momentPrompt(moment, durationMs)
+}
+
+function packCueLabel(
+  v: Extract<View, { kind: 'play' }>,
+  moment: Moment,
+  left: number,
+): string {
+  if (left <= 0) return ''
+  if (left <= PACK_WARN_MS) {
+    return v.index + 1 < v.momentIds.length ? 'Nächste' : 'Gleich'
+  }
+  if (moment.sideSwitch && left <= v.durationMs / 2) return 'Andere Seite'
+  return ''
+}
+
+function firePackCues(
+  v: Extract<View, { kind: 'play' }>,
+  moment: Moment,
+  left: number,
+): void {
+  if (left <= 0) return
+  const sound = loadState().soundEnabled
+  const half = v.durationMs / 2
+  if (moment.sideSwitch && !v.warnedSide && left <= half && left > PACK_WARN_MS) {
+    v.warnedSide = true
+    playPackCue(sound)
+  }
+  if (!v.warned3 && left <= PACK_WARN_MS) {
+    v.warned3 = true
+    playPackCue(sound)
+  }
 }
 
 function renderPlay(root: HTMLElement, v: Extract<View, { kind: 'play' }>): void {
@@ -372,17 +482,21 @@ function renderPlay(root: HTMLElement, v: Extract<View, { kind: 'play' }>): void
 
   const moment = getMoment(v.momentIds[v.index])!
   const rem = remainingMs(v)
+  const step = `${v.index + 1} / ${v.momentIds.length}`
   const playerState = {
+    phaseLabel: step,
     title: moment.title,
-    hint: momentPrompt(moment, v.durationMs),
+    hint: packPlayHint(moment, v.durationMs),
     remainingMs: rem,
     durationMs: v.durationMs,
     figureHtml: momentFigureHtml(moment.figureId, 'stage'),
+    cue: packCueLabel(v, moment, rem),
+    ending: rem <= PACK_WARN_MS && rem > 0,
   }
 
   root.innerHTML = `
     <div class="moments">
-      ${shellTop(`${appPath('moments.html')}#${v.packId}`, 'Back to pack')}
+      ${playTop()}
       ${momentPlayerHtml(playerState, {
         skipLabel: v.index + 1 < v.momentIds.length ? 'Skip' : 'Finish',
         stopLabel: 'Stop pack',
@@ -400,6 +514,13 @@ function renderPlay(root: HTMLElement, v: Extract<View, { kind: 'play' }>): void
     },
   })
 
+  const leavePack = () => {
+    stopTick()
+    view = { kind: 'pack', packId: v.packId }
+    render(root)
+  }
+  root.querySelector('#btn-play-back')?.addEventListener('click', leavePack)
+
   stopTick()
   tickId = window.setInterval(() => {
     if (view.kind !== 'play') {
@@ -409,12 +530,15 @@ function renderPlay(root: HTMLElement, v: Extract<View, { kind: 'play' }>): void
     const left = remainingMs(view)
     const m = getMoment(view.momentIds[view.index])
     if (!m) return
+    firePackCues(view, m, left)
     updateMomentPlayer(root, {
       title: m.title,
-      hint: momentPrompt(m, view.durationMs),
+      hint: packPlayHint(m, view.durationMs),
       remainingMs: left,
       durationMs: view.durationMs,
       figureHtml: momentFigureHtml(m.figureId, 'stage'),
+      cue: packCueLabel(view, m, left),
+      ending: left <= PACK_WARN_MS && left > 0,
     })
     if (left <= 0) advancePlay(root, true)
   }, TICK_MS)
@@ -445,6 +569,7 @@ function renderDone(root: HTMLElement, v: Extract<View, { kind: 'done' }>): void
   root.querySelector('#btn-again')?.addEventListener('click', () => {
     const packObj = getMomentPack(v.packId)
     if (!packObj) return
+    unlockAudio()
     startPlay(v.packId, getPackMoments(packObj).map((m) => m.id))
     render(root)
   })
@@ -461,6 +586,7 @@ function wireHeader(root: HTMLElement): void {
 }
 
 function render(root: HTMLElement): void {
+  setPackPlayAwake(view.kind === 'play')
   if (view.kind === 'browse') {
     renderBrowse(root)
     wireHeader(root)
