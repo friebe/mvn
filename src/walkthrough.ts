@@ -91,7 +91,7 @@ const STEPS: readonly WalkthroughStep[] = [
     phase: 'setup',
     kicker: 'That’s the loop',
     lead: 'Sit · micro-move · stand.',
-    sub: 'Ready when you are — Start begins your real day.',
+    sub: 'Ready when you are — Start begins your real day. Moments up top — packs for the evening.',
     atmosphere: '·',
     fill: 0,
   },

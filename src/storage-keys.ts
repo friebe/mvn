@@ -9,5 +9,5 @@ export const SETTINGS_SEEN_KEY = 'stint.settings-seen'
 export const WALKTHROUGH_SEEN_KEY = 'stint.walkthrough-seen'
 /** Purchased / unlocked moment pack ids (JSON string[]). */
 export const OWNED_PACKS_KEY = 'stint.owned-packs.v1'
-/** Moment ids opted into the sit/stand loop (JSON string[]). Missing or empty = none. */
+/** Moment ids opted into the sit/stand loop (JSON string[]). Missing or empty = starter favorites. */
 export const LOOP_MOMENTS_KEY = 'stint.loop-moments.v1'

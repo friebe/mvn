@@ -240,9 +240,9 @@ function renderBrowse(root: HTMLElement): void {
       ${shellTop(appPath(), 'Back to app')}
       <div class="moments-lede">
         <h1 class="moments-title">Moments</h1>
-        <p class="moments-note">Run a pack, or check moments into sit/stand.</p>
+        <p class="moments-note">Run a pack in full, or check a moment into sit/stand. Starters are already in Favorites.</p>
       </div>
-      <ul class="pack-list" aria-label="Moment packs">
+      <ul class="pack-list pack-list-loop" aria-label="Sit/stand favorites">
         <li>
           <button type="button" class="pack-row" id="btn-favorites">
             <span class="pack-row-kind">Loop</span>
@@ -250,6 +250,8 @@ function renderBrowse(root: HTMLElement): void {
             <span class="pack-row-meta">${loopCount} in sit/stand</span>
           </button>
         </li>
+      </ul>
+      <ul class="pack-list" aria-label="Moment packs">
         ${packs.map((pack) => packRowHtml(pack)).join('')}
       </ul>
       ${pageDockHtml(appPath(), 'Back to app')}
@@ -289,7 +291,7 @@ function renderFavorites(root: HTMLElement): void {
         <p class="moments-note">
           ${
             empty
-              ? 'Nothing in sit/stand yet. Check a moment in a pack to opt in.'
+              ? 'Starter favorites will fill sit/stand until you pick some.'
               : 'Sit/stand picks from here.'
           }
         </p>

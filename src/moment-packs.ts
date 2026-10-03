@@ -80,6 +80,14 @@ export const MOMENT_PACKS: MomentPack[] = [
 
 const ALL_PACK_IDS = MOMENT_PACKS.map((p) => p.id)
 
+/** Desk-safe starter favorites — sit/stand is never an empty pool. */
+export const DEFAULT_LOOP_MOMENT_IDS: readonly string[] = [
+  'nacken-seite',
+  'schulterblatt-zug',
+  'fensterblick',
+  'wasser-schluck',
+]
+
 export function getMomentPack(id: string): MomentPack | undefined {
   return MOMENT_PACKS.find((p) => p.id === id)
 }
@@ -173,13 +181,17 @@ function writeLoopIds(ids: string[]): void {
   }
 }
 
-/** Ids opted into the sit/stand loop. Missing key → none. */
+function defaultLoopIds(): string[] {
+  const owned = new Set(ownedMomentIds())
+  return DEFAULT_LOOP_MOMENT_IDS.filter((id) => owned.has(id))
+}
+
+/** Ids in the sit/stand loop. Missing or empty → starter favorites. */
 export function loopMomentIds(): string[] {
-  const owned = ownedMomentIds()
+  const owned = new Set(ownedMomentIds())
   const saved = readSavedLoopIds()
-  if (saved == null) return []
-  const ownedSet = new Set(owned)
-  return saved.filter((id) => ownedSet.has(id))
+  const picked = saved == null ? [] : saved.filter((id) => owned.has(id))
+  return picked.length > 0 ? picked : defaultLoopIds()
 }
 
 export function isMomentInLoop(id: string): boolean {
@@ -219,7 +231,7 @@ export function loopMomentsByPack(): { pack: MomentPack; moments: Moment[] }[] {
   return groups
 }
 
-/** Sit/stand pick pool — only opted-in moments. Empty means no micro-moves. */
+/** Sit/stand pick pool — opted-in moments, or the starter favorites. */
 export function rhythmMoments(): Moment[] {
   return loopMoments()
 }
