@@ -2,7 +2,7 @@
 title: 'Höhenverstellbarer Schreibtisch: wie oft stehen und sitzen?'
 description: 'Höhenverstellbarer Schreibtisch: wie oft stehen und sitzen? Praxis-Ranges ~30–60 Min wechseln, kurze Stehphasen — kein Maximal-Stehen, kein Fokus-Timer.'
 pubDate: 2026-08-05
-updatedDate: 2026-08-26
+updatedDate: 2026-10-03
 faq:
   - question: 'Höhenverstellbarer Schreibtisch — wie oft stehen?'
     answer: 'Nicht den ganzen Tag. Praxis: etwa alle 30–60 Minuten die Haltung wechseln; Stehphasen anfangs kurz (oft 5–15 Minuten) und steigern. Ziel ist Variation, nicht Maximal-Stehen.'
@@ -20,7 +20,7 @@ faq:
 
 **Kurzantwort:** Am **höhenverstellbaren Schreibtisch** (Stehschreibtisch) gibt es keine magische Minuten-Zahl. Ergonomie-Leitlinien betonen vor allem **häufigen Haltungswechsel** — oft alle **~30–60 Minuten** sitzen und stehen abwechseln, Stehphasen anfangs kurz halten und steigern. Entscheidend ist ein Rhythmus, den du **über Wochen** durchhältst, nicht Maximal-Stehen und nicht ein Plan, der nach drei Tagen nervt.
 
-Dieser Artikel beantwortet: *„Höhenverstellbarer Schreibtisch — wie oft stehen?“* und *„Wie oft Sit/Stand wechseln?“* Kein medizinischer Rat; bei anhaltenden Beschwerden bitte eine Fachperson.
+Dieser Artikel beantwortet: *„Höhenverstellbarer Schreibtisch — wie oft stehen?“* und *„Wie oft Sit/Stand wechseln?“* Die ersten Tage nach dem Aufbau (wie lang eine Stehphase sein darf): [Stehschreibtisch Anfänger: wie lange stehen am Anfang?](/blog/stehschreibtisch-anfaenger-wie-lange-stehen/). Kein medizinischer Rat; bei anhaltenden Beschwerden bitte eine Fachperson.
 
 ## Wie oft stehen?
 

@@ -2,7 +2,7 @@
 title: 'Stehschreibtisch im Home-Office nutzen — warum Sit/Stand oft liegen bleibt'
 description: 'Stehschreibtisch im Home-Office ungenutzt? Warum Sit/Stand oft liegen bleibt — Calls, Flow, Abend — und wie Umgebung statt Motivation den Rhythmus hält.'
 pubDate: 2026-08-17
-updatedDate: 2026-08-18
+updatedDate: 2026-10-03
 faq:
   - question: 'Warum nutze ich meinen Stehschreibtisch im Home-Office kaum?'
     answer: 'Weil der Kauf die leichte Entscheidung war — der Alltag die schwere. Calls, Deep Work und „nur noch kurz“ lassen den Tisch auf Sitzhöhe einfrieren. Ohne sichtbares System und wenig Reibung gewinnt Bequemlichkeit.'
@@ -84,7 +84,7 @@ Der klassische Fehlstart: Am Montag Maximal-Stehen, am Mittwoch Tisch dauerhaft 
 
 Eine Woche, eine Regel:
 
-- Stehphasen **kurz** halten (eher ein paar Minuten als eine Stunde).
+- Stehphasen **kurz** halten (eher ein paar Minuten als eine Stunde). Wie lang am allerersten Anfang: [Stehschreibtisch Anfänger](/blog/stehschreibtisch-anfaenger-wie-lange-stehen/).
 - Sit-Blöcke dürfen länger sein. Variation schlägt Maximal-Stehen.
 - Ein Cue-Kanal, Pause erlaubt, kein Streak.
 - Optional in der Motor-Lücke eine Mini-Bewegung — [nicht Gym](/blog/mikro-bewegung-stehschreibtisch/).
