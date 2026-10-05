@@ -164,19 +164,22 @@ export function pickMomentCards(
     third = pickMomentAvoidingParts(exclude(), usedParts, { nextPosture, durationMs })
   }
 
-  if (third && !used.has(third.id)) {
-    picked.push(third)
-  } else {
+  const addCard = (m: Moment | undefined): boolean => {
+    if (!m || used.has(m.id)) return false
+    picked.push(m)
+    used.add(m.id)
+    usedParts.add(m.part)
+    return true
+  }
+
+  if (!addCard(third)) {
     const fallback = poolFor(undefined, nextPosture, durationMs).find((m) => !used.has(m.id))
-    if (fallback) picked.push(fallback)
+    addCard(fallback)
   }
 
   while (picked.length < 3) {
     const m = pickMomentAvoidingParts(exclude(), usedParts, { nextPosture, durationMs })
-    if (!m || used.has(m.id)) break
-    picked.push(m)
-    used.add(m.id)
-    usedParts.add(m.part)
+    if (!addCard(m)) break
   }
 
   return picked.slice(0, 3)
