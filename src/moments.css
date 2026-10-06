@@ -193,8 +193,17 @@ body {
 }
 
 .pack-row.is-locked {
-  opacity: 0.45;
-  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pack-row.is-locked .pack-row-kind {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.pack-row.is-locked:hover .pack-row-title,
+.pack-row.is-locked:focus-visible .pack-row-title {
+  color: var(--color-accent);
 }
 
 .pack-row-meta {
@@ -477,13 +486,28 @@ body {
 .moments-actions {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: 0.35rem;
-  width: var(--instrument-max-width);
-  max-width: 100%;
+  width: 100%;
+  max-width: var(--instrument-max-width);
   padding-top: 0.15rem;
 }
 
+.moments-actions .moments-row {
+  width: 100%;
+}
+
+.moments-actions .btn {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+}
+
 @media (max-width: 1000px) {
+  .moments {
+    --moments-gutter: clamp(1rem, 3vmin, 2rem);
+  }
+
   .pack-detail {
     flex: 1 1 auto;
     max-width: none;
@@ -495,13 +519,38 @@ body {
     bottom: 0;
     z-index: 8;
     margin-top: auto;
-    width: 100%;
-    padding: 0.55rem 0 calc(0.45rem + env(safe-area-inset-bottom));
+    max-width: none;
+    width: calc(100% + 2 * var(--moments-gutter));
+    margin-left: calc(-1 * var(--moments-gutter));
+    padding: 0.55rem var(--moments-gutter) calc(0.45rem + env(safe-area-inset-bottom));
+    background: var(--color-paper);
+    border-top: 1px solid var(--color-paper-3);
+    box-shadow: 0 -10px 28px var(--shadow-soft);
   }
 
-  .moments-row .btn,
-  .moments-row-secondary .btn {
+  .moments-actions .moments-row-secondary .btn {
+    color: var(--color-ink-2);
+    background: var(--color-paper-2);
+    border-color: var(--color-paper-3);
+  }
+
+  .moments-actions .moments-row-secondary .btn:hover {
+    color: var(--color-ink);
+    background: var(--color-paper-3);
+  }
+
+  .moments .page-dock {
+    box-sizing: border-box;
+    width: calc(100% + 2 * var(--moments-gutter));
+    margin-left: calc(-1 * var(--moments-gutter));
+    padding-left: var(--moments-gutter);
+    padding-right: var(--moments-gutter);
+  }
+
+  .moments .page-dock-back {
+    box-sizing: border-box;
     width: 100%;
+    max-width: none;
   }
 }
 

@@ -4,6 +4,7 @@ import '@fontsource/source-sans-3/600.css'
 import './moments.css'
 import './moment-player.css'
 
+import { trackPackUnlock } from './analytics-umami'
 import { playMomentDone, playPackCue, unlockAudio } from './audio'
 import { brandLockupHtml, BRAND_TAG, HEADER_MARK_SIZE } from './brand-mark'
 import {
@@ -27,9 +28,11 @@ import {
   loopCountInPack,
   loopMomentIds,
   loopMomentsByPack,
+  MOMENT_PACKS,
   packZoneSections,
   PACK_ZONE_META,
   setMomentInLoop,
+  unlockPack,
   type MomentPack,
 } from './moment-packs'
 import { appPath } from './paths'
@@ -186,9 +189,9 @@ function packRowHtml(pack: MomentPack): string {
         type="button"
         class="pack-row${locked ? ' is-locked' : ''}"
         data-pack-id="${pack.id}"
-        ${locked ? 'disabled' : ''}
+        aria-label="${locked ? `Unlock ${pack.title}` : pack.title}"
       >
-        <span class="pack-row-kind">${zoneTitle}</span>
+        <span class="pack-row-kind">${zoneTitle}${locked ? ' · Unlock' : ''}</span>
         <span class="pack-row-title">${pack.title}</span>
         <span class="pack-row-meta">${loopMeta} · ${packDurationLabel(count)}</span>
       </button>
@@ -232,7 +235,7 @@ function bindMomentPicks(root: HTMLElement, onChange: () => void): void {
 
 function renderBrowse(root: HTMLElement): void {
   stopTick()
-  const packs = packZoneSections().flatMap((section) => section.packs)
+  const packs = packZoneSections(MOMENT_PACKS).flatMap((section) => section.packs)
   const loopCount = loopMomentIds().length
 
   root.innerHTML = `
@@ -240,7 +243,7 @@ function renderBrowse(root: HTMLElement): void {
       ${shellTop(appPath(), 'Back to app')}
       <div class="moments-lede">
         <h1 class="moments-title">Moments</h1>
-        <p class="moments-note">Run a pack in full, or check a moment into sit/stand. Starters are already in Favorites.</p>
+        <p class="moments-note">Neck &amp; shoulders and Desk ritual are included. Gray packs unlock on tap — preview only, no payment yet.</p>
       </div>
       <ul class="pack-list pack-list-loop" aria-label="Sit/stand favorites">
         <li>
@@ -267,7 +270,11 @@ function renderBrowse(root: HTMLElement): void {
   root.querySelectorAll<HTMLButtonElement>('[data-pack-id]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const packId = btn.dataset.packId
-      if (!packId || !isPackOwned(packId)) return
+      if (!packId) return
+      if (!isPackOwned(packId)) {
+        unlockPack(packId)
+        trackPackUnlock(packId)
+      }
       view = { kind: 'pack', packId }
       window.location.hash = packId
       render(root)
@@ -352,11 +359,10 @@ function renderPack(root: HTMLElement, pack: MomentPack): void {
         <div class="moments-actions">
           ${packDurationTabsHtml()}
           <div class="moments-row">
-            <button type="button" class="btn btn-primary" id="btn-run-pack">Run pack</button>
+            <button type="button" class="btn btn-primary" id="btn-run-pack">Start</button>
           </div>
           <div class="moments-row moments-row-secondary">
-            <a class="btn btn-ghost" href="${appPath('moments.html')}#favorites">Favorites</a>
-            <a class="btn btn-ghost" href="${libraryHref()}">All packs</a>
+            <a class="btn btn-ghost" href="${libraryHref()}">Back</a>
           </div>
         </div>
       </div>

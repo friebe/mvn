@@ -31,8 +31,6 @@ function momentPool(): Moment[] {
   return rhythmMoments()
 }
 
-const CORE_PARTS: MomentPart[] = ['neck', 'shoulders', 'back']
-
 const KIND_LABEL: Record<MomentKind, string> = {
   body: 'Körper',
   eyes: 'Augen',
@@ -102,35 +100,12 @@ export function pickMoment(
   )
 }
 
-function pickMomentAvoidingParts(
-  recentIds: string[],
-  usedParts: Set<MomentPart>,
-  opts: {
-    kind?: MomentKind
-    parts?: MomentPart[]
-    nextPosture?: 'sit' | 'stand'
-    durationMs?: number
-  } = {},
-): Moment | undefined {
-  const { kind, parts, nextPosture, durationMs } = opts
-  let pool = poolFor(kind, nextPosture, durationMs)
-  if (parts?.length) pool = pool.filter((m) => parts.includes(m.part))
-
-  const fresh = pool.filter((m) => !recentIds.includes(m.id) && !usedParts.has(m.part))
-  const fromFresh = pickRandom(fresh)
-  if (fromFresh) return fromFresh
-
-  const byPart = pool.filter((m) => !usedParts.has(m.part))
-  const fromPart = pickRandom(preferFresh(byPart, recentIds))
-  if (fromPart) return fromPart
-
-  return (
-    pickRandom(preferFresh(pool, recentIds)) ??
-    pickMoment(recentIds, undefined, nextPosture, durationMs)
-  )
+function pickFromPool(pool: Moment[], recentIds: string[]): Moment | undefined {
+  if (pool.length === 0) return undefined
+  return pickRandom(preferFresh(pool, recentIds))
 }
 
-/** Three choices: two core desk zones, third slot sometimes ritual or eyes. */
+/** Three choices: two random body/eyes from favorites, then one ritual (desk) last. */
 export function pickMomentCards(
   recentIds: string[],
   nextPosture: 'sit' | 'stand' = 'stand',
@@ -138,48 +113,27 @@ export function pickMomentCards(
 ): Moment[] {
   const picked: Moment[] = []
   const used = new Set<string>()
-  const usedParts = new Set<MomentPart>()
   const exclude = () => [...recentIds, ...used]
-
-  for (let i = 0; i < 2; i++) {
-    const m = pickMomentAvoidingParts(exclude(), usedParts, {
-      kind: 'body',
-      parts: CORE_PARTS,
-      nextPosture,
-      durationMs,
-    })
-    if (!m || used.has(m.id)) break
-    picked.push(m)
-    used.add(m.id)
-    usedParts.add(m.part)
-  }
-
-  const roll = Math.random()
-  let third: Moment | undefined
-  if (roll < 0.28) {
-    third = pickMoment(exclude(), 'desk', nextPosture, durationMs)
-  } else if (roll < 0.45) {
-    third = pickMoment(exclude(), 'eyes', nextPosture, durationMs)
-  } else {
-    third = pickMomentAvoidingParts(exclude(), usedParts, { nextPosture, durationMs })
-  }
 
   const addCard = (m: Moment | undefined): boolean => {
     if (!m || used.has(m.id)) return false
     picked.push(m)
     used.add(m.id)
-    usedParts.add(m.part)
     return true
   }
 
-  if (!addCard(third)) {
-    const fallback = poolFor(undefined, nextPosture, durationMs).find((m) => !used.has(m.id))
-    addCard(fallback)
+  const variablePool = () =>
+    poolFor(undefined, nextPosture, durationMs).filter((m) => m.kind !== 'desk' && !used.has(m.id))
+
+  const ritualPool = () =>
+    poolFor('desk', nextPosture, durationMs).filter((m) => !used.has(m.id))
+
+  for (let i = 0; i < 2; i++) {
+    if (!addCard(pickFromPool(variablePool(), exclude()))) break
   }
 
-  while (picked.length < 3) {
-    const m = pickMomentAvoidingParts(exclude(), usedParts, { nextPosture, durationMs })
-    if (!addCard(m)) break
+  if (!addCard(pickFromPool(ritualPool(), exclude()))) {
+    addCard(pickFromPool(variablePool(), exclude()))
   }
 
   return picked.slice(0, 3)

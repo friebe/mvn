@@ -42,7 +42,7 @@ export const MOMENT_PACKS: MomentPack[] = [
     title: 'Look away',
     description: 'Screen break — eyes off the monitor.',
     momentIds: ['fensterblick'],
-    tier: 'free',
+    tier: 'paid',
   },
   {
     id: 'upper',
@@ -66,7 +66,7 @@ export const MOMENT_PACKS: MomentPack[] = [
       'tisch-lehnen',
       'brust-oeffnen',
     ],
-    tier: 'free',
+    tier: 'paid',
   },
   {
     id: 'desk',
@@ -78,7 +78,9 @@ export const MOMENT_PACKS: MomentPack[] = [
   },
 ]
 
-const ALL_PACK_IDS = MOMENT_PACKS.map((p) => p.id)
+function defaultOwnedPackIds(): string[] {
+  return MOMENT_PACKS.filter((p) => p.tier === 'free').map((p) => p.id)
+}
 
 /** Desk-safe starter favorites — sit/stand is never an empty pool. */
 export const DEFAULT_LOOP_MOMENT_IDS: readonly string[] = [
@@ -101,13 +103,13 @@ export function getPackMoments(pack: MomentPack): Moment[] {
 export function readOwnedPackIds(): string[] {
   try {
     const raw = localStorage.getItem(OWNED_PACKS_KEY)
-    if (!raw) return [...ALL_PACK_IDS]
+    if (!raw) return defaultOwnedPackIds()
     const parsed = JSON.parse(raw) as unknown
-    if (!Array.isArray(parsed)) return [...ALL_PACK_IDS]
+    if (!Array.isArray(parsed)) return defaultOwnedPackIds()
     const ids = parsed.filter((id): id is string => typeof id === 'string')
-    return ids.length > 0 ? ids : [...ALL_PACK_IDS]
+    return ids.length > 0 ? ids : defaultOwnedPackIds()
   } catch {
-    return [...ALL_PACK_IDS]
+    return defaultOwnedPackIds()
   }
 }
 
