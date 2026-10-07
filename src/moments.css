@@ -133,11 +133,235 @@ body {
   line-height: 1.12;
 }
 
+html.moments-unlock-active {
+  overflow: hidden;
+}
+
+/* Pack unlock — border sweep + label once around the screen, then navigate */
+.moments-unlock-ceremony {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: auto;
+  visibility: hidden;
+  background: transparent;
+}
+
+.moments-unlock-ceremony[hidden] {
+  display: none !important;
+}
+
+.moments-unlock-ceremony.is-active {
+  visibility: visible;
+}
+
+.moments-unlock-frame {
+  position: absolute;
+  inset: max(11px, env(safe-area-inset-top)) max(11px, env(safe-area-inset-right))
+    max(11px, env(safe-area-inset-bottom)) max(11px, env(safe-area-inset-left));
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 0 color-mix(in oklch, var(--color-accent) 0%, transparent);
+}
+
+.moments-unlock-ceremony.is-active .moments-unlock-frame {
+  animation: moments-unlock-frame-blink 1.45s var(--ease) forwards;
+}
+
+.moments-unlock-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 5px;
+  opacity: 0;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.moments-unlock-sweep::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 220vmax;
+  height: 220vmax;
+  translate: -50% -50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 286deg,
+    var(--color-accent) 300deg,
+    var(--color-stand) 318deg,
+    var(--color-accent-2) 332deg,
+    transparent 346deg
+  );
+}
+
+.moments-unlock-ceremony.is-active .moments-unlock-sweep {
+  opacity: 1;
+}
+
+.moments-unlock-ceremony.is-active .moments-unlock-sweep::before {
+  animation: moments-unlock-sweep-spin 1.28s linear forwards;
+}
+
+.moments-unlock-runner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: clamp(0.72rem, 2.1vmin, 0.92rem);
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--color-paper);
+  background: color-mix(in oklch, var(--color-accent) 88%, var(--color-ink));
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--color-paper) 35%, transparent),
+    0 4px 18px var(--shadow-soft);
+  white-space: nowrap;
+  max-width: min(14rem, 55vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  offset-path: inset(
+    max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+      max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)) round 14px
+  );
+  offset-distance: 0%;
+  offset-anchor: center center;
+  offset-rotate: auto;
+  opacity: 0;
+}
+
+.moments-unlock-ceremony.is-active .moments-unlock-runner {
+  animation: moments-unlock-runner 1.28s linear forwards;
+}
+
+.moments-unlock-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes moments-unlock-frame-blink {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 0 color-mix(in oklch, var(--color-accent) 0%, transparent);
+  }
+
+  6%,
+  14% {
+    box-shadow: inset 0 0 0 3px color-mix(in oklch, var(--color-accent) 70%, transparent);
+  }
+
+  10% {
+    box-shadow: inset 0 0 0 4px color-mix(in oklch, var(--color-stand) 55%, transparent);
+  }
+
+  72% {
+    box-shadow: inset 0 0 0 2px color-mix(in oklch, var(--color-accent) 40%, transparent);
+  }
+}
+
+@keyframes moments-unlock-sweep-spin {
+  from {
+    rotate: 0deg;
+  }
+
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes moments-unlock-runner {
+  0% {
+    opacity: 0;
+    offset-distance: 0%;
+  }
+
+  4% {
+    opacity: 1;
+  }
+
+  96% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    offset-distance: 100%;
+  }
+}
+
+.moments-unlock-ceremony.is-reduced .moments-unlock-runner {
+  display: none;
+}
+
+.moments-unlock-ceremony.is-reduced.is-active .moments-unlock-sweep::before {
+  animation-duration: 0.45s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moments-unlock-ceremony.is-active .moments-unlock-runner {
+    animation: none;
+    display: none;
+  }
+
+  .moments-unlock-ceremony.is-active .moments-unlock-sweep::before {
+    animation-duration: 0.45s;
+  }
+}
+
 .moments-note {
   margin: 0;
   color: var(--color-ink-3);
   font-size: clamp(0.85rem, 1.8vmin, 0.95rem);
   line-height: 1.4;
+}
+
+.moments-lede .moments-note + .moments-note {
+  margin-top: 0.45rem;
+}
+
+.moments-note-lead {
+  color: var(--color-ink-2);
+  font-size: clamp(0.92rem, 1.95vmin, 1.02rem);
+  line-height: 1.45;
+}
+
+.pack-list-heading {
+  margin: 0 0 0.15rem;
+  max-width: var(--instrument-max-width);
+  font-size: clamp(0.78rem, 1.6vmin, 0.88rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+}
+
+.pack-rhythm-heading {
+  margin: 0.65rem 0 0.1rem;
+  font-family: var(--font-body);
+  font-size: clamp(0.78rem, 1.6vmin, 0.88rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
 }
 
 /* —— Browse —— */

@@ -45,6 +45,7 @@ import {
 } from './preferences'
 import { loadState } from './state'
 import { applyThemeFromState, bindSystemThemeListener, normalizeTheme } from './theme'
+import { playPackUnlockCeremony } from './moments-unlock-pulse'
 import { bindThemeToggle, syncThemeToggle, themeToggleButtonHtml } from './theme-toggle'
 
 applyThemeFromState(loadState())
@@ -68,7 +69,6 @@ type View =
 
 const TICK_MS = 250
 const PACK_WARN_MS = 3000
-
 let view: View = { kind: 'browse' }
 let tickId: number | null = null
 
@@ -179,10 +179,10 @@ function packRowHtml(pack: MomentPack): string {
   const inLoop = loopCountInPack(pack)
   const loopMeta =
     inLoop === 0
-      ? `${count} moment${count === 1 ? '' : 's'}`
+      ? `${count} moment${count === 1 ? '' : 's'} · none in rhythm`
       : inLoop === count
-        ? `${count} moment${count === 1 ? '' : 's'} in sit/stand`
-        : `${inLoop} of ${count} in sit/stand`
+        ? `${count} in rhythm`
+        : `${inLoop} of ${count} in rhythm`
   return `
     <li>
       <button
@@ -209,6 +209,7 @@ function momentPickHtml(moment: Moment, durationMs: number): string {
           type="checkbox"
           class="moment-pick-input"
           data-moment-id="${moment.id}"
+          aria-label="${moment.title} — include in sit/stand rhythm"
           ${on ? 'checked' : ''}
         />
         <span class="moment-pick-ui" aria-hidden="true" data-checked="${on ? 'true' : 'false'}"></span>
@@ -243,17 +244,23 @@ function renderBrowse(root: HTMLElement): void {
       ${shellTop(appPath(), 'Back to app')}
       <div class="moments-lede">
         <h1 class="moments-title">Moments</h1>
-        <p class="moments-note">Neck &amp; shoulders and Desk ritual are included. Gray packs unlock on tap — preview only, no payment yet.</p>
+        <p class="moments-note moments-note-lead">
+          Open a pack and check the moments you like. Checked items feed your sit/stand rhythm — Stint shows three cards each time the desk switches posture.
+        </p>
+        <p class="moments-note">
+          Neck &amp; shoulders and Desk ritual are included. Gray packs unlock on tap — preview only, no payment yet.
+        </p>
       </div>
-      <ul class="pack-list pack-list-loop" aria-label="Sit/stand favorites">
+      <ul class="pack-list pack-list-loop" aria-label="Sit/stand rhythm">
         <li>
           <button type="button" class="pack-row" id="btn-favorites">
-            <span class="pack-row-kind">Loop</span>
-            <span class="pack-row-title">Favorites</span>
-            <span class="pack-row-meta">${loopCount} in sit/stand</span>
+            <span class="pack-row-kind">Desk loop</span>
+            <span class="pack-row-title">Sit/stand rhythm</span>
+            <span class="pack-row-meta">${loopCount} moment${loopCount === 1 ? '' : 's'} · 3 cards per switch</span>
           </button>
         </li>
       </ul>
+      <p class="pack-list-heading">Packs</p>
       <ul class="pack-list" aria-label="Moment packs">
         ${packs.map((pack) => packRowHtml(pack)).join('')}
       </ul>
@@ -269,15 +276,21 @@ function renderBrowse(root: HTMLElement): void {
 
   root.querySelectorAll<HTMLButtonElement>('[data-pack-id]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const packId = btn.dataset.packId
-      if (!packId) return
-      if (!isPackOwned(packId)) {
-        unlockPack(packId)
-        trackPackUnlock(packId)
-      }
-      view = { kind: 'pack', packId }
-      window.location.hash = packId
-      render(root)
+      void (async () => {
+        const packId = btn.dataset.packId
+        if (!packId) return
+        if (!isPackOwned(packId)) {
+          const pack = getMomentPack(packId)
+          if (!pack) return
+          btn.disabled = true
+          unlockPack(packId)
+          trackPackUnlock(packId)
+          await playPackUnlockCeremony(pack.title)
+        }
+        view = { kind: 'pack', packId }
+        window.location.hash = packId
+        render(root)
+      })()
     })
   })
 }
@@ -293,16 +306,19 @@ function renderFavorites(root: HTMLElement): void {
     <div class="moments">
       ${shellTop(libraryHref(), 'Back to library')}
       <div class="moments-lede">
-        <p class="pack-kind">Loop</p>
-        <h1 class="moments-title">Favorites</h1>
+        <p class="pack-kind">Desk loop</p>
+        <h1 class="moments-title">Sit/stand rhythm</h1>
+        <p class="moments-note moments-note-lead">
+          Your checked moments are the pool for desk switches. Uncheck to remove; open any pack to add more.
+        </p>
         <p class="moments-note">
           ${
             empty
-              ? 'Starter favorites will fill sit/stand until you pick some.'
-              : 'Sit/stand picks from here.'
+              ? 'Starter moments stay on until you change them in a pack.'
+              : `${count} in your pool · Stint picks 3 cards per switch (incl. one ritual when checked).`
           }
         </p>
-        ${empty ? '' : `<p class="pack-meta">${count} moment${count === 1 ? '' : 's'} · ${durationNote()}</p>`}
+        ${empty ? '' : `<p class="pack-meta">${durationNote()}</p>`}
       </div>
       ${
         empty
@@ -333,9 +349,12 @@ function renderFavorites(root: HTMLElement): void {
 
 function packLoopNote(inLoop: number, total: number): string {
   if (inLoop === 0) {
-    return 'Check a moment to add it to sit/stand. Run pack always plays the full pack.'
+    return 'Nothing from this pack in your rhythm yet — check moments below.'
   }
-  return `${inLoop} of ${total} in sit/stand.`
+  if (inLoop === total) {
+    return `All ${total} in your rhythm. Start runs the full pack in order — separate from the desk card pool.`
+  }
+  return `${inLoop} of ${total} in your rhythm — check more to widen the card pool.`
 }
 
 function renderPack(root: HTMLElement, pack: MomentPack): void {
@@ -352,8 +371,9 @@ function renderPack(root: HTMLElement, pack: MomentPack): void {
         <h1 class="pack-title">${pack.title}</h1>
         <p class="pack-desc">${pack.description}</p>
         <p class="pack-meta">${moments.length} moment${moments.length === 1 ? '' : 's'} · ${packDurationLabel(moments.length)}</p>
+        <h2 class="pack-rhythm-heading">Sit/stand rhythm</h2>
         <p class="pack-loop-note">${packLoopNote(inLoop, moments.length)}</p>
-        <ol class="moment-sequence" aria-label="Moments in pack">
+        <ol class="moment-sequence" aria-label="Check moments to add to sit/stand rhythm">
           ${moments.map((m) => momentPickHtml(m, durationMs)).join('')}
         </ol>
         <div class="moments-actions">

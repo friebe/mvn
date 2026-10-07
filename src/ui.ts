@@ -359,7 +359,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
 
           <section class="pick" id="pick" hidden>
             <p class="pick-lead" id="pick-lead">Raise the desk and move briefly.</p>
-            <p class="pick-sub" id="pick-sub">Or stand right away — one card is enough.</p>
+            <p class="pick-sub" id="pick-sub">Or stand right away — one card is enough. Change the pool in Moments → Sit/stand rhythm.</p>
             <div class="moment-list" id="moment-cards"></div>
           </section>
 

@@ -105,12 +105,24 @@ function pickFromPool(pool: Moment[], recentIds: string[]): Moment | undefined {
   return pickRandom(preferFresh(pool, recentIds))
 }
 
-/** Three choices: two random body/eyes from favorites, then one ritual (desk) last. */
+/** Sit/stand favorites — no posture/depth filter so three cards stay fillable. */
+function pickFromFavorites(
+  pool: Moment[],
+  recentIds: string[],
+  used: Set<string>,
+): Moment | undefined {
+  const available = pool.filter((m) => !used.has(m.id))
+  if (available.length === 0) return undefined
+  return pickFromPool(available, recentIds)
+}
+
+/** Three choices: two random non-ritual favorites, then one ritual (desk) last. */
 export function pickMomentCards(
   recentIds: string[],
-  nextPosture: 'sit' | 'stand' = 'stand',
-  durationMs?: number,
+  _nextPosture: 'sit' | 'stand' = 'stand',
+  _durationMs?: number,
 ): Moment[] {
+  const favorites = momentPool()
   const picked: Moment[] = []
   const used = new Set<string>()
   const exclude = () => [...recentIds, ...used]
@@ -122,18 +134,15 @@ export function pickMomentCards(
     return true
   }
 
-  const variablePool = () =>
-    poolFor(undefined, nextPosture, durationMs).filter((m) => m.kind !== 'desk' && !used.has(m.id))
-
-  const ritualPool = () =>
-    poolFor('desk', nextPosture, durationMs).filter((m) => !used.has(m.id))
+  const variablePool = () => favorites.filter((m) => m.kind !== 'desk')
+  const ritualPool = () => favorites.filter((m) => m.kind === 'desk')
 
   for (let i = 0; i < 2; i++) {
-    if (!addCard(pickFromPool(variablePool(), exclude()))) break
+    if (!addCard(pickFromFavorites(variablePool(), exclude(), used))) break
   }
 
-  if (!addCard(pickFromPool(ritualPool(), exclude()))) {
-    addCard(pickFromPool(variablePool(), exclude()))
+  if (!addCard(pickFromFavorites(ritualPool(), exclude(), used))) {
+    addCard(pickFromFavorites(variablePool(), exclude(), used))
   }
 
   return picked.slice(0, 3)
