@@ -1,7 +1,8 @@
 ---
 title: 'Sit/Stand-Timer oder Pomodoro — was brauche ich am Stehschreibtisch?'
-description: 'Sit/Stand-Timer oder Pomodoro am Stehschreibtisch? Drei Jobs: Haltung, Fokus, Bewegungspausen — und welche Apps wohin passen.'
+description: 'Drei getrennte Jobs am Desk: Haltung wechseln, Fokus halten, Bewegungspausen — welche Tool-Art wofür passt und was du nicht vermischen solltest.'
 pubDate: 2026-08-26
+updatedDate: 2026-10-11
 faq:
   - question: 'Brauche ich einen Pomodoro-Timer oder etwas für Sit/Stand?'
     answer: 'Das hängt vom Job ab. Pomodoro taktet Fokusarbeit in kurzen Sprints. Ein Sit/Stand-Timer taktet Haltung am Tisch — längere Blöcke sitzen/stehen. Beides ist nützlich, aber nicht dasselbe Tool.'

@@ -1,8 +1,8 @@
 ---
 title: 'Aufsteh-Erinnerung am Stehschreibtisch ohne Stress'
-description: 'Aufsteh-Erinnerung am Stehschreibtisch ohne Stress: weiche Cues, Zweitmonitor, optionaler Ton — Sit/Stand-Reminder, die du nicht hasst.'
+description: 'Weiche Cues, Zweitmonitor, Ton optional — Reminder für Sit/Stand, die nicht wie Fitness-Alarm wirken. Weniger Schuld, mehr Rhythmus.'
 pubDate: 2026-08-08
-updatedDate: 2026-08-18
+updatedDate: 2026-10-11
 faq:
   - question: 'Was ist eine gute Aufsteh-Erinnerung am Schreibtisch?'
     answer: 'Eine, die dich an den Haltungswechsel erinnert, ohne den Flow zu zerreißen: sichtbar und leise oft besser als Sirene. Ideal optional — Ton und Banner getrennt, Pause erlaubt.'

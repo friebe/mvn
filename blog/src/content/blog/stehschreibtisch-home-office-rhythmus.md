@@ -1,8 +1,8 @@
 ---
 title: 'Stehschreibtisch im Home-Office nutzen — warum Sit/Stand oft liegen bleibt'
-description: 'Stehschreibtisch im Home-Office ungenutzt? Warum Sit/Stand oft liegen bleibt — Calls, Flow, Abend — und wie Umgebung statt Motivation den Rhythmus hält.'
+description: 'Calls, Flow, Abend: warum der Wechsel trotz Stehtisch ausfällt — und was Umgebung, sichtbare Cues und kleine Intervalle statt Motivationssprüche bringen.'
 pubDate: 2026-08-17
-updatedDate: 2026-10-03
+updatedDate: 2026-10-11
 faq:
   - question: 'Warum nutze ich meinen Stehschreibtisch im Home-Office kaum?'
     answer: 'Weil der Kauf die leichte Entscheidung war — der Alltag die schwere. Calls, Deep Work und „nur noch kurz“ lassen den Tisch auf Sitzhöhe einfrieren. Ohne sichtbares System und wenig Reibung gewinnt Bequemlichkeit.'

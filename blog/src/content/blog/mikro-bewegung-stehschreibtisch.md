@@ -1,8 +1,8 @@
 ---
 title: 'Mikro-Bewegung am Stehschreibtisch: was in 15 Sekunden reicht'
-description: 'Mikro-Bewegung am Stehschreibtisch: was in ~15 Sekunden reicht, während der Tisch fährt — Schultern, Nacken, Blick. Kein Gym, Prävention am Desk.'
+description: 'Schultern, Nacken, Blick in der Zeit, während der Tisch fährt — Prävention in ~15 Sekunden, ohne Gym und ohne Lauf um den Schreibtisch.'
 pubDate: 2026-08-08
-updatedDate: 2026-08-18
+updatedDate: 2026-10-11
 faq:
   - question: 'Was ist Mikro-Bewegung am Stehschreibtisch?'
     answer: 'Eine sehr kurze Körper-Cue (oft ~15 Sekunden), während der Tisch hoch- oder runterfährt: Stretch, Schultern, Blick in die Ferne. Kein Workout, kein Satz, kein Schweiß.'

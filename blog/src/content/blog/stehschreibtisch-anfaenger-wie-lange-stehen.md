@@ -1,8 +1,8 @@
 ---
 title: 'Stehschreibtisch Anfänger: wie lange stehen am Anfang?'
-description: 'Stehschreibtisch Anfänger: wie lange stehen? Nicht Tag eins vier Stunden — sonst ist der teure Tisch in einer Woche nur noch Sitzmöbel. Kontinuität, kurze Intervalle.'
+description: 'Erste Woche am Stehtisch: realistische Minuten statt Maximal-Stehen — damit Kontinuität entsteht und der Tisch nicht zur Deko wird. Kurze Intervalle, eine Variable pro Woche.'
 pubDate: 2026-10-03
-updatedDate: 2026-10-03
+updatedDate: 2026-10-11
 faq:
   - question: 'Wie lange sollte ich am Anfang am Stehschreibtisch stehen?'
     answer: 'Die ersten Tage oft nur 5–10 Minuten am Stück, ein paar Mal über den Tag. Sit-Blöcke dürfen länger bleiben. Kontinuität schlägt die eine lange Steh-Session.'

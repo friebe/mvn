@@ -1,8 +1,8 @@
 ---
 title: 'Handy-Erinnerung am Schreibtisch — warum sie oft nicht reicht'
-description: 'Handy-Erinnerung am Schreibtisch reicht oft nicht: Cue neben der Arbeit, zu viel Reibung. Sit/Stand braucht ein Signal im Sichtfeld am Desktop.'
+description: 'Warum die Erinnerung auf dem Phone verpufft — und wann ein Cues am Monitor oder Desktop sinnvoller ist für Sit/Stand am Schreibtisch.'
 pubDate: 2026-08-12
-updatedDate: 2026-08-18
+updatedDate: 2026-10-11
 faq:
   - question: 'Warum helfen Handy-Erinnerungen am Schreibtisch oft nicht?'
     answer: 'Weil Ort und Reibung nicht stimmen. Der Cue liegt neben der Arbeit; schon zum Handy schauen ist oft ein Schritt zu viel. Sit/Stand braucht ein Signal im Sichtfeld — so wenig Aufwand, dass du es trotz Flow noch tust.'

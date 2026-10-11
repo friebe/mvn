@@ -1,8 +1,8 @@
 ---
 title: 'Stehschreibtisch-App: Sit/Stand-Erinnerung, Sound & Benachrichtigungen'
-description: 'Stint als Stehschreibtisch-App: Sit/Stand-Erinnerung, Sound und Notifications einstellen. Intervalle, Demo, Install — lokal, ohne Fitness-Druck. How-to.'
+description: 'Intervalle, Sound, Notifications und Demo in Stint einstellen — ruhiger Desk-Rhythmus, lokal im Browser, ohne Account und ohne Workout-App-Druck.'
 pubDate: 2026-08-02
-updatedDate: 2026-08-07
+updatedDate: 2026-10-11
 faq:
   - question: 'Was macht eine Sit/Stand-Erinnerung anders als ein Fokus-Timer?'
     answer: 'Sie erinnert an den Haltungswechsel (sitzen/stehen), nicht an Arbeits-Sprints. Idealerweise weich und optional — ohne Streaks oder Sirenen.'

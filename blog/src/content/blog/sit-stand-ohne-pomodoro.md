@@ -1,8 +1,8 @@
 ---
 title: 'Stehschreibtisch-Rhythmus ohne Pomodoro — Sit/Stand statt Fokus-Timer'
-description: 'Warum Sit/Stand am Stehschreibtisch kein Pomodoro ist: lange Blöcke, Mikro-Bewegung beim Wechsel, ruhiger Rhythmus statt Fokus-Timer. Körperpflege am Desk.'
+description: 'Lange Sit-Blöcke, kurzer Stand, Mikro-Bewegung beim Wechsel — Körperpflege am Desk, nicht Fokus-Sprints. Warum Pomodoro-Logik hier oft danebenliegt.'
 pubDate: 2026-08-02
-updatedDate: 2026-08-08
+updatedDate: 2026-10-11
 faq:
   - question: 'Ist ein Sit/Stand-Rhythmus dasselbe wie Pomodoro?'
     answer: 'Nein. Pomodoro taktet Fokusarbeit in kurzen Sprints. Sit/Stand taktet Haltung — lange Sitz- oder Stehblöcke und Wechsel am Tisch, unabhängig von 25-Minuten-Arbeitseinheiten.'
