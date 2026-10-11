@@ -11,11 +11,9 @@ import {
   CHECKIN_RATIO,
   CHECKIN_TIMEOUT_MS,
   DEMO_CHECKIN_TIMEOUT_MS,
-  DEMO_THRESHOLD_MOMENT_MS,
   FORESHADOW_RATIO,
   FREEZE_EXTEND_MS,
   FREEZE_PROMPT_MS,
-  THRESHOLD_MOMENT_MS,
   type ActivePhase,
   type AppState,
   type AtmosphereDisplay,
@@ -30,7 +28,7 @@ import {
   phaseLabel,
 } from './modes'
 import { resolveMomentDuration } from './intervals'
-import { getMoment, pickMoment, pickMomentCards, rememberId } from './exercises'
+import { getMoment, pickMoment, pickThresholdOffers, rememberId } from './exercises'
 import { hasRhythmMoments } from './moment-packs'
 import { pickAmbient, pickMotivation, rememberMotivation, shouldShowRareAmbient, ambientMilestoneAfterShow } from './motivation'
 import { CHECK_IN_YES_ACTION, notifyPhase, SNOOZE_POSTURE_ACTION } from './notify'
@@ -232,10 +230,6 @@ function checkInTimeoutMs(): number {
   return state.demo ? DEMO_CHECKIN_TIMEOUT_MS : CHECKIN_TIMEOUT_MS
 }
 
-function thresholdMomentMs(): number {
-  return state.demo ? DEMO_THRESHOLD_MOMENT_MS : THRESHOLD_MOMENT_MS
-}
-
 function thresholdMomentChoice(ended: ActivePhase | null = state.endedPhase): boolean {
   // Desk up / down only when the user opted moments into sit/stand.
   if (ended !== 'sit' && ended !== 'stand' && ended !== 'reset') return false
@@ -247,12 +241,32 @@ function clearThresholdMomentTimer(): void {
   state = { ...state, phaseEndsAt: null, phaseDurationMs: null }
 }
 
-function autoThresholdToMoment(): void {
-  if (state.phase !== 'threshold' || !thresholdMomentChoice()) return
-  recordStat('rise')
-  clearThresholdMomentTimer()
-  resetPostureSnooze()
-  enterPick()
+function thresholdOfferPosture(): 'sit' | 'stand' {
+  const next = state.pendingNextPhase
+  if (next === 'sit' || next === 'stand') return next
+  return 'stand'
+}
+
+function assignThresholdOffers(avoid?: {
+  offerId?: string | null
+  ritualId?: string | null
+}): void {
+  const { offer, ritualAlt } = pickThresholdOffers(
+    state.recentExerciseIds,
+    thresholdOfferPosture(),
+    { avoidOfferId: avoid?.offerId, avoidRitualId: avoid?.ritualId },
+  )
+  state = {
+    ...state,
+    momentChoiceIds: offer ? [offer.id] : null,
+    thresholdRitualId: ritualAlt?.id ?? null,
+  }
+}
+
+export function hasThresholdOfferUi(): boolean {
+  return (
+    (state.momentChoiceIds?.length ?? 0) > 0 || state.thresholdRitualId != null
+  )
 }
 
 function shouldShowFreezePrompt(): boolean {
@@ -273,13 +287,11 @@ export function initTimer(initial: AppState): void {
   }
   state = initial
   motivationPickCount = initial.recentMotivationIds.length
-  if (
-    state.phase === 'threshold' &&
-    state.phaseEndsAt != null &&
-    Date.now() >= state.phaseEndsAt &&
-    thresholdMomentChoice()
-  ) {
-    autoThresholdToMoment()
+  if (state.phase === 'pick') {
+    state = { ...state, phase: 'threshold' }
+  }
+  if (state.phase === 'threshold' && thresholdMomentChoice() && !hasThresholdOfferUi()) {
+    assignThresholdOffers()
   }
   startTicking()
   emit()
@@ -313,9 +325,6 @@ function onTick(): void {
   }
 
   if (state.phase === 'threshold') {
-    if (state.phaseEndsAt != null && Date.now() >= state.phaseEndsAt) {
-      autoThresholdToMoment()
-    }
     emit()
     return
   }
@@ -566,6 +575,7 @@ function finishAfterplay(): void {
     currentExerciseId: null,
     currentMotivationId: null,
     momentChoiceIds: null,
+    thresholdRitualId: null,
   }
   setBaseTitle(`Stint · ${phaseLabel(phase)}`)
   emit()
@@ -582,24 +592,29 @@ function enterThreshold(ended: ActivePhase): void {
   phaseIsSnoozeExtension = false
 
   const momentChoice = thresholdMomentChoice(ended)
-  const duration = momentChoice ? thresholdMomentMs() : null
+  const prevOfferId = state.momentChoiceIds?.[0] ?? null
+  const prevRitualId = state.thresholdRitualId
 
   state = {
     ...state,
     phase: 'threshold',
-    phaseEndsAt: momentChoice ? Date.now() + duration! : null,
-    phaseDurationMs: duration,
+    phaseEndsAt: null,
+    phaseDurationMs: null,
     foreshadowFired: false,
     endedPhase: ended,
     pendingNextPhase: next,
     currentExerciseId: null,
     currentMotivationId: null,
     momentChoiceIds: null,
+    thresholdRitualId: null,
     checkInAt: null,
     checkInShownAt: null,
     checkInHandled: true,
     resumeToThreshold: false,
     resumeAfterAfterplay: false,
+  }
+  if (momentChoice) {
+    assignThresholdOffers({ offerId: prevOfferId, ritualId: prevRitualId })
   }
   signalAttention(
     'threshold',
@@ -641,6 +656,7 @@ export function snoozePosture(): void {
     resumeToThreshold: false,
     resumeAfterAfterplay: false,
     momentChoiceIds: null,
+    thresholdRitualId: null,
     checkInAt: null,
     checkInShownAt: null,
     checkInHandled: true,
@@ -651,32 +667,6 @@ export function snoozePosture(): void {
 
 export function canSnoozePostureNow(): boolean {
   return canSnoozePosture()
-}
-
-function enterPick(): void {
-  const cards = pickMomentCards(
-    state.recentExerciseIds,
-    momentPosture(),
-    momentDurationMs(),
-  )
-  if (cards.length === 0) {
-    enterActivePhase(state.pendingNextPhase ?? 'sit', { soft: true })
-    return
-  }
-  clearAttention()
-  state = {
-    ...state,
-    phase: 'pick',
-    phaseEndsAt: null,
-    phaseDurationMs: null,
-    foreshadowFired: false,
-    momentChoiceIds: cards.map((c) => c.id),
-    currentExerciseId: null,
-    currentMotivationId: null,
-    momentRerolled: false,
-  }
-  signalAttention('ritual', 'Moment', 'Three cards. One is enough.')
-  emit()
 }
 
 function enterRitualWithMoment(momentId: string): void {
@@ -704,6 +694,7 @@ function enterRitualWithMoment(momentId: string): void {
     recentExerciseIds: rememberId(state.recentExerciseIds, moment.id),
     recentMotivationIds: rememberMotivation(state.recentMotivationIds, motivation.id),
     momentChoiceIds: null,
+    thresholdRitualId: null,
     momentRerolled: false,
   }
   signalAttention('ritual', 'Moment', moment.title)
@@ -749,6 +740,7 @@ function enterActivePhase(phase: ActivePhase, opts: { soft?: boolean } = {}): vo
     resumeToThreshold: false,
     resumeAfterAfterplay: false,
     momentChoiceIds: null,
+    thresholdRitualId: null,
     checkInAt: phase === 'stand' ? Date.now() + ms * CHECKIN_RATIO : null,
     checkInShownAt: null,
     checkInHandled: false,
@@ -770,27 +762,26 @@ function advanceThresholdNext(): void {
   enterActivePhase(state.pendingNextPhase ?? 'sit', { soft: true })
 }
 
-/** Threshold primary — moment on desk up and desk down. */
+/** Threshold — continue when the loop has no moment pool. */
 export function chooseRise(): void {
   if (state.phase !== 'threshold') return
-  if (!thresholdMomentChoice()) {
-    advanceThresholdNext()
-    return
-  }
-  recordStat('rise')
-  clearThresholdMomentTimer()
-  resetPostureSnooze()
-  enterPick()
+  if (thresholdMomentChoice() && hasThresholdOfferUi()) return
+  advanceThresholdNext()
 }
 
 export function chooseMoment(momentId: string): void {
-  if (state.phase !== 'pick') return
-  if (!state.momentChoiceIds?.includes(momentId)) return
+  if (state.phase !== 'threshold' && state.phase !== 'pick') return
+  const fromOffer = state.momentChoiceIds?.includes(momentId) === true
+  const fromRitual = state.thresholdRitualId === momentId
+  if (!fromOffer && !fromRitual) return
+  if (state.phase === 'threshold') recordStat('rise')
   recordStat('ritual_done')
+  clearThresholdMomentTimer()
+  resetPostureSnooze()
   enterRitualWithMoment(momentId)
 }
 
-/** Skip ritual — at threshold (direct) or after opening the moment pick. */
+/** Skip moment — at threshold or during exercise. */
 export function skipStanding(): void {
   if (state.phase === 'threshold') {
     if (!thresholdMomentChoice()) return
@@ -798,13 +789,14 @@ export function skipStanding(): void {
     advanceThresholdNext()
     return
   }
-  if (state.phase !== 'pick' && state.phase !== 'exercise') return
+  if (state.phase !== 'exercise') return
   recordStat('ritual_skip')
   clearAttention()
   const next = state.pendingNextPhase ?? 'sit'
   state = {
     ...state,
     momentChoiceIds: null,
+    thresholdRitualId: null,
     currentExerciseId: null,
     currentMotivationId: null,
   }
@@ -881,6 +873,7 @@ export function resetDay(): string {
     currentMotivationId: null,
     ambientMotivationId: null,
     momentChoiceIds: null,
+    thresholdRitualId: null,
     checkInAt: null,
     checkInShownAt: null,
     checkInHandled: false,
@@ -957,6 +950,7 @@ export function freeze(): void {
     resumeToThreshold: false,
     resumeAfterAfterplay: false,
     momentChoiceIds: null,
+    thresholdRitualId: null,
   }
   clearAttention()
   setBaseTitle('Stint · Freeze')
@@ -1044,6 +1038,7 @@ export function startFreezeAfterplay(): void {
     frozenAt: null,
     freezeExtendUntil: null,
     momentChoiceIds: null,
+    thresholdRitualId: null,
     momentRerolled: false,
   }
   signalAttention('ritual', 'Cooldown', moment.title)

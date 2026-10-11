@@ -199,6 +199,19 @@ function packRowHtml(pack: MomentPack): string {
   `
 }
 
+function momentPreviewHtml(moment: Moment, durationMs: number): string {
+  const figure = momentFigureHtml(moment.figureId, 'thumb')
+  return `
+    <li class="moment-preview${figure ? ' has-figure' : ''}">
+      ${figure}
+      <span class="moment-pick-copy">
+        <span class="moment-step-title">${moment.title}</span>
+        <span class="moment-step-prompt">${momentPrompt(moment, durationMs)}</span>
+      </span>
+    </li>
+  `
+}
+
 function momentPickHtml(moment: Moment, durationMs: number): string {
   const on = isMomentInLoop(moment.id)
   const figure = momentFigureHtml(moment.figureId, 'thumb')
@@ -245,22 +258,22 @@ function renderBrowse(root: HTMLElement): void {
       <div class="moments-lede">
         <h1 class="moments-title">Moments</h1>
         <p class="moments-note moments-note-lead">
-          Open a pack and check the moments you like. Checked items feed your sit/stand rhythm — Stint shows three cards each time the desk switches posture.
+          At the desk: a rotation for sit/stand switches, or run a full pack in order — no timer required.
         </p>
         <p class="moments-note">
-          Neck &amp; shoulders and Desk ritual are included. Gray packs unlock on tap — preview only, no payment yet.
+          Free packs included. Locked packs unlock on tap — preview only, no payment yet.
         </p>
       </div>
-      <ul class="pack-list pack-list-loop" aria-label="Sit/stand rhythm">
+      <ul class="pack-list pack-list-loop" aria-label="Desk rotation">
         <li>
           <button type="button" class="pack-row" id="btn-favorites">
-            <span class="pack-row-kind">Desk loop</span>
-            <span class="pack-row-title">Sit/stand rhythm</span>
-            <span class="pack-row-meta">${loopCount} moment${loopCount === 1 ? '' : 's'} · 3 cards per switch</span>
+            <span class="pack-row-kind">At the desk</span>
+            <span class="pack-row-title">Desk rotation</span>
+            <span class="pack-row-meta">${loopCount} moment${loopCount === 1 ? '' : 's'} · 1 random + Ritual per switch</span>
           </button>
         </li>
       </ul>
-      <p class="pack-list-heading">Packs</p>
+      <p class="pack-list-heading">Packs — run in order</p>
       <ul class="pack-list" aria-label="Moment packs">
         ${packs.map((pack) => packRowHtml(pack)).join('')}
       </ul>
@@ -300,22 +313,22 @@ function renderFavorites(root: HTMLElement): void {
   const groups = loopMomentsByPack()
   const durationMs = momentDurationMs()
   const count = loopMomentIds().length
-  const empty = groups.length === 0
+  const empty = groups.every((g) => g.moments.length === 0)
 
   root.innerHTML = `
     <div class="moments">
       ${shellTop(libraryHref(), 'Back to library')}
       <div class="moments-lede">
-        <p class="pack-kind">Desk loop</p>
-        <h1 class="moments-title">Sit/stand rhythm</h1>
+        <p class="pack-kind">At the desk</p>
+        <h1 class="moments-title">Desk rotation</h1>
         <p class="moments-note moments-note-lead">
-          Your checked moments are the pool for desk switches. Uncheck to remove; open any pack to add more.
+          Check moments to offer at each sit/stand switch — one random move plus an optional Ritual tap.
         </p>
         <p class="moments-note">
           ${
             empty
-              ? 'Starter moments stay on until you change them in a pack.'
-              : `${count} in your pool · Stint picks 3 cards per switch (incl. one ritual when checked).`
+              ? 'Starter moments stay on until you change them here.'
+              : `${count} in your pool · separate from pack runs (Start on a pack page).`
           }
         </p>
         ${empty ? '' : `<p class="pack-meta">${durationNote()}</p>`}
@@ -347,14 +360,8 @@ function renderFavorites(root: HTMLElement): void {
   bindMomentPicks(root, () => render(root))
 }
 
-function packLoopNote(inLoop: number, total: number): string {
-  if (inLoop === 0) {
-    return 'Nothing from this pack in your rhythm yet — check moments below.'
-  }
-  if (inLoop === total) {
-    return `All ${total} in your rhythm. Start runs the full pack in order — separate from the desk card pool.`
-  }
-  return `${inLoop} of ${total} in your rhythm — check more to widen the card pool.`
+function deskRotationHref(): string {
+  return `${appPath('moments.html')}#favorites`
 }
 
 function renderPack(root: HTMLElement, pack: MomentPack): void {
@@ -362,6 +369,12 @@ function renderPack(root: HTMLElement, pack: MomentPack): void {
   const moments = getPackMoments(pack)
   const durationMs = packDurationMs()
   const inLoop = loopCountInPack(pack)
+  const rotationNote =
+    inLoop === 0
+      ? 'None from this pack in your desk rotation yet.'
+      : inLoop === moments.length
+        ? `All ${moments.length} in desk rotation.`
+        : `${inLoop} of ${moments.length} in desk rotation.`
 
   root.innerHTML = `
     <div class="moments">
@@ -370,17 +383,18 @@ function renderPack(root: HTMLElement, pack: MomentPack): void {
         <p class="pack-kind">${PACK_ZONE_META[pack.zone].title}</p>
         <h1 class="pack-title">${pack.title}</h1>
         <p class="pack-desc">${pack.description}</p>
-        <p class="pack-meta">${moments.length} moment${moments.length === 1 ? '' : 's'} · ${packDurationLabel(moments.length)}</p>
-        <h2 class="pack-rhythm-heading">Sit/stand rhythm</h2>
-        <p class="pack-loop-note">${packLoopNote(inLoop, moments.length)}</p>
-        <ol class="moment-sequence" aria-label="Check moments to add to sit/stand rhythm">
-          ${moments.map((m) => momentPickHtml(m, durationMs)).join('')}
+        <p class="pack-meta">${moments.length} moment${moments.length === 1 ? '' : 's'} · ${packDurationLabel(moments.length)} run</p>
+        <h2 class="pack-rhythm-heading">Run pack</h2>
+        <p class="pack-loop-note">In order, at your pace — independent of the sit/stand timer.</p>
+        <ol class="moment-sequence moment-sequence-preview" aria-label="Moments in this pack">
+          ${moments.map((m) => momentPreviewHtml(m, durationMs)).join('')}
         </ol>
         <div class="moments-actions">
           ${packDurationTabsHtml()}
           <div class="moments-row">
-            <button type="button" class="btn btn-primary" id="btn-run-pack">Start</button>
+            <button type="button" class="btn btn-primary" id="btn-run-pack">Start pack</button>
           </div>
+          <p class="pack-desk-link">${rotationNote} <a href="${deskRotationHref()}">Edit desk rotation</a></p>
           <div class="moments-row moments-row-secondary">
             <a class="btn btn-ghost" href="${libraryHref()}">Back</a>
           </div>
@@ -388,19 +402,6 @@ function renderPack(root: HTMLElement, pack: MomentPack): void {
       </div>
     </div>
   `
-
-  bindMomentPicks(root, () => {
-    const loopNote = root.querySelector('.pack-loop-note')
-    if (loopNote) {
-      loopNote.textContent = packLoopNote(loopCountInPack(pack), moments.length)
-    }
-    root.querySelectorAll<HTMLInputElement>('.moment-pick-input').forEach((input) => {
-      const box = input.nextElementSibling
-      if (box instanceof HTMLElement && box.classList.contains('moment-pick-ui')) {
-        box.dataset.checked = input.checked ? 'true' : 'false'
-      }
-    })
-  })
 
   root.querySelectorAll<HTMLButtonElement>('[data-pack-sec]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -588,7 +589,7 @@ function renderDone(root: HTMLElement, v: Extract<View, { kind: 'done' }>): void
         </div>
         <div class="moments-row moments-row-secondary">
           <button type="button" class="btn btn-ghost" id="btn-back-pack">Back to pack</button>
-          <a class="btn btn-ghost" href="${appPath()}">Desk rhythm</a>
+          <a class="btn btn-ghost" href="${deskRotationHref()}">Desk rotation</a>
         </div>
       </div>
     </div>

@@ -158,10 +158,17 @@ body {
   flex: 1 1 auto;
 }
 
-.primary-actions .row.pick-actions {
-  width: var(--instrument-max-width);
+.primary-actions .row.pick-actions,
+.primary-actions .row.threshold-actions {
+  width: var(--instrument-btn-width);
   max-width: 100%;
   margin-top: 0.15rem;
+}
+
+.primary-actions .row.threshold-actions .btn-ghost {
+  width: 100%;
+  flex: 0 0 auto;
+  justify-content: center;
 }
 
 .primary-actions .row.pick-actions .pick-skip {
@@ -231,8 +238,15 @@ body {
     padding: 0.55rem 0 calc(0.45rem + env(safe-area-inset-bottom));
   }
 
-  .primary-actions .row {
+  .primary-actions .row,
+  .primary-actions .row.threshold-actions,
+  .primary-actions .row.pick-actions {
     width: 100%;
+  }
+
+  .threshold-choices {
+    width: 100%;
+    max-width: none;
   }
 
   .featured-on {
@@ -636,6 +650,10 @@ body {
   flex-shrink: 0;
 }
 
+.shell[data-compact='true'] .threshold-choices {
+  margin-top: var(--space-3);
+}
+
 .shell[data-compact='true'] .threshold-lead,
 .shell[data-compact='true'] .exercise-title,
 .shell[data-compact='true'] .freeze-q {
@@ -665,8 +683,8 @@ body {
 }
 
 .shell[data-compact='true'] .exercise {
-  padding: 0.5rem 0 0;
-  border-top: 1px solid var(--color-paper-3);
+  padding: clamp(var(--space-3), 2vmin, var(--space-4)) 0 0;
+  border-top: none;
   gap: 0.35rem;
   flex-shrink: 0;
   overflow: hidden;
@@ -985,6 +1003,26 @@ button[hidden] {
   max-width: 36rem;
 }
 
+/* Copy block (lead + sub) → choices: extra breath before actions, not between lines. */
+.threshold-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: var(--instrument-btn-width);
+  width: 100%;
+  margin-top: clamp(var(--space-3), 2.5vmin, var(--space-5));
+}
+
+.threshold-choices .moment-list {
+  width: 100%;
+  max-width: none;
+}
+
+.threshold-choices .threshold-ritual {
+  width: 100%;
+  margin: 0;
+}
+
 .threshold-actions,
 .freeze-actions,
 .exercise-actions,
@@ -1077,8 +1115,8 @@ button[hidden] {
 
 .motivation {
   margin: 0;
-  padding: 1rem 0 0;
-  border-top: 1px solid var(--color-paper-3);
+  padding: clamp(var(--space-4), 2vmin, var(--space-5)) 0 0;
+  border-top: none;
   font-size: clamp(1.15rem, 2.5vmin, 1.5rem);
   line-height: 1.45;
   color: var(--color-ink);
@@ -1123,12 +1161,14 @@ button[hidden] {
   display: none !important;
 }
 
-.shell[data-phase='pick'] .moment-list {
-  max-width: var(--instrument-max-width);
-  margin-top: 0.15rem;
+.shell[data-phase='pick'] .moment-list,
+.shell[data-phase='threshold'] .threshold .moment-list {
+  max-width: none;
+  margin-top: 0;
 }
 
-.shell[data-phase='pick'] .moment-choice {
+.shell[data-phase='pick'] .moment-choice,
+.shell[data-phase='threshold'] .threshold .moment-choice {
   padding: 0.55rem 0;
 }
 
@@ -1151,9 +1191,9 @@ button[hidden] {
 .moment-choice {
   appearance: none;
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
   text-align: left;
   width: 100%;
   padding: 0.85rem 0;
@@ -1490,6 +1530,16 @@ button[hidden] {
 
 .btn.has-kbd {
   justify-content: space-between;
+  width: 100%;
+}
+
+.btn.has-kbd .btn-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.primary-actions .row:is(.setup-actions, .threshold-actions, .freeze-actions) .btn.has-kbd .btn-text {
+  text-align: center;
 }
 
 .btn-text {
@@ -1517,20 +1567,11 @@ button[hidden] {
   border-color: var(--kbd-on-accent-border);
 }
 
-.moment-choice {
-  position: relative;
-}
-
-.moment-choice.has-kbd {
-  padding-right: 2.4rem;
-}
-
 .moment-choice .btn-kbd {
-  position: absolute;
-  top: 50%;
-  right: 0.65rem;
-  transform: translateY(-50%);
+  flex-shrink: 0;
+  align-self: center;
   font-size: 0.72rem;
+  margin-left: auto;
 }
 
 .btn:focus-visible {

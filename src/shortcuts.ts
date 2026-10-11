@@ -34,7 +34,7 @@ export const SHORTCUTS: ShortcutDef[] = [
     context: 'Threshold / Pick moment',
   },
   { id: 'pick1', keys: ['1'], label: '1', action: 'Moment 1', context: 'Pick moment' },
-  { id: 'pick2', keys: ['2'], label: '2', action: 'Moment 2', context: 'Pick moment' },
+  { id: 'pick2', keys: ['2'], label: '2', action: 'Ritual', context: 'Desk switch' },
   { id: 'pick3', keys: ['3'], label: '3', action: 'Moment 3', context: 'Pick moment' },
   { id: 'freeze', keys: ['f', 'F'], label: 'F', action: 'Freeze', context: 'Sit / Stand / Reset' },
   { id: 'doneMoment', keys: ['Enter', ' '], label: '↵', action: 'Done', context: 'Moment' },
@@ -76,15 +76,22 @@ export function availableShortcuts(ctx: ShortcutContext): Set<ShortcutId> {
   if (phase === 'setup') {
     active.add('start')
   } else if (phase === 'threshold') {
-    const momentChoice = state.phaseEndsAt != null &&
-      (state.endedPhase === 'sit' || state.endedPhase === 'stand' || state.endedPhase === 'reset')
-    if (momentChoice) active.add('skipStanding')
-    active.add('rise')
+    const ended =
+      state.endedPhase === 'sit' ||
+      state.endedPhase === 'stand' ||
+      state.endedPhase === 'reset'
+    const hasOffer = (state.momentChoiceIds?.length ?? 0) > 0
+    const hasRitual = state.thresholdRitualId != null
+    if (ended && (hasOffer || hasRitual)) {
+      if (hasOffer) active.add('pick1')
+      if (hasRitual) active.add('pick2')
+      active.add('skipStanding')
+    } else if (ended) {
+      active.add('rise')
+    }
   } else if (phase === 'pick') {
     const count = state.momentChoiceIds?.length ?? 0
     if (count >= 1) active.add('pick1')
-    if (count >= 2) active.add('pick2')
-    if (count >= 3) active.add('pick3')
     active.add('skipStanding')
   } else if (phase === 'frozen') {
     if (showFreezePrompt) {
@@ -182,8 +189,13 @@ export function bindShortcuts(
       case 'pick1':
       case 'pick2':
       case 'pick3': {
-        const index = Number(id.replace('pick', '')) - 1
-        const momentId = state.momentChoiceIds?.[index]
+        let momentId: string | undefined
+        if (state.phase === 'threshold' && id === 'pick2') {
+          momentId = state.thresholdRitualId ?? undefined
+        } else {
+          const index = Number(id.replace('pick', '')) - 1
+          momentId = state.momentChoiceIds?.[index]
+        }
         if (momentId) handlers.onChooseMoment(momentId)
         break
       }

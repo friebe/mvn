@@ -105,47 +105,40 @@ function pickFromPool(pool: Moment[], recentIds: string[]): Moment | undefined {
   return pickRandom(preferFresh(pool, recentIds))
 }
 
-/** Sit/stand favorites — no posture/depth filter so three cards stay fillable. */
-function pickFromFavorites(
-  pool: Moment[],
-  recentIds: string[],
-  used: Set<string>,
-): Moment | undefined {
-  const available = pool.filter((m) => !used.has(m.id))
-  if (available.length === 0) return undefined
-  return pickFromPool(available, recentIds)
+function withExcludedRecent(recentIds: string[], excludeId: string | null | undefined): string[] {
+  return excludeId ? rememberId(recentIds, excludeId) : recentIds
 }
 
-/** Three choices: two random non-ritual favorites, then one ritual (desk) last. */
-export function pickMomentCards(
+function pickFromPoolAvoiding(
+  pool: Moment[],
   recentIds: string[],
-  _nextPosture: 'sit' | 'stand' = 'stand',
-  _durationMs?: number,
-): Moment[] {
-  const favorites = momentPool()
-  const picked: Moment[] = []
-  const used = new Set<string>()
-  const exclude = () => [...recentIds, ...used]
+  avoidId: string | null | undefined,
+): Moment | undefined {
+  if (pool.length === 0) return undefined
+  const narrowed =
+    avoidId && pool.length > 1 ? pool.filter((m) => m.id !== avoidId) : pool
+  const candidates = narrowed.length > 0 ? narrowed : pool
+  return pickFromPool(candidates, recentIds) ?? pickRandom(candidates)
+}
 
-  const addCard = (m: Moment | undefined): boolean => {
-    if (!m || used.has(m.id)) return false
-    picked.push(m)
-    used.add(m.id)
-    return true
-  }
+/**
+ * Desk switch: one random move (body/eyes — not desk habits) plus ritual always separate.
+ * No depth filter here — the checked pool is the source of truth; timer length only affects copy.
+ */
+export function pickThresholdOffers(
+  recentIds: string[],
+  nextPosture: 'sit' | 'stand',
+  opts: { avoidOfferId?: string | null; avoidRitualId?: string | null } = {},
+): { offer: Moment | undefined; ritualAlt: Moment | undefined } {
+  const ritualPool = poolFor('desk', nextPosture)
+  const ritualRecent = withExcludedRecent(recentIds, opts.avoidRitualId)
+  const ritualAlt = pickFromPoolAvoiding(ritualPool, ritualRecent, opts.avoidRitualId)
 
-  const variablePool = () => favorites.filter((m) => m.kind !== 'desk')
-  const ritualPool = () => favorites.filter((m) => m.kind === 'desk')
+  const movePool = poolFor(undefined, nextPosture).filter((m) => m.kind !== 'desk')
+  const moveRecent = withExcludedRecent(recentIds, opts.avoidOfferId)
+  const offer = pickFromPoolAvoiding(movePool, moveRecent, opts.avoidOfferId)
 
-  for (let i = 0; i < 2; i++) {
-    if (!addCard(pickFromFavorites(variablePool(), exclude(), used))) break
-  }
-
-  if (!addCard(pickFromFavorites(ritualPool(), exclude(), used))) {
-    addCard(pickFromFavorites(variablePool(), exclude(), used))
-  }
-
-  return picked.slice(0, 3)
+  return { offer, ritualAlt }
 }
 
 /** Avoid immediate repeats — pool is small. */

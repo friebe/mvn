@@ -89,8 +89,8 @@ export function pickLead(pendingNext: ActivePhase | null, at = new Date()): stri
 }
 
 export function pickSub(pendingNext: ActivePhase | null): string {
-  if (pendingNext === 'sit') return 'Or sit right away — one card is enough.'
-  return 'Or stand right away — one card is enough.'
+  if (pendingNext === 'sit') return 'Or sit right away — tap the offer or skip.'
+  return 'Or stand right away — tap the offer or skip.'
 }
 
 export function runningPhaseHint(at = new Date()): string {

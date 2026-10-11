@@ -222,12 +222,11 @@ export function loopCountInPack(pack: MomentPack): number {
   return pack.momentIds.filter((id) => isMomentInLoop(id)).length
 }
 
-/** Favorites grouped by pack — for the library subpage. */
+/** Owned packs with every moment — desk rotation editor (checked or not). */
 export function loopMomentsByPack(): { pack: MomentPack; moments: Moment[] }[] {
-  const enabled = new Set(loopMomentIds())
   const groups: { pack: MomentPack; moments: Moment[] }[] = []
-  for (const pack of packZoneSections().flatMap((section) => section.packs)) {
-    const moments = getPackMoments(pack).filter((m) => enabled.has(m.id))
+  for (const pack of ownedPacks()) {
+    const moments = getPackMoments(pack)
     if (moments.length > 0) groups.push({ pack, moments })
   }
   return groups

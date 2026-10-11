@@ -545,6 +545,46 @@ html.moments-unlock-active {
   border-top: 1px solid var(--color-paper-3);
 }
 
+.moment-sequence-preview {
+  margin-bottom: 0.35rem;
+}
+
+.moment-preview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 0.75rem;
+  align-items: start;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--color-paper-3);
+  list-style: none;
+}
+
+.moment-preview.has-figure {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.moment-preview:last-child {
+  border-bottom: none;
+}
+
+.pack-desk-link {
+  margin: 0.65rem 0 0;
+  max-width: var(--instrument-max-width);
+  font-size: clamp(0.92rem, 2vmin, 1.05rem);
+  line-height: 1.45;
+  color: var(--color-ink-2);
+}
+
+.pack-desk-link a {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pack-desk-link a:hover {
+  text-decoration: underline;
+}
+
 .moment-pick {
   position: relative;
   display: grid;

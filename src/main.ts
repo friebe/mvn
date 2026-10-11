@@ -252,7 +252,7 @@ subscribeWalkthroughEnter((step) => {
   if (s.notificationsEnabled) {
     const title = step.id === 'threshold' ? 'Stint · Desk' : 'Stint · Moment'
     const body =
-      step.id === 'threshold' ? 'Desk wants up.' : 'Three cards. One is enough.'
+      step.id === 'threshold' ? 'Desk wants up.' : 'One from your pool — or Ritual.'
     void notifyPhase(title, body, true, {
       playSound: s.soundEnabled,
     })

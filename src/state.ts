@@ -52,8 +52,10 @@ export interface AppState {
   /** Current moment / motivation shown in ritual */
   currentExerciseId: string | null
   currentMotivationId: string | null
-  /** Three moment cards at pick phase */
+  /** Random moment offer at threshold (0–1 id) */
   momentChoiceIds: string[] | null
+  /** Optional ritual (desk) alternative at threshold */
+  thresholdRitualId: string | null
   /** Already used "Anderer Moment" once */
   momentRerolled: boolean
   /** Soft check-in due at this timestamp (stand mid-phase only) */
@@ -98,10 +100,9 @@ export const MOMENT_MS = EXERCISE_MS
 export const FORESHADOW_RATIO = 0.1
 /** Mid-phase soft check-in */
 export const CHECKIN_RATIO = 0.5
-/** Auto-advance to moment pick at threshold unless user opts out */
+/** Legacy export — check-in timeout only (threshold no longer auto-advances). */
 export const THRESHOLD_MOMENT_MS = 15 * 1000
 export const DEMO_THRESHOLD_MOMENT_MS = 5 * 1000
-/** Same 15s beat as moment / threshold — ignore it and it is not proof */
 export const CHECKIN_TIMEOUT_MS = THRESHOLD_MOMENT_MS
 export const DEMO_CHECKIN_TIMEOUT_MS = DEMO_THRESHOLD_MOMENT_MS
 
@@ -145,6 +146,7 @@ export function defaultState(): AppState {
     currentExerciseId: null,
     currentMotivationId: null,
     momentChoiceIds: null,
+    thresholdRitualId: null,
     momentRerolled: false,
     checkInAt: null,
     checkInShownAt: null,

@@ -30,19 +30,19 @@ export const THRESHOLD_LEAD_DOWN = [
 ] as const
 
 export const THRESHOLD_SUB_UP = [
-  'Raise the desk and move briefly — or just stand.',
-  'Desk button up — a short move or straight to standing.',
-  'Nothing heroic. Up, maybe move, maybe not.',
-  'Stand if you can. A moment is optional.',
-  'Your call: desk up with or without a move.',
+  'Desk up — one random moment from your pool, or Ritual for a habit.',
+  'Raise the desk. Tap the offer, Ritual, or just stand.',
+  'Up first. A short move is optional — skip is fine.',
+  'Stand when ready. One offer or a ritual habit — your call.',
+  'Desk button up. Random from your pool — or water instead.',
 ] as const
 
 export const THRESHOLD_SUB_DOWN = [
-  'Lower the desk and move briefly — or just sit.',
-  'Desk button down — a short move or straight to sitting.',
-  'Nothing heroic. Down, maybe move, maybe not.',
-  'Sit if you need to. A moment is optional.',
-  'Your call: desk down with or without a move.',
+  'Desk down — one random moment from your pool, or Ritual for a habit.',
+  'Lower the desk. Tap the offer, Ritual, or just sit.',
+  'Down first. A short move is optional — skip is fine.',
+  'Sit when ready. One offer or a ritual habit — your call.',
+  'Desk button down. Random from your pool — or water instead.',
 ] as const
 
 export const PICK_LEAD_UP = [

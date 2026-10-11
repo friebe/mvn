@@ -23,6 +23,7 @@ import { buildDayCloseComparison, buildDayStory, type StatsSummary } from './sta
 import { weekBarsHtml } from './week-bars'
 import { shortcutHintLabel, type ShortcutId } from './shortcuts'
 import { detailMode, isBarOnly } from './atmosphere-display'
+import { hasRhythmMoments } from './moment-packs'
 import { brandLockupHtml } from './brand-mark'
 import { analyticsNavIconHtml, momentsNavIconHtml } from './nav-icons'
 import { resolveTheme } from './theme'
@@ -32,6 +33,7 @@ import {
   getWalkthroughAtmosphere,
   getWalkthroughCueFeedback,
   getWalkthroughMomentIds,
+  getWalkthroughRitualId,
   getWalkthroughProgress,
   getWalkthroughStep,
   isLastWalkthroughStep,
@@ -351,6 +353,16 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
           <section class="threshold" id="threshold" hidden>
             <p class="threshold-lead" id="threshold-lead">Desk wants up.</p>
             <p class="threshold-sub" id="threshold-sub">Nothing to prove. Pick what works today.</p>
+            <div class="threshold-choices">
+              <div class="moment-list" id="threshold-moment-cards"></div>
+              <button type="button" class="moment-choice threshold-ritual" id="btn-threshold-ritual" data-moment-id="" hidden>
+                <span class="moment-choice-copy">
+                  <span class="moment-kind">Ritual</span>
+                  <span class="moment-title" id="threshold-ritual-title"></span>
+                  <span class="moment-prompt" id="threshold-ritual-prompt"></span>
+                </span>
+              </button>
+            </div>
           </section>
 
           <section class="freeze-prompt" id="freeze-prompt" hidden>
@@ -430,7 +442,7 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
               ${actionButton('btn-resume', 'btn btn-primary', 'Continue', 'resume', true)}
             </div>
             <div class="row threshold-actions" id="threshold-actions" hidden>
-              ${actionButton('btn-rise', 'btn btn-primary', 'Move briefly', 'rise')}
+              ${actionButton('btn-rise', 'btn btn-primary', 'Continue', 'rise')}
               ${actionButton('btn-threshold-skip', 'btn btn-ghost', 'Just sit', 'skipStanding')}
               ${actionButton('btn-snooze', 'btn btn-ghost', '+5 min', null)}
             </div>
@@ -492,11 +504,15 @@ export function mountUi(root: HTMLElement, handlers: UiHandlers): void {
     qs(root, 'link-settings').setAttribute('aria-label', 'Settings')
   })
 
-  qs(root, 'moment-cards').addEventListener('click', (e) => {
+  const onMomentPick = (e: Event) => {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-moment-id]')
-    if (!btn?.dataset.momentId) return
-    handlers.onChooseMoment(btn.dataset.momentId)
-  })
+    const id = btn?.dataset.momentId
+    if (!id) return
+    handlers.onChooseMoment(id)
+  }
+  qs(root, 'moment-cards').addEventListener('click', onMomentPick)
+  qs(root, 'threshold-moment-cards').addEventListener('click', onMomentPick)
+  qs(root, 'btn-threshold-ritual').addEventListener('click', onMomentPick)
 }
 
 export function setInstallVisible(root: HTMLElement, visible: boolean): void {
@@ -561,11 +577,15 @@ export function renderUi(
   const walkTimed = walkthroughVisible && walkAtmo?.timed === true
   const walkShowAtmo = walkTimed
   const walkApproaching = walkTimed && walkAtmo?.approaching === true
-  const momentChoiceAtThreshold =
-    isThreshold &&
-    state.phaseEndsAt != null &&
-    (state.endedPhase === 'sit' || state.endedPhase === 'stand' || state.endedPhase === 'reset')
-  const thresholdTimerActive = momentChoiceAtThreshold && state.phaseEndsAt != null
+  const thresholdEnded =
+    state.endedPhase === 'sit' ||
+    state.endedPhase === 'stand' ||
+    state.endedPhase === 'reset'
+  const momentChoiceAtThreshold = isThreshold && thresholdEnded && hasRhythmMoments()
+  const showThresholdOffers =
+    momentChoiceAtThreshold &&
+    ((state.momentChoiceIds?.length ?? 0) > 0 || state.thresholdRitualId != null)
+  const thresholdTimerActive = false
   const atmosphereDisplay = state.atmosphereDisplay ?? 'clock'
   const barOnly = isBarOnly(atmosphereDisplay)
   const atmosphereDetail = detailMode(atmosphereDisplay)
@@ -623,6 +643,7 @@ export function renderUi(
   const btnFreeze = qs<HTMLButtonElement>(root, 'btn-freeze')
   const btnResume = qs<HTMLButtonElement>(root, 'btn-resume')
   const btnRise = qs<HTMLButtonElement>(root, 'btn-rise')
+  const btnThresholdRitual = qs<HTMLButtonElement>(root, 'btn-threshold-ritual')
   const thresholdSkip = qs<HTMLButtonElement>(root, 'btn-threshold-skip')
   const btnSnooze = qs<HTMLButtonElement>(root, 'btn-snooze')
   const thresholdActions = qs(root, 'threshold-actions')
@@ -768,6 +789,13 @@ export function renderUi(
       durationMs: resolveMomentDuration(state.momentDurationMs),
     })
   }
+  if (walkThreshold && getWalkthroughMomentIds()?.length) {
+    momentsChanged =
+      setMomentCards(qs(root, 'threshold-moment-cards'), getWalkthroughMomentIds() ?? [], {
+        showPrompt: true,
+        durationMs: resolveMomentDuration(state.momentDurationMs),
+      }) || momentsChanged
+  }
 
   if (dayCloseVisible && dayCloseSummary) {
     setText(qs(root, 'day-close-story'), buildDayStory(dayCloseSummary))
@@ -812,14 +840,16 @@ export function renderUi(
     setButtonLabel(skipStand, skipLabel)
   }
 
+  const walkOffers =
+    walkthroughVisible &&
+    (walkThreshold || walkPick) &&
+    (getWalkthroughMomentIds()?.length ?? 0) > 0
+
   if (!walkThreshold) {
     setHidden(thresholdSkip, !momentChoiceAtThreshold || dayCloseVisible || walkthroughVisible)
     setHidden(btnSnooze, !isThreshold || dayCloseVisible || walkthroughVisible || !canSnoozePostureNow())
     if (momentChoiceAtThreshold) {
       setButtonLabel(thresholdSkip, thresholdSkipLabel(state.pendingNextPhase))
-      setButtonLabel(btnRise, thresholdRiseLabel(state.endedPhase))
-      btnRise.classList.add('btn-primary')
-      btnRise.classList.remove('btn-ghost')
       thresholdSkip.classList.remove('btn-primary')
       thresholdSkip.classList.add('btn-ghost')
     } else if (isThreshold) {
@@ -827,6 +857,26 @@ export function renderUi(
       btnRise.classList.add('btn-primary')
       btnRise.classList.remove('btn-ghost')
     }
+  }
+
+  setHidden(
+    btnRise,
+    dayCloseVisible || (isThreshold && showThresholdOffers) || walkOffers,
+  )
+
+  const ritualDuration = resolveMomentDuration(state.momentDurationMs)
+  const ritualId = walkOffers ? getWalkthroughRitualId() : state.thresholdRitualId
+  const ritualMoment = ritualId ? getMoment(ritualId) : undefined
+  const showRitualAlt =
+    ritualMoment != null && (showThresholdOffers || (walkOffers && getWalkthroughRitualId() != null))
+  if (showRitualAlt && ritualMoment) {
+    setHidden(btnThresholdRitual, false)
+    btnThresholdRitual.dataset.momentId = ritualMoment.id
+    setText(qs(root, 'threshold-ritual-title'), ritualMoment.title)
+    setText(qs(root, 'threshold-ritual-prompt'), momentPrompt(ritualMoment, ritualDuration))
+  } else {
+    setHidden(btnThresholdRitual, true)
+    btnThresholdRitual.dataset.momentId = ''
   }
 
   if (walkthroughVisible && walkStep) {
@@ -952,6 +1002,23 @@ export function renderUi(
     setHintText(hint, 'The desk is waiting. No pressure.')
     setText(qs(root, 'threshold-lead'), thresholdLead(state.endedPhase))
     setText(qs(root, 'threshold-sub'), thresholdSub(state.endedPhase))
+    if (showThresholdOffers) {
+      momentsChanged = setMomentCards(
+        qs(root, 'threshold-moment-cards'),
+        state.momentChoiceIds ?? [],
+        {
+          showPrompt: true,
+          durationMs: resolveMomentDuration(state.momentDurationMs),
+        },
+      )
+    } else {
+      const thresholdCards = qs(root, 'threshold-moment-cards')
+      if (thresholdCards.dataset.momentIds !== '') {
+        thresholdCards.dataset.momentIds = ''
+        thresholdCards.innerHTML = ''
+        momentsChanged = true
+      }
+    }
   } else if (isPick) {
     setText(qs(root, 'pick-lead'), pickLead(state.pendingNextPhase))
     setText(qs(root, 'pick-sub'), pickSub(state.pendingNextPhase))

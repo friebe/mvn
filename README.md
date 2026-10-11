@@ -129,7 +129,8 @@ An active Yes on “Still at your desk?” or “Still standing?” counts as `d
 
 | Field | Meaning |
 |------|---------|
-| `momentChoiceIds` | The three moment cards in pick phase |
+| `momentChoiceIds` | Random moment offer at threshold (0–1 id) |
+| `thresholdRitualId` | Optional ritual alternative at threshold |
 | `momentRerolled` | “Another moment” already used once |
 | `currentExerciseId` | Currently shown moment |
 | `currentMotivationId` | Currently shown motivation line |

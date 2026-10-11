@@ -59,21 +59,21 @@ const STEPS: readonly WalkthroughStep[] = [
     phase: 'threshold',
     kicker: 'Desk',
     lead: 'Desk wants up.',
-    sub: 'This is the switch cue — tap Move briefly when the desk is ready.',
+    sub: 'Raise or lower the desk — one random moment from your pool, or a ritual habit.',
     atmosphere: '·',
     fill: 1,
-    coach: 'When the desk cue appears, you’d tap Move briefly.',
+    coach: 'One offer from your pool — or Ritual for a small habit like water.',
   },
   {
     id: 'moment',
-    layout: 'pick',
-    phase: 'pick',
+    layout: 'threshold',
+    phase: 'threshold',
     kicker: 'Moment',
-    lead: 'Three cards. One is enough.',
-    sub: 'Pick a micro-move — or skip and just stand.',
+    lead: 'One from the pool.',
+    sub: 'Random from what you checked — or tap Ritual instead. Skip is always fine.',
     atmosphere: '·',
     fill: 0,
-    coach: 'Three example moments — pick one in a real day.',
+    coach: 'Same screen on a real day: one offer + optional ritual.',
   },
   {
     id: 'stand',
@@ -112,8 +112,9 @@ let autoId: number | null = null
 let drainRaf: number | null = null
 let liveAtmo: WalkthroughAtmosphere | null = null
 let lastFillEmitAt = 0
-/** Sample cards for the pick step (real UI). */
+/** Sample offer for threshold walkthrough steps. */
 let momentChoiceIds: string[] | null = null
+let walkthroughRitualId: string | null = null
 const listeners = new Set<Listener>()
 const enterListeners = new Set<EnterListener>()
 
@@ -209,9 +210,14 @@ function prepareStep(index: number): void {
   clearAuto()
 
   if (step.layout === 'pick') {
-    momentChoiceIds = ['nacken-seite', 'schulterblatt-zug', 'fensterblick']
+    momentChoiceIds = ['schulterblatt-zug']
+    walkthroughRitualId = 'wasser-schluck'
+  } else if (step.id === 'moment' || step.id === 'threshold') {
+    momentChoiceIds = ['schulterblatt-zug']
+    walkthroughRitualId = 'wasser-schluck'
   } else {
     momentChoiceIds = null
+    walkthroughRitualId = null
   }
 
   const drainMs = drainDurationFor(step)
@@ -280,6 +286,10 @@ export function getWalkthroughMomentIds(): string[] | null {
   return momentChoiceIds
 }
 
+export function getWalkthroughRitualId(): string | null {
+  return walkthroughRitualId
+}
+
 export function getWalkthroughProgress(): { index: number; total: number } | null {
   if (stepIndex == null) return null
   return { index: stepIndex, total: STEPS.length }
@@ -313,6 +323,7 @@ export function skipWalkthrough(): void {
   clearDrain()
   stepIndex = null
   momentChoiceIds = null
+  walkthroughRitualId = null
   cueFeedback = null
   markWalkthroughSeen()
   emit()
@@ -324,6 +335,7 @@ export function finishWalkthrough(): void {
   clearDrain()
   stepIndex = null
   momentChoiceIds = null
+  walkthroughRitualId = null
   cueFeedback = null
   markWalkthroughSeen()
   emit()
