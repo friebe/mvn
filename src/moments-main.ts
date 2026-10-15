@@ -21,6 +21,15 @@ import {
   updateMomentPlayer,
 } from './moment-player'
 import {
+  CUSTOM_RITUAL_ID,
+  CUSTOM_RITUAL_PROMPT_MAX,
+  CUSTOM_RITUAL_TITLE_MAX,
+  getCustomRitualMoment,
+  isCustomRitualConfigured,
+  readCustomRitual,
+  writeCustomRitual,
+} from './custom-ritual'
+import {
   getMomentPack,
   getPackMoments,
   isMomentInLoop,
@@ -173,16 +182,20 @@ function playTop(): string {
 }
 
 function packRowHtml(pack: MomentPack): string {
-  const count = getPackMoments(pack).length
+  const isDeskRitual = pack.id === DESK_RITUAL_PACK_ID
+  const count = isDeskRitual ? deskPackPreviewMoments(pack).length : getPackMoments(pack).length
   const locked = !isPackOwned(pack.id)
   const zoneTitle = PACK_ZONE_META[pack.zone].title
-  const inLoop = loopCountInPack(pack)
+  const inLoop = loopCountInPack(pack) + (isDeskRitual && isCustomRitualConfigured() && isMomentInLoop(CUSTOM_RITUAL_ID) ? 1 : 0)
+  const noun = isDeskRitual ? 'ritual' : 'moment'
   const loopMeta =
     inLoop === 0
-      ? `${count} moment${count === 1 ? '' : 's'} · none in rhythm`
+      ? `${count} ${noun}${count === 1 ? '' : 's'} · none in rotation`
       : inLoop === count
-        ? `${count} in rhythm`
-        : `${inLoop} of ${count} in rhythm`
+        ? `${count} in rotation`
+        : `${inLoop} of ${count} in rotation`
+  const timing = isDeskRitual ? '' : ` · ${packDurationLabel(count)}`
+  const ritualCue = isDeskRitual && !isCustomRitualConfigured() ? ritualPlusHtml() : ''
   return `
     <li>
       <button
@@ -192,8 +205,8 @@ function packRowHtml(pack: MomentPack): string {
         aria-label="${locked ? `Unlock ${pack.title}` : pack.title}"
       >
         <span class="pack-row-kind">${zoneTitle}${locked ? ' · Unlock' : ''}</span>
-        <span class="pack-row-title">${pack.title}</span>
-        <span class="pack-row-meta">${loopMeta} · ${packDurationLabel(count)}</span>
+        <span class="pack-row-title">${pack.title}${ritualCue}</span>
+        <span class="pack-row-meta">${loopMeta}${timing}</span>
       </button>
     </li>
   `
@@ -247,6 +260,156 @@ function bindMomentPicks(root: HTMLElement, onChange: () => void): void {
   })
 }
 
+const DESK_RITUAL_PACK_ID = 'desk'
+
+function deskPackHref(): string {
+  return `${appPath('moments.html')}#${DESK_RITUAL_PACK_ID}`
+}
+
+function customRitualFormHtml(): string {
+  const saved = readCustomRitual()
+  const title = saved?.title ?? ''
+  const prompt = saved?.prompt ?? ''
+  return `
+      <div class="custom-ritual-inline" aria-labelledby="custom-ritual-heading">
+        <h2 class="fav-group-title" id="custom-ritual-heading">Your ritual</h2>
+        <p class="pack-loop-note">Water stays. Add one habit of your own — it shows at each switch when checked in desk rotation.</p>
+        <form class="custom-ritual-form" id="custom-ritual-form">
+          <label class="custom-ritual-field">
+            <span class="custom-ritual-label">Title</span>
+            <input
+              type="text"
+              class="custom-ritual-input"
+              id="custom-ritual-title"
+              name="title"
+              maxlength="${CUSTOM_RITUAL_TITLE_MAX}"
+              autocomplete="off"
+              placeholder="e.g. Window glance"
+              value="${escapeAttr(title)}"
+              required
+            />
+          </label>
+          <label class="custom-ritual-field">
+            <span class="custom-ritual-label">Cue</span>
+            <textarea
+              class="custom-ritual-textarea"
+              id="custom-ritual-prompt"
+              name="prompt"
+              maxlength="${CUSTOM_RITUAL_PROMPT_MAX}"
+              rows="2"
+              placeholder="Short instruction — German is fine."
+              required
+            >${escapeText(prompt)}</textarea>
+          </label>
+          <p class="custom-ritual-error" id="custom-ritual-error" hidden></p>
+          <div class="custom-ritual-actions">
+            <button type="submit" class="btn btn-primary">Save ritual</button>
+            ${
+              saved
+                ? '<button type="button" class="btn btn-ghost" id="custom-ritual-clear">Remove</button>'
+                : ''
+            }
+          </div>
+        </form>
+      </div>
+  `
+}
+
+function ritualPlusHtml(): string {
+  return `<span class="ritual-plus" aria-hidden="true">+1</span>`
+}
+
+function favGroupHtml(group: { pack: MomentPack; moments: Moment[] }, durationMs: number): string {
+  const isDeskRitual = group.pack.id === DESK_RITUAL_PACK_ID
+  const custom = isDeskRitual ? getCustomRitualMoment() : undefined
+  const momentRows = [
+    ...group.moments.map((m) => momentPickHtml(m, durationMs)),
+    ...(custom ? [momentPickHtml(custom, durationMs)] : []),
+  ].join('')
+  const deskPackRow = isDeskRitual
+    ? `<li>
+        <a class="ritual-edit-row" href="${deskPackHref()}">
+          ${
+            custom
+              ? '<span class="ritual-edit-gutter" aria-hidden="true"></span>'
+              : ritualPlusHtml()
+          }
+          <span class="moment-pick-copy">
+            <span class="moment-step-title">${custom ? 'Edit your ritual' : 'Add your ritual'}</span>
+            <span class="moment-step-prompt">${custom ? 'Change the habit you wrote.' : 'One habit of your own. Water stays.'}</span>
+          </span>
+        </a>
+      </li>`
+    : ''
+
+  return `
+        <section class="fav-group" aria-label="${group.pack.title}">
+          <p class="pack-kind">${PACK_ZONE_META[group.pack.zone].title}</p>
+          <h2 class="fav-group-title">${group.pack.title}${isDeskRitual && !custom ? ritualPlusHtml() : ''}</h2>
+          <ul class="moment-sequence">
+            ${momentRows}
+            ${deskPackRow}
+          </ul>
+        </section>`
+}
+
+function packPlayMomentIds(pack: MomentPack): string[] {
+  const ids = getPackMoments(pack).map((m) => m.id)
+  if (pack.id === DESK_RITUAL_PACK_ID && getCustomRitualMoment()) {
+    ids.push(CUSTOM_RITUAL_ID)
+  }
+  return ids
+}
+
+function deskPackPreviewMoments(pack: MomentPack): Moment[] {
+  const list = [...getPackMoments(pack)]
+  const custom = getCustomRitualMoment()
+  if (pack.id === DESK_RITUAL_PACK_ID && custom) list.push(custom)
+  return list
+}
+
+function escapeAttr(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+}
+
+function escapeText(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+}
+
+function bindCustomRitualForm(root: HTMLElement, onChange: () => void): void {
+  const form = root.querySelector<HTMLFormElement>('#custom-ritual-form')
+  if (!form) return
+  const errorEl = root.querySelector<HTMLElement>('#custom-ritual-error')
+  const titleEl = root.querySelector<HTMLInputElement>('#custom-ritual-title')
+  const promptEl = root.querySelector<HTMLTextAreaElement>('#custom-ritual-prompt')
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const title = titleEl?.value ?? ''
+    const prompt = promptEl?.value ?? ''
+    if (!writeCustomRitual({ title, prompt })) {
+      if (errorEl) {
+        errorEl.textContent = 'Could not save — storage may be full.'
+        errorEl.hidden = false
+      }
+      return
+    }
+    if (!isMomentInLoop(CUSTOM_RITUAL_ID)) {
+      setMomentInLoop(CUSTOM_RITUAL_ID, true)
+    }
+    onChange()
+  })
+
+  root.querySelector('#custom-ritual-clear')?.addEventListener('click', () => {
+    writeCustomRitual(null)
+    setMomentInLoop(CUSTOM_RITUAL_ID, false)
+    onChange()
+  })
+}
+
 function renderBrowse(root: HTMLElement): void {
   stopTick()
   const packs = packZoneSections(MOMENT_PACKS).flatMap((section) => section.packs)
@@ -273,7 +436,7 @@ function renderBrowse(root: HTMLElement): void {
           </button>
         </li>
       </ul>
-      <p class="pack-list-heading">Packs — run in order</p>
+      <p class="pack-list-heading">Packs</p>
       <ul class="pack-list" aria-label="Moment packs">
         ${packs.map((pack) => packRowHtml(pack)).join('')}
       </ul>
@@ -322,7 +485,7 @@ function renderFavorites(root: HTMLElement): void {
         <p class="pack-kind">At the desk</p>
         <h1 class="moments-title">Desk rotation</h1>
         <p class="moments-note moments-note-lead">
-          Check moments to offer at each sit/stand switch — one random move plus an optional Ritual tap.
+          Check what goes into each switch — one random move from Body/Eyes, plus any checked rituals under Ritual.
         </p>
         <p class="moments-note">
           ${
@@ -333,22 +496,7 @@ function renderFavorites(root: HTMLElement): void {
         </p>
         ${empty ? '' : `<p class="pack-meta">${durationNote()}</p>`}
       </div>
-      ${
-        empty
-          ? ''
-          : groups
-              .map(
-                (group) => `
-        <section class="fav-group" aria-label="${group.pack.title}">
-          <p class="pack-kind">${PACK_ZONE_META[group.pack.zone].title}</p>
-          <h2 class="fav-group-title">${group.pack.title}</h2>
-          <ul class="moment-sequence">
-            ${group.moments.map((m) => momentPickHtml(m, durationMs)).join('')}
-          </ul>
-        </section>`,
-              )
-              .join('')
-      }
+      ${empty ? '' : groups.map((group) => favGroupHtml(group, durationMs)).join('')}
       <div class="moments-actions">
         <div class="moments-row moments-row-secondary">
           <a class="btn btn-ghost" href="${libraryHref()}">All packs</a>
@@ -367,28 +515,47 @@ function deskRotationHref(): string {
 function renderPack(root: HTMLElement, pack: MomentPack): void {
   stopTick()
   const moments = getPackMoments(pack)
+  const previewMoments = deskPackPreviewMoments(pack)
+  const playIds = packPlayMomentIds(pack)
   const durationMs = packDurationMs()
+  const isDeskRitual = pack.id === DESK_RITUAL_PACK_ID
   const inLoop = loopCountInPack(pack)
+  const customInLoop = isDeskRitual && isCustomRitualConfigured() && isMomentInLoop(CUSTOM_RITUAL_ID)
+  const ritualInLoop = inLoop + (customInLoop ? 1 : 0)
+  const ritualTotal = previewMoments.length
   const rotationNote =
-    inLoop === 0
+    ritualInLoop === 0
       ? 'None from this pack in your desk rotation yet.'
-      : inLoop === moments.length
-        ? `All ${moments.length} in desk rotation.`
-        : `${inLoop} of ${moments.length} in desk rotation.`
+      : ritualInLoop === ritualTotal
+        ? `All ${ritualTotal} in desk rotation.`
+        : `${ritualInLoop} of ${ritualTotal} in desk rotation.`
 
-  root.innerHTML = `
-    <div class="moments">
-      ${shellTop(libraryHref(), 'Back to library')}
-      <div class="pack-detail">
-        <p class="pack-kind">${PACK_ZONE_META[pack.zone].title}</p>
-        <h1 class="pack-title">${pack.title}</h1>
-        <p class="pack-desc">${pack.description}</p>
-        <p class="pack-meta">${moments.length} moment${moments.length === 1 ? '' : 's'} · ${packDurationLabel(moments.length)} run</p>
+  const runCount = playIds.length
+  const ritualDurationMs = momentDurationMs()
+  const ritualsBlock = isDeskRitual
+    ? `
+        <hr/>
+        <ul class="moment-sequence ritual-list" aria-label="Rituals">
+          ${previewMoments.map((m) => momentPreviewHtml(m, ritualDurationMs)).join('')}
+        </ul>
+        <p class="pack-desk-link">${rotationNote} <a href="${deskRotationHref()}">Desk rotation</a></p>
+        ${customRitualFormHtml()}
+    `
+    : ''
+
+  const runPreviewHtml = isDeskRitual
+    ? ''
+    : `<ol class="moment-sequence moment-sequence-preview" aria-label="Moments in this pack">
+          ${moments.map((m) => momentPreviewHtml(m, durationMs)).join('')}
+        </ol>`
+
+  const runBlock = isDeskRitual
+    ? ''
+    : `
         <h2 class="pack-rhythm-heading">Run pack</h2>
         <p class="pack-loop-note">In order, at your pace — independent of the sit/stand timer.</p>
-        <ol class="moment-sequence moment-sequence-preview" aria-label="Moments in this pack">
-          ${moments.map((m) => momentPreviewHtml(m, durationMs)).join('')}
-        </ol>
+        <p class="pack-meta">${runCount} moment${runCount === 1 ? '' : 's'} · ${packDurationLabel(runCount)} run</p>
+        ${runPreviewHtml}
         <div class="moments-actions">
           ${packDurationTabsHtml()}
           <div class="moments-row">
@@ -399,9 +566,33 @@ function renderPack(root: HTMLElement, pack: MomentPack): void {
             <a class="btn btn-ghost" href="${libraryHref()}">Back</a>
           </div>
         </div>
+    `
+
+  root.innerHTML = `
+    <div class="moments">
+      ${shellTop(libraryHref(), 'Back to library')}
+      <div class="pack-detail">
+        <p class="pack-kind">${PACK_ZONE_META[pack.zone].title}</p>
+        <h1 class="pack-title">${pack.title}</h1>
+        <p class="pack-desc">${pack.description}</p>
+        ${ritualsBlock}
+        ${runBlock}
       </div>
+      ${
+        isDeskRitual
+          ? `<div class="moments-actions">
+        <div class="moments-row moments-row-secondary">
+          <a class="btn btn-ghost" href="${libraryHref()}">Back</a>
+        </div>
+      </div>`
+          : ''
+      }
     </div>
   `
+
+  if (isDeskRitual) {
+    bindCustomRitualForm(root, () => render(root))
+  }
 
   root.querySelectorAll<HTMLButtonElement>('[data-pack-sec]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -414,7 +605,7 @@ function renderPack(root: HTMLElement, pack: MomentPack): void {
 
   root.querySelector('#btn-run-pack')?.addEventListener('click', () => {
     unlockAudio()
-    startPlay(pack.id, moments.map((m) => m.id))
+    startPlay(pack.id, playIds)
     render(root)
   })
 }

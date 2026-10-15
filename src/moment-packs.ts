@@ -1,3 +1,8 @@
+import {
+  CUSTOM_RITUAL_ID,
+  getCustomRitualMoment,
+  isCustomRitualConfigured,
+} from './custom-ritual'
 import momentsJson from './moments.json'
 import type { Moment } from './exercises'
 import { LOOP_MOMENTS_KEY, OWNED_PACKS_KEY } from './storage-keys'
@@ -160,6 +165,9 @@ function ownedMomentIds(): string[] {
       if (!ids.includes(id)) ids.push(id)
     }
   }
+  if (isCustomRitualConfigured() && !ids.includes(CUSTOM_RITUAL_ID)) {
+    ids.push(CUSTOM_RITUAL_ID)
+  }
   return ids
 }
 
@@ -211,7 +219,9 @@ export function setMomentInLoop(id: string, on: boolean): void {
 
 export function loopMoments(): Moment[] {
   const enabled = new Set(loopMomentIds())
-  return ALL_MOMENTS.filter((m) => enabled.has(m.id))
+  const builtIn = ALL_MOMENTS.filter((m) => enabled.has(m.id))
+  const custom = enabled.has(CUSTOM_RITUAL_ID) ? getCustomRitualMoment() : undefined
+  return custom ? [...builtIn, custom] : builtIn
 }
 
 export function hasCustomizedLoop(): boolean {

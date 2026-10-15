@@ -1,3 +1,4 @@
+import { getCustomRitualMoment } from './custom-ritual'
 import momentsJson from './moments.json'
 import { isLongMomentDuration } from './intervals'
 import { rhythmMoments } from './moment-packs'
@@ -48,6 +49,8 @@ export function momentPrompt(moment: Moment, durationMs: number): string {
 
 export function getMoment(id: string | null | undefined): Moment | undefined {
   if (!id) return undefined
+  const custom = getCustomRitualMoment()
+  if (custom?.id === id) return custom
   return MOMENTS.find((m) => m.id === id)
 }
 

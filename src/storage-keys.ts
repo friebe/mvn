@@ -11,3 +11,5 @@ export const WALKTHROUGH_SEEN_KEY = 'stint.walkthrough-seen'
 export const OWNED_PACKS_KEY = 'stint.owned-packs.v1'
 /** Moment ids opted into the sit/stand loop (JSON string[]). Missing or empty = starter favorites. */
 export const LOOP_MOMENTS_KEY = 'stint.loop-moments.v1'
+/** User-defined desk ritual — `{ title, prompt }` or removed when cleared. */
+export const CUSTOM_RITUAL_KEY = 'stint.custom-ritual.v1'
