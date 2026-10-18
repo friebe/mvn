@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -16,6 +16,20 @@ const appVersion = JSON.parse(
   readFileSync(resolve(__dirname, 'package.json'), 'utf8'),
 ).version as string
 
+/** Drop the Umami tag while `vite` / `npm run dev` is running. Production builds keep it. */
+function stripUmamiInDev(): Plugin {
+  return {
+    name: 'strip-umami-in-dev',
+    apply: 'serve',
+    transformIndexHtml(html) {
+      return html.replace(
+        /\s*<!-- Umami: production builds only\. The dev server strips this tag\. -->\s*<script defer src="https:\/\/cloud\.umami\.is\/script\.js"[^>]*><\/script>/,
+        '',
+      )
+    },
+  }
+}
+
 export default defineConfig({
   base,
   define: {
@@ -32,6 +46,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    stripUmamiInDev(),
     VitePWA({
       registerType: 'prompt',
       includeAssets: [

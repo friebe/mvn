@@ -57,16 +57,28 @@ function waitForUmami(): void {
   }, UMAMI_POLL_MS)
 }
 
-/** Fake purchase / unlock — Umami Events tab. */
+/** Locked pack opened — Umami Events tab. Retries until the deferred script is ready. */
 export function trackPackUnlock(packId: string): void {
-  const track = window.umami?.track
-  if (typeof track !== 'function') return
-  track('pack-unlock', { pack: packId })
+  if (!import.meta.env.PROD) return
+
+  const send = (): boolean => {
+    const track = window.umami?.track
+    if (typeof track !== 'function') return false
+    track('pack-unlock', { pack: packId })
+    return true
+  }
+  if (send()) return
+
+  let tries = 0
+  const id = window.setInterval(() => {
+    tries += 1
+    if (send() || tries >= UMAMI_MAX_TRIES) window.clearInterval(id)
+  }, UMAMI_POLL_MS)
 }
 
 /** Once per page load when Stint runs as installed PWA — Umami Events tab. */
 export function trackPwaLaunch(): void {
-  if (!shouldTrackPwaLaunch()) return
+  if (!import.meta.env.PROD || !shouldTrackPwaLaunch()) return
 
   const run = (): void => {
     waitForUmami()
