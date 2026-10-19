@@ -76,9 +76,38 @@ html[data-theme='dark'] {
   /* Secondary-monitor / across-desk readability */
   --ui-distance-scale: clamp(18px, 2.4vmin, 28px);
   --page-max-width: min(40rem, 100%);
+  /* Shared page inset so the wordmark lands on the same x/y on every route */
+  --page-pad-top: clamp(1.25rem, 3vmin, 2.5rem);
+  --page-pad-x: clamp(1.25rem, 4vmin, 3rem);
+  /* Back control. It hangs in the left inset so the wordmark stays flush with the column. */
+  --header-back-size: 2.5rem;
   /** Atmosphere column + desk-edge bar */
   --instrument-timeline: 24rem;
   --instrument-max-width: min(100%, var(--instrument-timeline));
   /** Primary actions — timeline + 4rem, visibly wider than the bar */
   --instrument-btn-width: min(100%, calc(var(--instrument-timeline) + 4rem));
+}
+
+/* Header back button is on screen: inset must hold the control beside the column */
+@media (min-width: 1001px) {
+  :root {
+    --page-pad-x: max(
+      calc(var(--header-back-size) + 0.65rem),
+      clamp(1.25rem, 4vmin, 3rem)
+    );
+  }
+}
+
+/* Same top inset as the timer's compact header (viewport height ≤ 900px) */
+@media (max-height: 900px) {
+  :root {
+    --page-pad-top: clamp(0.75rem, 2vmin, 1.25rem);
+  }
+}
+
+@media (max-width: 414px) {
+  :root {
+    --page-pad-top: 1rem;
+    --page-pad-x: 0.85rem;
+  }
 }

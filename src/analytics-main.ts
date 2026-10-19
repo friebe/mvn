@@ -58,7 +58,7 @@ function render(period: Period): void {
           </svg>
         </a>
         <div class="analytics-heading app-header-brand">
-          ${brandLockupHtml(BRAND_TAG, HEADER_MARK_SIZE)}
+          ${brandLockupHtml(BRAND_TAG, HEADER_MARK_SIZE, appPath())}
         </div>
         <nav class="analytics-nav" aria-label="Actions">
           <button type="button" class="icon-link" id="btn-refresh" aria-label="Refresh" title="Refresh">

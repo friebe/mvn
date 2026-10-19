@@ -132,7 +132,7 @@ function render(): void {
           </svg>
         </a>
         <div class="settings-heading app-header-brand">
-          ${brandLockupHtml(BRAND_TAG, HEADER_MARK_SIZE)}
+          ${brandLockupHtml(BRAND_TAG, HEADER_MARK_SIZE, appPath())}
         </div>
       </header>
 

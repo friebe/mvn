@@ -20,13 +20,13 @@ export function brandMarkSvg(size = 28): string {
 /** Mark size for compact header (desk in session + secondary pages). */
 export const HEADER_MARK_SIZE = 23
 
-/** Shared header lockup: mark + Stint + product subline. */
-export function brandLockupHtml(tag: string = BRAND_TAG, markSize = 30): string {
-  return `<div class="brand-lockup">
-    ${brandMarkSvg(markSize)}
+/** Shared header lockup: mark + Stint + product subline. `href` makes the mark go home. */
+export function brandLockupHtml(tag: string = BRAND_TAG, markSize = 30, href?: string): string {
+  const inner = `${brandMarkSvg(markSize)}
     <div class="brand-text">
       <h1 class="brand">Stint</h1>
       <p class="tag">${tag}</p>
-    </div>
-  </div>`
+    </div>`
+  if (!href) return `<div class="brand-lockup">${inner}</div>`
+  return `<a class="brand-lockup" href="${href}">${inner}</a>`
 }

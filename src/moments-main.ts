@@ -161,7 +161,7 @@ function shellTop(backHref: string, backLabel: string): string {
     <header class="moments-top">
       ${backLinkHtml(backHref, backLabel)}
       <div class="moments-heading app-header-brand">
-        ${brandLockupHtml(BRAND_TAG, HEADER_MARK_SIZE)}
+        ${brandLockupHtml(BRAND_TAG, HEADER_MARK_SIZE, appPath())}
       </div>
       ${headerNav()}
     </header>

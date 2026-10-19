@@ -32,8 +32,7 @@ body {
 .moments {
   max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: clamp(1rem, 2.5vmin, 1.75rem) clamp(1rem, 3vmin, 2rem)
-    clamp(1.25rem, 3vmin, 2rem);
+  padding: var(--page-pad-top) var(--page-pad-x) clamp(1.25rem, 3vmin, 2rem);
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -41,8 +40,8 @@ body {
 }
 
 .moments-top {
+  position: relative;
   display: flex;
-  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
@@ -54,7 +53,9 @@ body {
 }
 
 .moments-top-play {
-  gap: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  column-gap: 0.5rem;
 }
 
 .moments-top-play .back-link {

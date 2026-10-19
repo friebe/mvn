@@ -33,8 +33,7 @@ body {
 .analytics {
   max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: clamp(1.25rem, 3vmin, 2.5rem) clamp(1.25rem, 4vmin, 3rem)
-    clamp(2rem, 5vmin, 3.5rem);
+  padding: var(--page-pad-top) var(--page-pad-x) clamp(2rem, 5vmin, 3.5rem);
   display: flex;
   flex-direction: column;
   gap: clamp(1.25rem, 3vmin, 2rem);
@@ -42,8 +41,8 @@ body {
 }
 
 .analytics-top {
+  position: relative;
   display: flex;
-  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
@@ -79,10 +78,6 @@ body {
   text-decoration: none;
   cursor: pointer;
   font: inherit;
-}
-
-.icon-link.back-link {
-  margin: 0 0 0 -0.45rem;
 }
 
 .icon-link:hover {
