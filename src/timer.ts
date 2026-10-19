@@ -247,19 +247,34 @@ function thresholdOfferPosture(): 'sit' | 'stand' {
   return 'stand'
 }
 
+function lastRecentId(kind: 'move' | 'desk'): string | null {
+  for (const id of state.recentExerciseIds) {
+    const moment = getMoment(id)
+    if (!moment) continue
+    if (kind === 'desk' ? moment.kind === 'desk' : moment.kind !== 'desk') return id
+  }
+  return null
+}
+
 function assignThresholdOffers(avoid?: {
   offerId?: string | null
   ritualId?: string | null
 }): void {
   const { offer, ritualAlt } = pickThresholdOffers(
-    state.recentExerciseIds,
     thresholdOfferPosture(),
-    { avoidOfferId: avoid?.offerId, avoidRitualId: avoid?.ritualId },
+    {
+      avoidOfferId: avoid?.offerId || lastRecentId('move'),
+      avoidRitualId: avoid?.ritualId || lastRecentId('desk'),
+    },
   )
+  let recent = state.recentExerciseIds
+  if (ritualAlt) recent = rememberId(recent, ritualAlt.id)
+  if (offer) recent = rememberId(recent, offer.id)
   state = {
     ...state,
     momentChoiceIds: offer ? [offer.id] : null,
     thresholdRitualId: ritualAlt?.id ?? null,
+    recentExerciseIds: recent,
   }
 }
 

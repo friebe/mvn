@@ -103,43 +103,27 @@ export function pickMoment(
   )
 }
 
-function pickFromPool(pool: Moment[], recentIds: string[]): Moment | undefined {
+function pickRandomAvoiding(pool: Moment[], avoidId: string | null | undefined): Moment | undefined {
   if (pool.length === 0) return undefined
-  return pickRandom(preferFresh(pool, recentIds))
-}
-
-function withExcludedRecent(recentIds: string[], excludeId: string | null | undefined): string[] {
-  return excludeId ? rememberId(recentIds, excludeId) : recentIds
-}
-
-function pickFromPoolAvoiding(
-  pool: Moment[],
-  recentIds: string[],
-  avoidId: string | null | undefined,
-): Moment | undefined {
-  if (pool.length === 0) return undefined
-  const narrowed =
+  const candidates =
     avoidId && pool.length > 1 ? pool.filter((m) => m.id !== avoidId) : pool
-  const candidates = narrowed.length > 0 ? narrowed : pool
-  return pickFromPool(candidates, recentIds) ?? pickRandom(candidates)
+  return pickRandom(candidates.length > 0 ? candidates : pool)
 }
 
 /**
- * Desk switch: one random move (body/eyes — not desk habits) plus ritual always separate.
- * No depth filter here — the checked pool is the source of truth; timer length only affects copy.
+ * Desk switch: one random move from the checked pool, plus a ritual.
+ * Each call draws again. Only the previous offer is skipped, so a shown card
+ * does not stick for the rest of the day when it is not performed.
  */
 export function pickThresholdOffers(
-  recentIds: string[],
   nextPosture: 'sit' | 'stand',
   opts: { avoidOfferId?: string | null; avoidRitualId?: string | null } = {},
 ): { offer: Moment | undefined; ritualAlt: Moment | undefined } {
   const ritualPool = poolFor('desk', nextPosture)
-  const ritualRecent = withExcludedRecent(recentIds, opts.avoidRitualId)
-  const ritualAlt = pickFromPoolAvoiding(ritualPool, ritualRecent, opts.avoidRitualId)
+  const ritualAlt = pickRandomAvoiding(ritualPool, opts.avoidRitualId)
 
   const movePool = poolFor(undefined, nextPosture).filter((m) => m.kind !== 'desk')
-  const moveRecent = withExcludedRecent(recentIds, opts.avoidOfferId)
-  const offer = pickFromPoolAvoiding(movePool, moveRecent, opts.avoidOfferId)
+  const offer = pickRandomAvoiding(movePool, opts.avoidOfferId)
 
   return { offer, ritualAlt }
 }
